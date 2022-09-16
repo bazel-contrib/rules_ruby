@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"xml:ETI"(RSS::Atom::Feed::Entry::Content#xml;TI"W;T:publico:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"(Returns the element content in XML.;T:
+@fileI"lib/rss/atom.rb;T:0@omit_headings_from_table_of_contents_below0F@I"$RSS::Atom::Feed::Entry::Content;TcRDoc::NormalClass0

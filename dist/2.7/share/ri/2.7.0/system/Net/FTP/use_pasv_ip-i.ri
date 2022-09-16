@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"use_pasv_ip:ETI"Net::FTP#use_pasv_ip;TI"RW;T:privateo:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"LWhen +true+, use the IP address in PASV responses.  Otherwise, it uses ;TI"Gthe same IP address for the control connection.  Default: +false+.;T:
+@fileI"lib/net/ftp.rb;T:0@omit_headings_from_table_of_contents_below0F@I"Net::FTP;TcRDoc::NormalClass0

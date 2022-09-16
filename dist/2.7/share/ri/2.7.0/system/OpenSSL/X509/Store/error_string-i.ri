@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"error_string:ETI"&OpenSSL::X509::Store#error_string;TI"R;T:privateo:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"HThe description for the error code set by the last call of #verify.;T:
+@fileI"!ext/openssl/ossl_x509store.c;T:0@omit_headings_from_table_of_contents_below0F@I"OpenSSL::X509::Store;TcRDoc::NormalClass0

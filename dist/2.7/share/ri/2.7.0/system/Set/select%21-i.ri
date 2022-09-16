@@ -1,0 +1,3 @@
+U:RDoc::AnyMethod[iI"select!:ETI"Set#select!;TF:privateo:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"CEquivalent to Set#keep_if, but returns nil if no changes were ;TI"6made. Returns an enumerator if no block is given.;T:
+@fileI"lib/set.rb;T:0@omit_headings_from_table_of_contents_below000[[I"filter!;To;;	[o;
+;	[I"Equivalent to Set#select!;T;@;0I"(&block);T@FI"Set;TcRDoc::NormalClass00

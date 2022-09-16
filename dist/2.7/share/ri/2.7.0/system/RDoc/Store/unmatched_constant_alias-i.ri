@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"unmatched_constant_alias:ETI")RDoc::Store#unmatched_constant_alias;TI"R;T:privateo:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I";The lazy constants alias will be discovered in passing;T:
+@fileI"lib/rdoc/store.rb;T:0@omit_headings_from_table_of_contents_below0F@I"RDoc::Store;TcRDoc::NormalClass0

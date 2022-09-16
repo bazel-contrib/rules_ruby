@@ -1,0 +1,9 @@
+prefix=/Users/p0deje/Development/SeleniumHQ/rules_ruby/ruby-build/dist/./2.7/openssl
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: OpenSSL
+Description: Secure Sockets Layer and cryptography libraries and tools
+Version: 1.1.1n
+Requires: libssl libcrypto

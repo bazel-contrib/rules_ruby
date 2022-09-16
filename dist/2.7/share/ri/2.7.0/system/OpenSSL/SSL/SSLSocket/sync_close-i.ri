@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"sync_close:ETI"'OpenSSL::SSL::SSLSocket#sync_close;TI"RW;T:privateo:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"FWhether to close the underlying socket as well, when the SSL/TLS ;TI"7connection is shut down. This defaults to +false+.;T:
+@fileI"#ext/openssl/lib/openssl/ssl.rb;T:0@omit_headings_from_table_of_contents_below0F@I"OpenSSL::SSL::SSLSocket;TcRDoc::NormalClass0

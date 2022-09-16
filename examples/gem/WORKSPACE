@@ -1,0 +1,15 @@
+local_repository(
+    name = "rules_ruby",
+    path = "../..",
+)
+
+load("@rules_ruby//:ruby.bzl", "rb_bundle")
+
+rb_bundle(
+    name = "bundle",
+    gemfile = "//:Gemfile",
+    srcs = [
+        "//:gem.gemspec",
+        "//:lib/gem/version.rb",
+    ]
+)

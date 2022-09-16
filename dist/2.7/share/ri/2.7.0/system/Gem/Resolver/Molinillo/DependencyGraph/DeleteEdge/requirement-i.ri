@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"requirement:ETI"FGem::Resolver::Molinillo::DependencyGraph::DeleteEdge#requirement;TI"R;T:privateo:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I">@return [Object] the requirement that the edge represents;T:
+@fileI"Rlib/rubygems/resolver/molinillo/lib/molinillo/dependency_graph/delete_edge.rb;T:0@omit_headings_from_table_of_contents_below0F@I":Gem::Resolver::Molinillo::DependencyGraph::DeleteEdge;TcRDoc::NormalClass0

@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"max_version:ETI"Net::HTTP#max_version;TI"RW;T:privateo:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"MSets the maximum SSL version.  See OpenSSL::SSL::SSLContext#max_version=;T:
+@fileI"lib/net/http.rb;T:0@omit_headings_from_table_of_contents_below0F@I"Net::HTTP;TcRDoc::NormalClass0
