@@ -2,4 +2,3 @@ bazel-bin
 bazel-gem
 bazel-out
 bazel-testlogs
-bazel-ruby_rules

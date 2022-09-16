@@ -1,3 +1,4 @@
+load("@rules_ruby//:ruby.bzl", "rb_binary")
 load("@rules_ruby//:ruby.bzl", "rb_library")
 
 package(default_visibility = ["//:__subpackages__"])
@@ -10,4 +11,10 @@ rb_library(
 rb_library(
     name = "version",
     srcs = ["version.rb"],
+)
+
+rb_binary(
+    name = "print-version",
+    bin = "version.rb",
+    deps = [":version"]
 )
