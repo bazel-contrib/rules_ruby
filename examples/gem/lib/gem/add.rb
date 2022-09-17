@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 module GEM
-  class Add
-    def initialize(a, b)
+  class Add # :nodoc:
+    def initialize(a, b) # rubocop:disable Naming/MethodParameterName
       @a = a
       @b = b
     end

@@ -10,11 +10,12 @@ rb_library(
 
 rb_binary(
     name = "rubocop",
-    bin = "@bundle//:vendor/bundle/ruby/2.7.0/bin/rubocop",
+    bin = "rubocop",
+    args = ["lib"],
     deps = [
-	":gem",
-	"@bundle"
-    ],
+        ":gem",
+        "@bundle"
+    ]
 )
 
 # rb_library(

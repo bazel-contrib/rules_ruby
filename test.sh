@@ -1,6 +1,6 @@
 #!/bin/sh
 
 cd examples/gem || exit 1
-bazel build :gem
-bazel run lib/gem:print-version
-bazel run :rubocop
+bazel build :gem || exit 1
+bazel run lib/gem:print-version || exit 1
+bazel run :rubocop || exit 1
