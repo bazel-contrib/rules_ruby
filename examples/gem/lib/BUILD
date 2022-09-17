@@ -7,6 +7,7 @@ rb_library(
     srcs = ["gem.rb"],
     deps = [
 	"//lib/gem:add",
+	"//lib/gem:subtract",
 	"//lib/gem:version"
     ]
 )

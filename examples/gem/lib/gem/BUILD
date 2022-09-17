@@ -9,6 +9,11 @@ rb_library(
 )
 
 rb_library(
+    name = "subtract",
+    srcs = ["subtract.rb"],
+)
+
+rb_library(
     name = "version",
     srcs = ["version.rb"],
 )

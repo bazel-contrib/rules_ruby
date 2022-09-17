@@ -5,6 +5,7 @@ package(default_visibility = ["//:__subpackages__"])
 
 rb_library(
     name = "gem",
+    srcs = ["Gemfile", "Gemfile.lock", "gem.gemspec"],
     deps = ["//lib:gem"]
 )
 
@@ -17,12 +18,3 @@ rb_binary(
         "@bundle"
     ]
 )
-
-# rb_library(
-#     name = "spec",
-#     bin = "@bundle//:rspec-r",
-#     deps = [
-# 	":gem",
-# 	"@bundle"
-#     ],
-# )

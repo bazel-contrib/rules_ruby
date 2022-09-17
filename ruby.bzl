@@ -84,6 +84,32 @@ rb_binary = rule(
     },
 )
 
+# }}} rb_test {{{1
+
+rb_test = rule(
+    implementation = _rb_binary_impl,
+    test = True,
+    attrs = {
+        "srcs": attr.label_list(allow_files = True),
+        "deps": attr.label_list(),
+        "bin": attr.string(),
+        "_ruby": attr.label(
+            default = "//ruby-build/dist/2.7/bin:ruby",
+            providers = [RubyInfo],
+            executable = True,
+            cfg = "exec",
+            allow_files = True,
+        ),
+        "_bundle": attr.label(
+            default = "//ruby-build/dist/2.7/bin:bundle",
+            providers = [RubyInfo],
+            executable = True,
+            cfg = "exec",
+            allow_files = True,
+        ),
+    },
+)
+
 # }}} rb_bundle {{{1
 
 def _rb_bundle_impl(repository_ctx):
