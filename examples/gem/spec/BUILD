@@ -12,7 +12,7 @@ rb_library(
 
 rb_test(
     name = "add",
-    bin = "rspec",
+    bin = "@bundle//:bin/rspec",
     args = ["spec/add_spec.rb"],
     srcs = ["add_spec.rb"],
     deps = [":spec_helper"]
@@ -20,7 +20,7 @@ rb_test(
 
 rb_test(
     name = "subtract",
-    bin = "rspec",
+    bin = "@bundle//:bin/rspec",
     args = ["spec/subtract_spec.rb"],
     srcs = ["subtract_spec.rb"],
     deps = [":spec_helper"]

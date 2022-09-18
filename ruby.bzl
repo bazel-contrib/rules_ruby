@@ -37,24 +37,19 @@ rb_library = rule(
 # }}} rb_binary {{{1
 
 _RUN_SCRIPT = """
-{env} {bundle} exec {bin} {args}
+{bin} {args}
 """
 
 def _rb_binary_impl(ctx):
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps)
-    runfiles = ctx.runfiles(transitive_srcs.to_list() + [ctx.executable._ruby, ctx.executable._bundle])
+    runfiles = ctx.runfiles(transitive_srcs.to_list())
 
     script = ctx.actions.declare_file("{}.rb".format(ctx.label.name))
     ctx.actions.write(
         output = script,
         content = _RUN_SCRIPT.format(
-            bundle = ctx.executable._bundle.path,
-            bin = ctx.attr.bin,
+            bin = ctx.executable.bin.path,
             args = " ".join(ctx.attr.args),
-            env = " ".join([
-                "BUNDLE_DISABLE_SHARED_GEMS=true",
-                "BUNDLE_PATH=external/bundle/vendor/bundle"
-            ])
         )
     )
 
@@ -66,20 +61,10 @@ rb_binary = rule(
     attrs = {
         "srcs": attr.label_list(allow_files = True),
         "deps": attr.label_list(),
-        "bin": attr.string(),
-        "_ruby": attr.label(
-            default = "//ruby-build/dist/2.7/bin:ruby",
-            providers = [RubyInfo],
+        "bin": attr.label(
             executable = True,
+            allow_single_file = True,
             cfg = "exec",
-            allow_files = True,
-        ),
-        "_bundle": attr.label(
-            default = "//ruby-build/dist/2.7/bin:bundle",
-            providers = [RubyInfo],
-            executable = True,
-            cfg = "exec",
-            allow_files = True,
         ),
     },
 )
@@ -92,20 +77,10 @@ rb_test = rule(
     attrs = {
         "srcs": attr.label_list(allow_files = True),
         "deps": attr.label_list(),
-        "bin": attr.string(),
-        "_ruby": attr.label(
-            default = "//ruby-build/dist/2.7/bin:ruby",
-            providers = [RubyInfo],
+        "bin": attr.label(
             executable = True,
+            allow_single_file = True,
             cfg = "exec",
-            allow_files = True,
-        ),
-        "_bundle": attr.label(
-            default = "//ruby-build/dist/2.7/bin:bundle",
-            providers = [RubyInfo],
-            executable = True,
-            cfg = "exec",
-            allow_files = True,
         ),
     },
 )
@@ -113,15 +88,12 @@ rb_test = rule(
 # }}} rb_bundle {{{1
 
 def _rb_bundle_impl(repository_ctx):
-    bundle_path = repository_ctx.path('vendor/bundle')
+    binstubs_path = repository_ctx.path('bin')
     workspace_root = repository_ctx.path(repository_ctx.attr.gemfile).dirname
 
     repository_ctx.template(
         "BUILD",
         repository_ctx.attr._build_tpl,
-        substitutions = {
-            "{bundle_path}": "vendor/bundle"
-        },
         executable = False
     )
 
@@ -132,10 +104,8 @@ def _rb_bundle_impl(repository_ctx):
         ],
         quiet = False,
         environment = {
-            "BUNDLE_DISABLE_SHARED_GEMS": "true",
-            "BUNDLE_JOBS": "4",
-            "BUNDLE_PATH": repr(bundle_path),
-            "BUNDLE_RETRY": "3",
+            "BUNDLE_BIN": repr(binstubs_path),
+            "BUNDLE_SHEBANG": repr(repository_ctx.path(repository_ctx.attr._ruby)),
         },
         working_directory = repr(workspace_root)
     )
@@ -146,8 +116,15 @@ rb_bundle = repository_rule(
     attrs = {
         "srcs": attr.label_list(allow_files = True),
         "gemfile": attr.label(allow_single_file = True),
+        "_ruby": attr.label(
+            default = "//dist/bin:ruby",
+            providers = [RubyInfo],
+            executable = True,
+            cfg = "exec",
+            allow_files = True,
+        ),
         "_bundle": attr.label(
-            default = "//dist/2.7/bin:bundle",
+            default = "//dist/bin:bundle",
             providers = [RubyInfo],
             executable = True,
             cfg = "exec",

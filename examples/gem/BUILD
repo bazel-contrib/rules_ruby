@@ -11,7 +11,7 @@ rb_library(
 
 rb_binary(
     name = "rubocop",
-    bin = "rubocop",
+    bin = "@bundle//:bin/rubocop",
     args = ["lib"],
     deps = [
         ":gem",
