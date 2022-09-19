@@ -20,6 +20,6 @@ rb_library(
 
 rb_binary(
     name = "print-version",
-    bin = "version.rb",
+    args = ["lib/gem/version.rb"],
     deps = [":version"]
 )

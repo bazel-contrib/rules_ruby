@@ -42,7 +42,7 @@ _RUN_SCRIPT = """
 
 def _rb_binary_impl(ctx):
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps)
-    runfiles = ctx.runfiles(transitive_srcs.to_list())
+    runfiles = ctx.runfiles(transitive_srcs.to_list() + [ctx.executable.bin])
 
     script = ctx.actions.declare_file("{}.rb".format(ctx.label.name))
     ctx.actions.write(
@@ -63,6 +63,7 @@ rb_binary = rule(
         "deps": attr.label_list(),
         "bin": attr.label(
             executable = True,
+            default = "@rules_ruby//dist/bin:ruby",
             allow_single_file = True,
             cfg = "exec",
         ),
@@ -117,14 +118,14 @@ rb_bundle = repository_rule(
         "srcs": attr.label_list(allow_files = True),
         "gemfile": attr.label(allow_single_file = True),
         "_ruby": attr.label(
-            default = "//dist/bin:ruby",
+            default = "@rules_ruby//dist/bin:ruby",
             providers = [RubyInfo],
             executable = True,
             cfg = "exec",
             allow_files = True,
         ),
         "_bundle": attr.label(
-            default = "//dist/bin:bundle",
+            default = "@rules_ruby//dist/bin:bundle",
             providers = [RubyInfo],
             executable = True,
             cfg = "exec",
