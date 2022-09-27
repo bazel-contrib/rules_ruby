@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
 
   s.summary = 'Example'
   s.description = 'Example'
-  s.files = ['Gemfile'] + Dir['lib/gem/**/*']
+  s.files = ['Gemfile'] + Dir['lib/**/*']
 
   s.require_paths = ['lib']
 

@@ -86,6 +86,56 @@ rb_test = rule(
     },
 )
 
+# }}} rb_gem {{{1
+
+def _rb_gem_impl(ctx):
+    gem_builder = ctx.actions.declare_file("{}_gem_builder.rb".format(ctx.label.name))
+
+    ctx.actions.expand_template(
+        template = ctx.file._gem_builder_tpl,
+        output = gem_builder,
+        substitutions = {
+            "{bazel_out_dir}": ctx.outputs.gem.dirname,
+            "{gem_filename}": ctx.outputs.gem.basename,
+            "{gemspec}": ctx.file.gemspec.path,
+        },
+    )
+
+    args = ctx.actions.args()
+    args.add(gem_builder)
+    inputs = get_transitive_srcs(ctx.files.srcs + [gem_builder], ctx.attr.deps)
+    ctx.actions.run(
+        inputs = inputs,
+        executable = ctx.executable._ruby,
+        arguments = [args],
+        outputs = [ctx.outputs.gem],
+    )
+
+rb_gem = rule(
+    _rb_gem_impl,
+    attrs = {
+        "gemspec": attr.label(
+            allow_single_file = True,
+            mandatory = True,
+        ),
+        "srcs": attr.label_list(allow_files = True),
+        "deps": attr.label_list(),
+        "_ruby": attr.label(
+            executable = True,
+            default = "@rules_ruby//dist/bin:ruby",
+            allow_single_file = True,
+            cfg = "exec",
+        ),
+        "_gem_builder_tpl": attr.label(
+            allow_single_file = True,
+            default = "@rules_ruby//:gem_builder.rb.tpl",
+        ),
+    },
+    outputs = {
+        "gem": "%{name}.gem",
+    },
+)
+
 # }}} rb_bundle {{{1
 
 def _rb_bundle_impl(repository_ctx):
