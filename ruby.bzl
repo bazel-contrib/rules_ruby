@@ -41,14 +41,20 @@ _RUN_SCRIPT = """
 """
 
 def _rb_binary_impl(ctx):
+    if ctx.attr.bin:
+        binary = ctx.executable.bin
+    else:
+        toolchain = ctx.toolchains["@rules_ruby//:toolchain_type"]
+        binary = toolchain.ruby
+
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps)
-    runfiles = ctx.runfiles(transitive_srcs.to_list() + [ctx.executable.bin])
+    runfiles = ctx.runfiles(transitive_srcs.to_list() + [binary])
 
     script = ctx.actions.declare_file("{}.rb".format(ctx.label.name))
     ctx.actions.write(
         output = script,
         content = _RUN_SCRIPT.format(
-            bin = ctx.executable.bin.path,
+            bin = binary.path,
             args = " ".join(ctx.attr.args),
         )
     )
@@ -63,11 +69,11 @@ rb_binary = rule(
         "deps": attr.label_list(),
         "bin": attr.label(
             executable = True,
-            default = "@rules_ruby//dist/bin:ruby",
             allow_single_file = True,
             cfg = "exec",
         ),
     },
+    toolchains = ["@rules_ruby//:toolchain_type"],
 )
 
 # }}} rb_test {{{1
@@ -90,6 +96,7 @@ rb_test = rule(
 
 def _rb_gem_impl(ctx):
     gem_builder = ctx.actions.declare_file("{}_gem_builder.rb".format(ctx.label.name))
+    toolchain = ctx.toolchains["@rules_ruby//:toolchain_type"]
 
     ctx.actions.expand_template(
         template = ctx.file._gem_builder_tpl,
@@ -106,7 +113,7 @@ def _rb_gem_impl(ctx):
     inputs = get_transitive_srcs(ctx.files.srcs + [gem_builder], ctx.attr.deps)
     ctx.actions.run(
         inputs = inputs,
-        executable = ctx.executable._ruby,
+        executable = toolchain.ruby,
         arguments = [args],
         outputs = [ctx.outputs.gem],
     )
@@ -120,12 +127,6 @@ rb_gem = rule(
         ),
         "srcs": attr.label_list(allow_files = True),
         "deps": attr.label_list(),
-        "_ruby": attr.label(
-            executable = True,
-            default = "@rules_ruby//dist/bin:ruby",
-            allow_single_file = True,
-            cfg = "exec",
-        ),
         "_gem_builder_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//:gem_builder.rb.tpl",
@@ -134,6 +135,7 @@ rb_gem = rule(
     outputs = {
         "gem": "%{name}.gem",
     },
+    toolchains = ["@rules_ruby//:toolchain_type"],
 )
 
 # }}} rb_bundle {{{1
@@ -168,14 +170,14 @@ rb_bundle = repository_rule(
         "srcs": attr.label_list(allow_files = True),
         "gemfile": attr.label(allow_single_file = True),
         "_ruby": attr.label(
-            default = "@rules_ruby//dist/bin:ruby",
+            default = "@rules_ruby//:dist/bin/ruby",
             providers = [RubyInfo],
             executable = True,
             cfg = "exec",
             allow_files = True,
         ),
         "_bundle": attr.label(
-            default = "@rules_ruby//dist/bin:bundle",
+            default = "@rules_ruby//:dist/bin/bundle",
             providers = [RubyInfo],
             executable = True,
             cfg = "exec",
@@ -184,6 +186,56 @@ rb_bundle = repository_rule(
         "_build_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//:bundle.BUILD.tpl",
+        ),
+    },
+)
+
+# }}} rb_toolchain {{{1
+
+def rb_setup(toolchain = "@%s//:toolchain" % "rules_ruby"):
+    native.register_toolchains(toolchain)
+
+def rb_toolchain(name, ruby, bundle):
+    toolchain_name = "%s_toolchain" % name
+
+    _rb_toolchain(
+        name = toolchain_name,
+        ruby = ruby,
+        bundle = bundle,
+    )
+
+    native.toolchain(
+        name = name,
+        toolchain = ":%s" % toolchain_name,
+        toolchain_type = "@rules_ruby//:toolchain_type",
+    )
+
+def _rb_toolchain_impl(ctx):
+    return platform_common.ToolchainInfo(
+        ruby = ctx.executable.ruby,
+        ruby_runfiles = ctx.runfiles(ctx.files.ruby).merge(
+            ctx.attr.ruby[DefaultInfo].default_runfiles,
+        ),
+        bundle = ctx.executable.bundle,
+        bundle_runfiles = ctx.runfiles(ctx.files.bundle).merge(
+            ctx.attr.bundle[DefaultInfo].default_runfiles,
+        ),
+    )
+
+_rb_toolchain = rule(
+    implementation = _rb_toolchain_impl,
+    attrs = {
+        "ruby": attr.label(
+            doc = "`ruby` binary to execute",
+            allow_files = True,
+            executable = True,
+            cfg = "exec",
+        ),
+        "bundle": attr.label(
+            doc = "`bundle` to execute",
+            allow_files = True,
+            executable = True,
+            cfg = "exec",
         ),
     },
 )

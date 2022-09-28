@@ -3,6 +3,10 @@ local_repository(
     path = "../..",
 )
 
+load("@rules_ruby//:ruby.bzl", "rb_setup")
+
+rb_setup()
+
 load("@rules_ruby//:ruby.bzl", "rb_bundle")
 
 rb_bundle(
