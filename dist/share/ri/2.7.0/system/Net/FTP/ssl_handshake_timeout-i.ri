@@ -1,3 +1,0 @@
-U:RDoc::Attr[iI"ssl_handshake_timeout:ETI"#Net::FTP#ssl_handshake_timeout;TI"RW;T:privateo:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[
-I"ANumber of seconds to wait for the TLS handshake. Any number ;TI"Fmay be used, including Floats for fractional seconds. If the FTP ;TI"Gobject cannot complete the TLS handshake in this many seconds, it ;TI"Fraises a Net::OpenTimeout exception. The default value is +nil+. ;TI"IIf +ssl_handshake_timeout+ is +nil+, +open_timeout+ is used instead.;T:
-@fileI"lib/net/ftp.rb;T:0@omit_headings_from_table_of_contents_below0F@I"Net::FTP;TcRDoc::NormalClass0

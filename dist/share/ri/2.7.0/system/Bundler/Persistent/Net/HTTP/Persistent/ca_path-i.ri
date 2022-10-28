@@ -1,2 +1,0 @@
-U:RDoc::Attr[iI"ca_path:ETI"7Bundler::Persistent::Net::HTTP::Persistent#ca_path;TI"R;T:privateo:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"LA directory of SSL certificates to be used as certificate authorities. ;TI"6Setting this will set verify_mode to VERIFY_PEER.;T:
-@fileI"Flib/bundler/vendor/net-http-persistent/lib/net/http/persistent.rb;T:0@omit_headings_from_table_of_contents_below0F@I"/Bundler::Persistent::Net::HTTP::Persistent;TcRDoc::NormalClass0

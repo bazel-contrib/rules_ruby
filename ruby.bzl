@@ -150,12 +150,12 @@ def _rb_bundle_impl(repository_ctx):
         executable = False
     )
 
+    repository_ctx.report_progress("Running bundle install")
     repository_ctx.execute(
         [
             repository_ctx.path(repository_ctx.attr._bundle),
             "install",
         ],
-        quiet = False,
         environment = {
             "BUNDLE_BIN": repr(binstubs_path),
             "BUNDLE_SHEBANG": repr(repository_ctx.path(repository_ctx.attr._ruby)),
@@ -170,14 +170,14 @@ rb_bundle = repository_rule(
         "srcs": attr.label_list(allow_files = True),
         "gemfile": attr.label(allow_single_file = True),
         "_ruby": attr.label(
-            default = "@rules_ruby//:dist/bin/ruby",
+            default = "@rules_ruby_dist//:bin/ruby",
             providers = [RubyInfo],
             executable = True,
             cfg = "exec",
             allow_files = True,
         ),
         "_bundle": attr.label(
-            default = "@rules_ruby//:dist/bin/bundle",
+            default = "@rules_ruby_dist//:bin/bundle",
             providers = [RubyInfo],
             executable = True,
             cfg = "exec",
@@ -190,10 +190,48 @@ rb_bundle = repository_rule(
     },
 )
 
-# }}} rb_toolchain {{{1
+# }}} rb_download {{{1
 
-def rb_setup(toolchain = "@%s//:toolchain" % "rules_ruby"):
-    native.register_toolchains(toolchain)
+def rb_download(version):
+    _rb_download(
+        name = "rules_ruby_dist",
+        version = version
+    )
+    native.register_toolchains("@rules_ruby_dist//:toolchain")
+
+def _rb_download_impl(repository_ctx):
+    repository_ctx.report_progress("Downloading ruby-build")
+    repository_ctx.download_and_extract(
+        url = "https://github.com/rbenv/ruby-build/archive/refs/tags/v%s.tar.gz" % repository_ctx.attr._ruby_build_version,
+        output = "ruby-build",
+        stripPrefix = "ruby-build-%s" % repository_ctx.attr._ruby_build_version
+    )
+
+    repository_ctx.report_progress("Installing Ruby")
+    repository_ctx.execute(["ruby-build/bin/ruby-build", repository_ctx.attr.version, "."])
+
+    repository_ctx.template(
+        "BUILD",
+        repository_ctx.attr._build_tpl,
+    )
+
+_rb_download = repository_rule(
+    implementation = _rb_download_impl,
+    attrs = {
+        "version": attr.string(
+            mandatory = True,
+        ),
+        "_ruby_build_version": attr.string(
+            default = "20220910.1",
+        ),
+        "_build_tpl": attr.label(
+            allow_single_file = True,
+            default = "@rules_ruby//:toolchain.BUILD.tpl",
+        )
+    }
+)
+
+# }}} rb_toolchain {{{1
 
 def rb_toolchain(name, ruby, bundle):
     toolchain_name = "%s_toolchain" % name
