@@ -1,6 +1,9 @@
 load("@rules_ruby//:ruby.bzl", "rb_toolchain")
 
-exports_files(glob(['bin/*']))
+filegroup(
+    name = "bin",
+    srcs = glob(['dist/bin/*'])
+)
 
 toolchain_type(
     name = "toolchain_type",
@@ -9,6 +12,6 @@ toolchain_type(
 
 rb_toolchain(
     name = "toolchain",
-    ruby = "bin/ruby",
-    bundle = "bin/bundle",
+    ruby = "dist/bin/ruby",
+    bundle = "dist/bin/bundle",
 )

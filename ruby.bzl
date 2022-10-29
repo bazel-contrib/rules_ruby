@@ -170,14 +170,14 @@ rb_bundle = repository_rule(
         "srcs": attr.label_list(allow_files = True),
         "gemfile": attr.label(allow_single_file = True),
         "_ruby": attr.label(
-            default = "@rules_ruby_dist//:bin/ruby",
+            default = "@rules_ruby_dist//bin:ruby",
             providers = [RubyInfo],
             executable = True,
             cfg = "exec",
             allow_files = True,
         ),
         "_bundle": attr.label(
-            default = "@rules_ruby_dist//:bin/bundle",
+            default = "@rules_ruby_dist//bin:bundle",
             providers = [RubyInfo],
             executable = True,
             cfg = "exec",
@@ -208,7 +208,7 @@ def _rb_download_impl(repository_ctx):
     )
 
     repository_ctx.report_progress("Installing Ruby")
-    repository_ctx.execute(["ruby-build/bin/ruby-build", repository_ctx.attr.version, "."])
+    repository_ctx.execute(["ruby-build/bin/ruby-build", repository_ctx.attr.version, "dist"])
 
     repository_ctx.template(
         "BUILD",
@@ -222,7 +222,7 @@ _rb_download = repository_rule(
             mandatory = True,
         ),
         "_ruby_build_version": attr.string(
-            default = "20220910.1",
+            default = "20221026",
         ),
         "_build_tpl": attr.label(
             allow_single_file = True,
