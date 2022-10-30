@@ -13,4 +13,4 @@ bazel run :rubocop || exit 1
 bazel test spec:all || exit 1
 
 # rb_gem
-bazel build :example || exit
+bazel build :example || exit 1

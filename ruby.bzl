@@ -37,24 +37,29 @@ rb_library = rule(
 # }}} rb_binary {{{1
 
 _RUN_SCRIPT = """
+set PATH={ruby_bin};%PATH%
 {bin} {args}
 """
 
 def _rb_binary_impl(ctx):
+    toolchain = ctx.toolchains["@rules_ruby//:toolchain_type"]
+
     if ctx.attr.bin:
         binary = ctx.executable.bin
+        binarys = "call %s.cmd" % ctx.executable.bin.path
     else:
-        toolchain = ctx.toolchains["@rules_ruby//:toolchain_type"]
         binary = toolchain.ruby
+        binarys = "ruby"
 
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps)
     runfiles = ctx.runfiles(transitive_srcs.to_list() + [binary])
 
-    script = ctx.actions.declare_file("{}.rb".format(ctx.label.name))
+    script = ctx.actions.declare_file("{}.rb.cmd".format(ctx.label.name))
     ctx.actions.write(
         output = script,
         content = _RUN_SCRIPT.format(
-            bin = binary.path,
+            bin = binarys.replace('/', '\\'),
+            ruby_bin = toolchain.bin.replace('/', '\\'),
             args = " ".join(ctx.attr.args),
         )
     )
@@ -90,6 +95,7 @@ rb_test = rule(
             cfg = "exec",
         ),
     },
+    toolchains = ["@rules_ruby//:toolchain_type"],
 )
 
 # }}} rb_gem {{{1
@@ -105,6 +111,7 @@ def _rb_gem_impl(ctx):
             "{bazel_out_dir}": ctx.outputs.gem.dirname,
             "{gem_filename}": ctx.outputs.gem.basename,
             "{gemspec}": ctx.file.gemspec.path,
+            "{inputs}": repr([f.path for f in get_transitive_srcs(ctx.files.srcs + [gem_builder], ctx.attr.deps).to_list()])
         },
     )
 
@@ -160,7 +167,8 @@ def _rb_bundle_impl(repository_ctx):
             "BUNDLE_BIN": repr(binstubs_path),
             "BUNDLE_SHEBANG": repr(repository_ctx.path(repository_ctx.attr._ruby)),
         },
-        working_directory = repr(workspace_root)
+        working_directory = repr(workspace_root),
+        quiet = False
     )
 
 rb_bundle = repository_rule(
@@ -170,14 +178,14 @@ rb_bundle = repository_rule(
         "srcs": attr.label_list(allow_files = True),
         "gemfile": attr.label(allow_single_file = True),
         "_ruby": attr.label(
-            default = "@rules_ruby_dist//bin:ruby",
+            default = "@rules_ruby_dist//:dist/bin/ruby.exe",
             providers = [RubyInfo],
             executable = True,
             cfg = "exec",
             allow_files = True,
         ),
         "_bundle": attr.label(
-            default = "@rules_ruby_dist//bin:bundle",
+            default = "@rules_ruby_dist//:dist/bin/bundle.cmd",
             providers = [RubyInfo],
             executable = True,
             cfg = "exec",
@@ -200,19 +208,49 @@ def rb_download(version):
     native.register_toolchains("@rules_ruby_dist//:toolchain")
 
 def _rb_download_impl(repository_ctx):
-    repository_ctx.report_progress("Downloading ruby-build")
-    repository_ctx.download_and_extract(
-        url = "https://github.com/rbenv/ruby-build/archive/refs/tags/v%s.tar.gz" % repository_ctx.attr._ruby_build_version,
-        output = "ruby-build",
-        stripPrefix = "ruby-build-%s" % repository_ctx.attr._ruby_build_version
-    )
+    print("Download ")
+    if repository_ctx.os.name.startswith("windows"):
+        repository_ctx.report_progress("Downloading RubyInstaller")
 
-    repository_ctx.report_progress("Installing Ruby")
-    repository_ctx.execute(["ruby-build/bin/ruby-build", repository_ctx.attr.version, "dist"])
+        repository_ctx.download(
+            url = "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-%s-1/rubyinstaller-devkit-%s-1-x64.exe" % (repository_ctx.attr.version, repository_ctx.attr.version),
+            output = "ruby-installer.exe"
+        )
+
+        print("Install")
+        repository_ctx.report_progress("Installing Ruby")
+        r = repository_ctx.execute([
+            "./ruby-installer.exe",
+            "/dir=dist",
+            "/tasks=nomodpath,noassocfiles",
+            "/verysilent",
+            "/components=ruby,msys2"
+        ], quiet = False)
+        print(r.return_code)
+        print(r.stdout)
+        print(r.stderr)
+
+    else:
+        repository_ctx.report_progress("Downloading ruby-build")
+        repository_ctx.download_and_extract(
+            url = "https://github.com/rbenv/ruby-build/archive/refs/tags/v%s.tar.gz" % repository_ctx.attr._ruby_build_version,
+            output = "ruby-build",
+            stripPrefix = "ruby-build-%s" % repository_ctx.attr._ruby_build_version
+        )
+
+        print("Install")
+        repository_ctx.report_progress("Installing Ruby")
+        r = repository_ctx.execute(["ruby-build/bin/ruby-build", repository_ctx.attr.version, "dist"], quiet = False)
+        print(r.return_code)
+        print(r.stdout)
+        print(r.stderr)
 
     repository_ctx.template(
         "BUILD",
         repository_ctx.attr._build_tpl,
+        substitutions = {
+            "{bin}": repr(repository_ctx.path("dist/bin"))
+        }
     )
 
 _rb_download = repository_rule(
@@ -233,13 +271,14 @@ _rb_download = repository_rule(
 
 # }}} rb_toolchain {{{1
 
-def rb_toolchain(name, ruby, bundle):
+def rb_toolchain(name, ruby, bundle, bin):
     toolchain_name = "%s_toolchain" % name
 
     _rb_toolchain(
         name = toolchain_name,
         ruby = ruby,
         bundle = bundle,
+        bin = bin,
     )
 
     native.toolchain(
@@ -258,6 +297,7 @@ def _rb_toolchain_impl(ctx):
         bundle_runfiles = ctx.runfiles(ctx.files.bundle).merge(
             ctx.attr.bundle[DefaultInfo].default_runfiles,
         ),
+        bin = ctx.attr.bin
     )
 
 _rb_toolchain = rule(
@@ -275,6 +315,9 @@ _rb_toolchain = rule(
             executable = True,
             cfg = "exec",
         ),
+        "bin": attr.string(
+            doc = "Ruby bin path",
+        )
     },
 )
 

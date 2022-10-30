@@ -6,7 +6,7 @@ local_repository(
 load("@rules_ruby//:ruby.bzl", "rb_bundle", "rb_download")
 
 rb_download(
-    version = "3.1.0"
+    version = "3.0.3"
 )
 
 rb_bundle(

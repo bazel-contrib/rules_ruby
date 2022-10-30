@@ -12,6 +12,7 @@ toolchain_type(
 
 rb_toolchain(
     name = "toolchain",
-    ruby = "dist/bin/ruby",
-    bundle = "dist/bin/bundle",
+    ruby = "dist/bin/ruby.exe",
+    bundle = "dist/bin/bundle.cmd",
+    bin = "{bin}",
 )
