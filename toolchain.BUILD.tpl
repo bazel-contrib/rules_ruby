@@ -1,5 +1,7 @@
 load("@rules_ruby//:ruby.bzl", "rb_toolchain")
 
+package(default_visibility = ["//visibility:public"])
+
 filegroup(
     name = "ruby",
     srcs = select({
@@ -18,7 +20,6 @@ filegroup(
 
 toolchain_type(
     name = "toolchain_type",
-    visibility = ["//visibility:public"],
 )
 
 rb_toolchain(
