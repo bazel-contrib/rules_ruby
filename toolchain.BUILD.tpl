@@ -1,8 +1,19 @@
 load("@rules_ruby//:ruby.bzl", "rb_toolchain")
 
 filegroup(
-    name = "bin",
-    srcs = glob(['dist/bin/*'])
+    name = "ruby",
+    srcs = select({
+        "@platforms//os:windows": ["dist/bin/ruby.exe"],
+        "//conditions:default": ["dist/bin/ruby"],
+    }),
+)
+
+filegroup(
+    name = "bundle",
+    srcs = select({
+        "@platforms//os:windows": ["dist/bin/bundle.cmd"],
+        "//conditions:default": ["dist/bin/bundle"],
+    }),
 )
 
 toolchain_type(
@@ -12,7 +23,7 @@ toolchain_type(
 
 rb_toolchain(
     name = "toolchain",
-    ruby = "dist/bin/ruby.exe",
-    bundle = "dist/bin/bundle.cmd",
-    bin = "{bin}",
+    ruby = ":ruby",
+    bundle = ":bundle",
+    bindir = "{bindir}",
 )
