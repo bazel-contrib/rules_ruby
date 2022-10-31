@@ -179,6 +179,13 @@ def _rb_bundle_impl(repository_ctx):
     binstubs_path = repository_ctx.path('bin')
     workspace_root = repository_ctx.path(repository_ctx.attr.gemfile).dirname
 
+    if repository_ctx.os.name.startswith("windows"):
+        bundle = repository_ctx.path(Label("@rules_ruby_dist//:dist/bin/bundle.cmd"))
+        ruby = repository_ctx.path(Label("@rules_ruby_dist//:dist/bin/ruby.exe"))
+    else:
+        bundle = repository_ctx.path(Label("@rules_ruby_dist//:dist/bin/bundle"))
+        ruby = repository_ctx.path(Label("@rules_ruby_dist//:dist/bin/ruby"))
+   
     repository_ctx.template(
         "BUILD",
         repository_ctx.attr._build_tpl,
@@ -188,12 +195,12 @@ def _rb_bundle_impl(repository_ctx):
     repository_ctx.report_progress("Running bundle install")
     result = repository_ctx.execute(
         [
-            repository_ctx.path(repository_ctx.attr._bundle),
+            bundle,
             "install",
         ],
         environment = {
             "BUNDLE_BIN": repr(binstubs_path),
-            "BUNDLE_SHEBANG": repr(repository_ctx.path(repository_ctx.attr._ruby)),
+            "BUNDLE_SHEBANG": repr(ruby),
         },
         working_directory = repr(workspace_root),
     )
@@ -205,19 +212,7 @@ rb_bundle = repository_rule(
     implementation = _rb_bundle_impl,
     attrs = {
         "srcs": attr.label_list(allow_files = True),
-        "gemfile": attr.label(allow_single_file = True),
-        "_ruby": attr.label(
-            default = "@rules_ruby_dist//:dist/bin/ruby",
-            executable = True,
-            cfg = "exec",
-            allow_single_file = True,
-        ),
-        "_bundle": attr.label(
-            default = "@rules_ruby_dist//:dist/bin/bundle",
-            executable = True,
-            cfg = "exec",
-            allow_single_file = True,
-        ),
+        "gemfile": attr.label(allow_single_file = True),cd .
         "_build_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//:bundle.BUILD.tpl",
@@ -263,13 +258,6 @@ def _rb_download_impl(repository_ctx):
 
     if result.return_code != 0:
         fail("%s\n%s" % (result.stdout, result.stderr))
-
-    # We need to create symlinks because rb_bundle cannot using
-    # platform constraints to select a proper binary depending on OS.
-    if not repository_ctx.path('dist/bin/bundle').exists:
-        repository_ctx.symlink('dist/bin/bundle.cmd', 'dist/bin/bundle')
-    if not repository_ctx.path('dist/bin/ruby').exists:
-        repository_ctx.symlink('dist/bin/ruby.exe', 'dist/bin/ruby')
 
     repository_ctx.template(
         "BUILD",
