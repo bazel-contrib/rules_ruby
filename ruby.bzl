@@ -185,7 +185,7 @@ def _rb_bundle_impl(repository_ctx):
     else:
         bundle = repository_ctx.path(Label("@rules_ruby_dist//:dist/bin/bundle"))
         ruby = repository_ctx.path(Label("@rules_ruby_dist//:dist/bin/ruby"))
-   
+
     repository_ctx.template(
         "BUILD",
         repository_ctx.attr._build_tpl,
@@ -212,7 +212,7 @@ rb_bundle = repository_rule(
     implementation = _rb_bundle_impl,
     attrs = {
         "srcs": attr.label_list(allow_files = True),
-        "gemfile": attr.label(allow_single_file = True),cd .
+        "gemfile": attr.label(allow_single_file = True),
         "_build_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//:bundle.BUILD.tpl",

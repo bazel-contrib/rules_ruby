@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 
 cd examples/gem || exit 1
 
