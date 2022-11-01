@@ -1,6 +1,6 @@
 load("//ruby/private:providers.bzl", "get_transitive_srcs")
 
-_SH_SCRIPT = "{binary} {args}"
+_SH_SCRIPT = "{binary} {args} $@"
 
 # We have to explicitly set PATH on Windows because bundler
 # binstubs rely on calling Ruby available globally.
@@ -8,14 +8,14 @@ _SH_SCRIPT = "{binary} {args}"
 
 _CMD_BINARY_SCRIPT = """
 @set PATH={toolchain_bindir};%PATH%
-@call {binary}.cmd {args}
+@call {binary}.cmd {args} %*
 """
 
 # Calling ruby.exe directly throws strange error so we rely on PATH instead.
 
 _CMD_RUBY_SCRIPT = """
 @set PATH={toolchain_bindir};%PATH%
-@ruby {args}
+@ruby {args} %*
 """
 
 def rb_binary_impl(ctx):
