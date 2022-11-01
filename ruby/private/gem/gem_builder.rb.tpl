@@ -7,6 +7,20 @@ gemspec_path = '{gemspec}'
 packaged_gem_path = File.expand_path('{gem_filename}', '{bazel_out_dir}')
 inputs = JSON.parse('{inputs_manifest}')
 
+# We need to check if there are inputs which are directories.
+# For such cases, we are going to check the contents of the directories
+# and add the file to the inputs manifest.
+inputs.dup.each do |src, dst|
+  next unless File.directory?(src)
+
+  inputs.delete(src)
+  Dir.chdir(src) do
+    Dir['**/*'].each do |file|
+      inputs[File.join(src, file)] = File.join(dst, file)
+    end
+  end
+end
+
 Dir.mktmpdir do |tmpdir|
   inputs.each do |src, dst|
     dst = File.join(tmpdir, dst)
