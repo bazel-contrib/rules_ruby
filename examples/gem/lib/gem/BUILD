@@ -1,5 +1,4 @@
-load("@rules_ruby//:ruby.bzl", "rb_binary")
-load("@rules_ruby//:ruby.bzl", "rb_library")
+load("@rules_ruby//ruby:defs.bzl", "rb_binary", "rb_library")
 
 package(default_visibility = ["//:__subpackages__"])
 

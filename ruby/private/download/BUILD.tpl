@@ -1,4 +1,4 @@
-load("@rules_ruby//:ruby.bzl", "rb_toolchain")
+load("@rules_ruby//ruby:toolchain.bzl", "rb_toolchain")
 
 package(default_visibility = ["//visibility:public"])
 

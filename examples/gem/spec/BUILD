@@ -1,5 +1,4 @@
-load("@rules_ruby//:ruby.bzl", "rb_library")
-load("@rules_ruby//:ruby.bzl", "rb_test")
+load("@rules_ruby//ruby:defs.bzl", "rb_library", "rb_test")
 
 rb_library(
     name = "spec_helper",
