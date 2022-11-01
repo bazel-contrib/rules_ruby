@@ -39,7 +39,7 @@ def rb_binary_impl(ctx):
         else:
             template = _CMD_RUBY_SCRIPT
     else:
-        script = ctx.actions.declare_file("{}.rb".format(ctx.label.name))
+        script = ctx.actions.declare_file("{}.rb.sh".format(ctx.label.name))
         template = _SH_SCRIPT
 
     args = " ".join(ctx.attr.args)
