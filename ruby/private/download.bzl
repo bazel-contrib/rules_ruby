@@ -1,7 +1,7 @@
 def rb_download(version):
     _rb_download(
         name = "rules_ruby_dist",
-        version = version
+        version = version,
     )
     native.register_toolchains("@rules_ruby_dist//:toolchain")
 
@@ -10,7 +10,7 @@ def _rb_download_impl(repository_ctx):
         repository_ctx.report_progress("Downloading RubyInstaller")
         repository_ctx.download(
             url = "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-%s-1/rubyinstaller-devkit-%s-1-x64.exe" % (repository_ctx.attr.version, repository_ctx.attr.version),
-            output = "ruby-installer.exe"
+            output = "ruby-installer.exe",
         )
 
         repository_ctx.report_progress("Installing Ruby")
@@ -26,7 +26,7 @@ def _rb_download_impl(repository_ctx):
         repository_ctx.download_and_extract(
             url = "https://github.com/rbenv/ruby-build/archive/refs/tags/v%s.tar.gz" % repository_ctx.attr._ruby_build_version,
             output = "ruby-build",
-            stripPrefix = "ruby-build-%s" % repository_ctx.attr._ruby_build_version
+            stripPrefix = "ruby-build-%s" % repository_ctx.attr._ruby_build_version,
         )
 
         repository_ctx.report_progress("Installing Ruby")
@@ -40,8 +40,8 @@ def _rb_download_impl(repository_ctx):
         repository_ctx.attr._build_tpl,
         executable = False,
         substitutions = {
-            "{bindir}": repr(repository_ctx.path("dist/bin"))
-        }
+            "{bindir}": repr(repository_ctx.path("dist/bin")),
+        },
     )
 
 _rb_download = repository_rule(
@@ -56,6 +56,6 @@ _rb_download = repository_rule(
         "_build_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//:ruby/private/download/BUILD.tpl",
-        )
-    }
+        ),
+    },
 )

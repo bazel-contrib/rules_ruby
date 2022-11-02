@@ -1,4 +1,4 @@
-load("//ruby/private:providers.bzl", "get_transitive_srcs", "RubyFiles")
+load("//ruby/private:providers.bzl", "RubyFiles", "get_transitive_srcs")
 
 def _rb_library_impl(ctx):
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps)
@@ -9,5 +9,5 @@ rb_library = rule(
     attrs = {
         "srcs": attr.label_list(allow_files = True),
         "deps": attr.label_list(),
-    }
+    },
 )

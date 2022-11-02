@@ -5,7 +5,7 @@ _BINSTUB_CMD = """@ruby -x "%~f0" %*
 """
 
 def _rb_bundle_impl(repository_ctx):
-    binstubs_path = repository_ctx.path('bin')
+    binstubs_path = repository_ctx.path("bin")
     workspace_root = repository_ctx.path(repository_ctx.attr.gemfile).dirname
 
     if repository_ctx.os.name.startswith("windows"):
@@ -18,7 +18,7 @@ def _rb_bundle_impl(repository_ctx):
     repository_ctx.template(
         "BUILD",
         repository_ctx.attr._build_tpl,
-        executable = False
+        executable = False,
     )
 
     repository_ctx.report_progress("Running bundle install")
@@ -36,11 +36,11 @@ def _rb_bundle_impl(repository_ctx):
 
     # Check if there are missing Windows binstubs and generate them manually.
     # This is necessary on Ruby 2.7 with Bundler 2.1 and earlier.
-    if not binstubs_path.get_child('bundle.cmd').exists:
+    if not binstubs_path.get_child("bundle.cmd").exists:
         for binstub in binstubs_path.readdir():
             repository_ctx.file(
                 "%s.cmd" % binstub,
-                _BINSTUB_CMD.format(repository_ctx.read(binstub))
+                _BINSTUB_CMD.format(repository_ctx.read(binstub)),
             )
 
 rb_bundle = repository_rule(

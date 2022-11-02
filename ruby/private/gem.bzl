@@ -25,7 +25,7 @@ def _rb_gem_impl(ctx):
             "{bazel_out_dir}": ctx.outputs.gem.dirname,
             "{gem_filename}": ctx.outputs.gem.basename,
             "{gemspec}": ctx.file.gemspec.path,
-            "{inputs_manifest}": json.encode(inputs_manifest)
+            "{inputs_manifest}": json.encode(inputs_manifest),
         },
     )
 

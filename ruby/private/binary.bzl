@@ -31,9 +31,9 @@ def rb_binary_impl(ctx):
     binary_path = binary.path
     toolchain_bindir = toolchain.bindir
     if is_windows:
-        binary_path = binary_path.replace('/', '\\')
+        binary_path = binary_path.replace("/", "\\")
         script = ctx.actions.declare_file("{}.rb.cmd".format(ctx.label.name))
-        toolchain_bindir = toolchain_bindir.replace('/', '\\')
+        toolchain_bindir = toolchain_bindir.replace("/", "\\")
         if ctx.attr.bin:
             template = _CMD_BINARY_SCRIPT
         else:
@@ -51,8 +51,8 @@ def rb_binary_impl(ctx):
         content = template.format(
             args = args,
             binary = binary_path,
-            toolchain_bindir = toolchain_bindir
-        )
+            toolchain_bindir = toolchain_bindir,
+        ),
     )
 
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps)
@@ -72,7 +72,7 @@ rb_binary = rule(
             cfg = "exec",
         ),
         "_windows_constraint": attr.label(
-            default = "@platforms//os:windows"
+            default = "@platforms//os:windows",
         ),
     },
     toolchains = ["@rules_ruby//:toolchain_type"],

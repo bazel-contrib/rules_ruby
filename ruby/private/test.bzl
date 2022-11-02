@@ -12,7 +12,7 @@ rb_test = rule(
             cfg = "exec",
         ),
         "_windows_constraint": attr.label(
-            default = "@platforms//os:windows"
+            default = "@platforms//os:windows",
         ),
     },
     toolchains = ["@rules_ruby//:toolchain_type"],

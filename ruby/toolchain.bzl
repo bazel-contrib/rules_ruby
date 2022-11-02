@@ -18,7 +18,7 @@ def _rb_toolchain_impl(ctx):
     return platform_common.ToolchainInfo(
         ruby = ctx.executable.ruby,
         bundle = ctx.executable.bundle,
-        bindir = ctx.attr.bindir
+        bindir = ctx.attr.bindir,
     )
 
 _rb_toolchain = rule(
