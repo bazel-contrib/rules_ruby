@@ -2,7 +2,6 @@ load("//ruby/private:binary.bzl", "generate_rb_binary_script")
 load("//ruby/private:providers.bzl", "get_transitive_srcs")
 
 def _rb_gem_push_impl(ctx):
-    print(ctx.toolchains["@rules_ruby//:toolchain_type"].gem)
     script = generate_rb_binary_script(
         ctx,
         ctx.toolchains["@rules_ruby//:toolchain_type"].gem,
