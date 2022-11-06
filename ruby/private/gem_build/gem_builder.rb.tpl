@@ -26,8 +26,6 @@ Dir.mktmpdir do |tmpdir|
     dst = File.join(tmpdir, dst)
     FileUtils.mkdir_p(File.dirname(dst))
     FileUtils.cp(src, dst)
-    # https://github.com/bazelbuild/bazel/issues/5588
-    File.chmod(0o644, dst)
   end
 
   Dir.chdir(tmpdir) do
