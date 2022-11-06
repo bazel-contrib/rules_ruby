@@ -23,12 +23,12 @@ rb_binary(<a href="#rb_binary-name">name</a>, <a href="#rb_binary-bin">bin</a>, 
 | <a id="rb_binary-srcs"></a>srcs |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 
 
-<a id="rb_gem"></a>
+<a id="rb_gem_build"></a>
 
-## rb_gem
+## rb_gem_build
 
 <pre>
-rb_gem(<a href="#rb_gem-name">name</a>, <a href="#rb_gem-deps">deps</a>, <a href="#rb_gem-gemspec">gemspec</a>, <a href="#rb_gem-srcs">srcs</a>)
+rb_gem_build(<a href="#rb_gem_build-name">name</a>, <a href="#rb_gem_build-deps">deps</a>, <a href="#rb_gem_build-gemspec">gemspec</a>, <a href="#rb_gem_build-srcs">srcs</a>)
 </pre>
 
 
@@ -38,10 +38,29 @@ rb_gem(<a href="#rb_gem-name">name</a>, <a href="#rb_gem-deps">deps</a>, <a href
 
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="rb_gem-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="rb_gem-deps"></a>deps |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
-| <a id="rb_gem-gemspec"></a>gemspec |  -   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
-| <a id="rb_gem-srcs"></a>srcs |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
+| <a id="rb_gem_build-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="rb_gem_build-deps"></a>deps |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
+| <a id="rb_gem_build-gemspec"></a>gemspec |  -   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+| <a id="rb_gem_build-srcs"></a>srcs |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
+
+
+<a id="rb_gem_push"></a>
+
+## rb_gem_push
+
+<pre>
+rb_gem_push(<a href="#rb_gem_push-name">name</a>, <a href="#rb_gem_push-src">src</a>)
+</pre>
+
+
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="rb_gem_push-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="rb_gem_push-src"></a>src |  -   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
 
 <a id="rb_library"></a>
