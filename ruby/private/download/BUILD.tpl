@@ -18,6 +18,14 @@ filegroup(
     }),
 )
 
+filegroup(
+    name = "gem",
+    srcs = select({
+        "@platforms//os:windows": ["dist/bin/gem.cmd"],
+        "//conditions:default": ["dist/bin/gem"],
+    }),
+)
+
 toolchain_type(
     name = "toolchain_type",
 )
@@ -26,5 +34,6 @@ rb_toolchain(
     name = "toolchain",
     ruby = ":ruby",
     bundle = ":bundle",
+    gem = ":gem",
     bindir = "{bindir}",
 )

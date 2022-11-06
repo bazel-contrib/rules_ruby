@@ -1,4 +1,4 @@
-load("@rules_ruby//ruby:defs.bzl", "rb_binary", "rb_library", "rb_gem")
+load("@rules_ruby//ruby:defs.bzl", "rb_binary", "rb_library", "rb_gem_build", "rb_gem_push")
 
 package(default_visibility = ["//:__subpackages__"])
 
@@ -18,8 +18,13 @@ rb_binary(
     ]
 )
 
-rb_gem(
+rb_gem_build(
     name = "example",
     gemspec = "gem.gemspec",
     deps = [":gem"],
+)
+
+rb_gem_push(
+    name = "example-release",
+    src = ":example",
 )

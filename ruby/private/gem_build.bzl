@@ -1,6 +1,6 @@
 load("//ruby/private:providers.bzl", "get_transitive_srcs")
 
-def _rb_gem_impl(ctx):
+def _rb_gem_build_impl(ctx):
     gem_builder = ctx.actions.declare_file("{}_gem_builder.rb".format(ctx.label.name))
     inputs = get_transitive_srcs(ctx.files.srcs + [gem_builder], ctx.attr.deps)
     toolchain = ctx.toolchains["@rules_ruby//:toolchain_type"]
@@ -38,8 +38,8 @@ def _rb_gem_impl(ctx):
         outputs = [ctx.outputs.gem],
     )
 
-rb_gem = rule(
-    _rb_gem_impl,
+rb_gem_build = rule(
+    _rb_gem_build_impl,
     attrs = {
         "gemspec": attr.label(
             allow_single_file = True,
@@ -49,7 +49,7 @@ rb_gem = rule(
         "deps": attr.label_list(),
         "_gem_builder_tpl": attr.label(
             allow_single_file = True,
-            default = "@rules_ruby//ruby/private:gem/gem_builder.rb.tpl",
+            default = "@rules_ruby//ruby/private:gem_build/gem_builder.rb.tpl",
         ),
     },
     outputs = {

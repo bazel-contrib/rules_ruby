@@ -18,31 +18,30 @@ _CMD_RUBY_SCRIPT = """
 @ruby {args} %*
 """
 
-def rb_binary_impl(ctx):
+def generate_rb_binary_script(ctx, binary, args):
     windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
     is_windows = ctx.target_platform_has_constraint(windows_constraint)
     toolchain = ctx.toolchains["@rules_ruby//:toolchain_type"]
-
-    if ctx.attr.bin:
-        binary = ctx.executable.bin
-    else:
-        binary = toolchain.ruby
-
-    binary_path = binary.path
     toolchain_bindir = toolchain.bindir
+
+    if binary:
+        binary_path = binary.path
+    else:
+        binary_path = toolchain.ruby.path
+
     if is_windows:
         binary_path = binary_path.replace("/", "\\")
         script = ctx.actions.declare_file("{}.rb.cmd".format(ctx.label.name))
         toolchain_bindir = toolchain_bindir.replace("/", "\\")
-        if ctx.attr.bin:
-            template = _CMD_BINARY_SCRIPT
-        else:
+        if binary:
             template = _CMD_RUBY_SCRIPT
+        else:
+            template = _CMD_BINARY_SCRIPT
     else:
         script = ctx.actions.declare_file("{}.rb.sh".format(ctx.label.name))
         template = _SH_SCRIPT
 
-    args = " ".join(ctx.attr.args)
+    args = " ".join(args)
     args = ctx.expand_location(args)
 
     ctx.actions.write(
@@ -55,8 +54,14 @@ def rb_binary_impl(ctx):
         ),
     )
 
-    transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps)
-    runfiles = ctx.runfiles(transitive_srcs.to_list() + [binary])
+    return script
+
+def rb_binary_impl(ctx):
+    script = generate_rb_binary_script(ctx, ctx.executable.bin, ctx.attr.args)
+    transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
+    if not ctx.attr.bin:
+        transitive_srcs += [ctx.toolchains["@rules_ruby//:toolchain_type"].ruby]
+    runfiles = ctx.runfiles(transitive_srcs)
 
     return [DefaultInfo(executable = script, runfiles = runfiles)]
 
