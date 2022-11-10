@@ -5,22 +5,22 @@ rb_library(
     srcs = ["spec_helper.rb"],
     deps = [
         "//:gem",
-        "@bundle"
+        "@bundle",
     ],
 )
 
 rb_test(
     name = "add",
-    bin = "@bundle//:bin/rspec",
-    args = ["spec/add_spec.rb"],
     srcs = ["add_spec.rb"],
-    deps = [":spec_helper"]
+    args = ["spec/add_spec.rb"],
+    bin = "@bundle//:bin/rspec",
+    deps = [":spec_helper"],
 )
 
 rb_test(
     name = "subtract",
-    bin = "@bundle//:bin/rspec",
-    args = ["spec/subtract_spec.rb"],
     srcs = ["subtract_spec.rb"],
-    deps = [":spec_helper"]
+    args = ["spec/subtract_spec.rb"],
+    bin = "@bundle//:bin/rspec",
+    deps = [":spec_helper"],
 )

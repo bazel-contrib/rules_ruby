@@ -3,7 +3,7 @@ load("//ruby/private:providers.bzl", "get_transitive_srcs")
 def _rb_gem_build_impl(ctx):
     gem_builder = ctx.actions.declare_file("{}_gem_builder.rb".format(ctx.label.name))
     inputs = get_transitive_srcs(ctx.files.srcs + [gem_builder], ctx.attr.deps)
-    toolchain = ctx.toolchains["@rules_ruby//:toolchain_type"]
+    toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
     # Inputs manifest is a dictionary where:
     #   - key is a path where a file is available (https://bazel.build/rules/lib/File#path)
@@ -55,5 +55,5 @@ rb_gem_build = rule(
     outputs = {
         "gem": "%{name}.gem",
     },
-    toolchains = ["@rules_ruby//:toolchain_type"],
+    toolchains = ["@rules_ruby//ruby:toolchain_type"],
 )

@@ -12,7 +12,7 @@ def rb_toolchain(name, ruby, bundle, gem, bindir):
     native.toolchain(
         name = name,
         toolchain = ":%s" % toolchain_name,
-        toolchain_type = "@rules_ruby//:toolchain_type",
+        toolchain_type = "@rules_ruby//ruby:toolchain_type",
     )
 
 def _rb_toolchain_impl(ctx):

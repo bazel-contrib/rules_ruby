@@ -4,11 +4,11 @@ load("//ruby/private:providers.bzl", "get_transitive_srcs")
 def _rb_gem_push_impl(ctx):
     script = generate_rb_binary_script(
         ctx,
-        ctx.toolchains["@rules_ruby//:toolchain_type"].gem,
-        ["push", ctx.file.src.short_path]
+        ctx.toolchains["@rules_ruby//ruby:toolchain_type"].gem,
+        ["push", ctx.file.src.short_path],
     )
 
-    runfiles = ctx.runfiles([ctx.file.src, ctx.toolchains["@rules_ruby//:toolchain_type"].gem])
+    runfiles = ctx.runfiles([ctx.file.src, ctx.toolchains["@rules_ruby//ruby:toolchain_type"].gem])
     return [DefaultInfo(executable = script, runfiles = runfiles)]
 
 rb_gem_push = rule(
@@ -23,5 +23,5 @@ rb_gem_push = rule(
             default = "@platforms//os:windows",
         ),
     },
-    toolchains = ["@rules_ruby//:toolchain_type"],
+    toolchains = ["@rules_ruby//ruby:toolchain_type"],
 )

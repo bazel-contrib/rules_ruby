@@ -15,5 +15,5 @@ rb_test = rule(
             default = "@platforms//os:windows",
         ),
     },
-    toolchains = ["@rules_ruby//:toolchain_type"],
+    toolchains = ["@rules_ruby//ruby:toolchain_type"],
 )
