@@ -1,8 +1,9 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
+
+package(default_visibility = ["//:__subpackages__"])
 
 bzl_library(
-    name = "rules",
+    name = "ruby",
     srcs = [
         "//ruby:defs.bzl",
         "//ruby:deps.bzl",
@@ -16,11 +17,4 @@ bzl_library(
         "//ruby/private:providers.bzl",
         "//ruby/private:test.bzl",
     ],
-)
-
-stardoc(
-    name = "stardoc",
-    out = "README.md",
-    input = "//ruby:defs.bzl",
-    deps = [":rules"],
 )
