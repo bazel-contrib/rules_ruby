@@ -1,0 +1,35 @@
+name: CI
+on: push
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  examples-gem:
+    name: Examples / Gem
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+    defaults:
+      run:
+        working-directory: examples/gem
+    steps:
+      - uses: actions/checkout@v3
+      - if: matrix.os == 'windows-latest'
+        run: echo "startup --output_user_root=D:/_bazel" >> .bazelrc
+      - run: bazel build ...
+      - run: bazel run lib/gem:print-version
+      - run: bazel run :rubocop
+      - run: bazel test spec/...
+
+  stardoc:
+    name: Stardoc
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: bazel build :stardoc
