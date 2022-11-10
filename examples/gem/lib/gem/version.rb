@@ -4,4 +4,4 @@ module GEM
   VERSION = '0.1.0'
 end
 
-puts GEM::VERSION if __FILE__ == $PROGRAM_NAME
+puts "Version is: #{GEM::VERSION}" if __FILE__ == $PROGRAM_NAME

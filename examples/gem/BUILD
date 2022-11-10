@@ -29,12 +29,12 @@ rb_binary(
 )
 
 rb_gem_build(
-    name = "example",
+    name = "gem-build",
     gemspec = "gem.gemspec",
     deps = [":gem"],
 )
 
 rb_gem_push(
-    name = "example-release",
-    src = ":example",
+    name = "gem-release",
+    src = ":gem-build",
 )

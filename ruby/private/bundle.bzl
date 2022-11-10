@@ -6,7 +6,7 @@ _BINSTUB_CMD = """@ruby -x "%~f0" %*
 
 def _rb_bundle_impl(repository_ctx):
     binstubs_path = repository_ctx.path("bin")
-    workspace_root = repository_ctx.path(repository_ctx.attr.gemfile).dirname
+    gemfile = repository_ctx.path(repository_ctx.attr.gemfile)
 
     if repository_ctx.os.name.startswith("windows"):
         bundle = repository_ctx.path(Label("@rules_ruby_dist//:dist/bin/bundle.cmd"))
@@ -26,9 +26,10 @@ def _rb_bundle_impl(repository_ctx):
         [bundle, "install"],
         environment = {
             "BUNDLE_BIN": repr(binstubs_path),
+            "BUNDLE_GEMFILE": repr(gemfile),
             "BUNDLE_SHEBANG": repr(ruby),
         },
-        working_directory = repr(workspace_root),
+        working_directory = repr(gemfile.dirname),
     )
 
     if result.return_code != 0:
@@ -46,11 +47,55 @@ def _rb_bundle_impl(repository_ctx):
 rb_bundle = repository_rule(
     implementation = _rb_bundle_impl,
     attrs = {
-        "srcs": attr.label_list(allow_files = True),
-        "gemfile": attr.label(allow_single_file = True),
+        "srcs": attr.label_list(
+            allow_files = True,
+            doc = """
+List of Ruby source files used to build the library.
+            """,
+        ),
+        "gemfile": attr.label(
+            allow_single_file = True,
+            doc = """
+Gemfile to install dependencies from.
+            """,
+        ),
         "_build_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//:ruby/private/bundle/BUILD.tpl",
         ),
     },
+    doc = """
+Installs Bundler dependencies and registers an external repository
+that can be used by other targets.
+
+`WORKSPACE`:
+```bazel
+load("@rules_ruby//ruby:deps.bzl", "rb_bundle")
+
+rb_bundle(
+    name = "bundle",
+    gemfile = "//:Gemfile",
+    srcs = [
+        "//:gem.gemspec",
+        "//:lib/gem/version.rb",
+    ]
+)
+```
+
+All the installed gems can be accessed using `@bundle` target and additionally
+gems binary files can also be used:
+
+`BUILD`:
+```bazel
+load("@rules_ruby//ruby:defs.bzl", "rb_binary")
+
+package(default_visibility = ["//:__subpackages__"])
+
+rb_binary(
+    name = "rubocop",
+    bin = "@bundle//:bin/rubocop",
+    deps = ["@bundle"],
+)
+```
+    """,
 )

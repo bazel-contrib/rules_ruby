@@ -6,16 +6,18 @@ Gem::Specification.new do |s|
   s.name = 'example'
   s.version = GEM::VERSION
 
-  s.authors = ['Alex Rodionov']
-  s.email = ['p0deje@gmail.com']
+  s.authors = ['Foo Bar']
+  s.email = ['foobar@gmail.com']
+  s.homepage = 'http://rubygems.org'
+  s.license = 'MIT'
 
   s.summary = 'Example'
-  s.description = 'Example'
+  s.description = 'Example gem'
   s.files = ['Gemfile'] + Dir['lib/**/*']
 
   s.require_paths = ['lib']
 
-  s.add_dependency 'rake'
-  s.add_development_dependency 'rspec'
-  s.add_development_dependency 'rubocop'
+  s.add_dependency 'rake', '~> 10'
+  s.add_development_dependency 'rspec', '~> 3.0'
+  s.add_development_dependency 'rubocop', '~> 1.10'
 end

@@ -44,9 +44,21 @@ rb_gem_build = rule(
         "gemspec": attr.label(
             allow_single_file = True,
             mandatory = True,
+            doc = """
+Gemspec file to use for gem building.
+            """,
         ),
-        "srcs": attr.label_list(allow_files = True),
-        "deps": attr.label_list(),
+        "srcs": attr.label_list(
+            allow_files = True,
+            doc = """
+List of Ruby source files used to build the library.
+            """,
+        ),
+        "deps": attr.label_list(
+            doc = """
+List of other Ruby libraries the target depends on.
+            """,
+        ),
         "_gem_builder_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//ruby/private:gem_build/gem_builder.rb.tpl",
@@ -56,4 +68,94 @@ rb_gem_build = rule(
         "gem": "%{name}.gem",
     },
     toolchains = ["@rules_ruby//ruby:toolchain_type"],
+    doc = """
+Builds a Ruby gem.
+
+Suppose you have the following simple Ruby gem, where `rb_library()` is used
+in `BUILD` files to define the packages for the gem.
+
+```output
+|-- BUILD
+|-- Gemfile
+|-- WORKSPACE
+|-- gem.gemspec
+`-- lib
+    |-- BUILD
+    |-- gem
+    |   |-- BUILD
+    |   |-- add.rb
+    |   |-- subtract.rb
+    |   `-- version.rb
+    `-- gem.rb
+```
+
+And a RubyGem specification is:
+
+`gem.gemspec`:
+```ruby
+root = File.expand_path(__dir__)
+$LOAD_PATH.push(File.expand_path('lib', root))
+require 'gem/version'
+
+Gem::Specification.new do |s|
+  s.name = 'example'
+  s.version = GEM::VERSION
+
+  s.authors = ['Foo Bar']
+  s.email = ['foobar@gmail.com']
+  s.homepage = 'http://rubygems.org'
+  s.license = 'MIT'
+
+  s.summary = 'Example'
+  s.description = 'Example gem'
+  s.files = ['Gemfile'] + Dir['lib/**/*']
+
+  s.require_paths = ['lib']
+  s.add_dependency 'rake', '~> 10'
+  s.add_development_dependency 'rspec', '~> 3.0'
+  s.add_development_dependency 'rubocop', '~> 1.10'
+end
+```
+
+You can now package everything into a `.gem` file by defining a target:
+
+`BUILD`:
+```bazel
+load("@rules_ruby//ruby:defs.bzl", "rb_gem_build", "rb_library")
+
+package(default_visibility = ["//:__subpackages__"])
+
+rb_library(
+    name = "gem",
+    srcs = [
+        "Gemfile",
+        "Gemfile.lock",
+        "gem.gemspec",
+    ],
+    deps = ["//lib:gem"],
+)
+
+rb_gem_build(
+    name = "gem-build",
+    gemspec = "gem.gemspec",
+    deps = [":gem"],
+)
+```
+
+```output
+$ bazel build :gem-build
+INFO: Analyzed target //:gem-build (0 packages loaded, 0 targets configured).
+INFO: Found 1 target...
+INFO: From Action gem-build.gem:
+  Successfully built RubyGem
+  Name: example
+  Version: 0.1.0
+  File: example-0.1.0.gem
+Target //:gem-build up-to-date:
+  bazel-bin/gem-build.gem
+INFO: Elapsed time: 0.196s, Critical Path: 0.10s
+INFO: 2 processes: 1 internal, 1 darwin-sandbox.
+INFO: Build completed successfully, 2 total actions
+```
+    """,
 )

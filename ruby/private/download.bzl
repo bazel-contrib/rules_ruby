@@ -56,13 +56,44 @@ _rb_download = repository_rule(
     attrs = {
         "version": attr.string(
             mandatory = True,
+            doc = """
+Ruby version to install.
+
+On Linux and macOS, the version is one of the
+[ruby-build](https://github.com/rbenv/ruby-build/tree/master/share/ruby-build) versions.
+
+On Windows, the version is one of [RubyInstaller](https://rubyinstaller.org) versions.
+            """,
         ),
         "ruby_build_version": attr.string(
             default = "20221101",
+            doc = """
+Version of [ruby-build](https://github.com/rbenv/ruby-build/releases)
+to install. You normally don't need to change this, unless `version` you pass is a new one
+which isn't available in this ruby-build yet.
+            """,
         ),
         "_build_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//:ruby/private/download/BUILD.tpl",
         ),
     },
+    doc = """
+Downloads an Ruby interpreter and registers it toolchain.
+
+On Linux and macOS, Ruby is installed using [ruby-build](https://github.com/rbenv/ruby-build)
+and supports variety of interpreters (MRI, JRuby, TruffleRuby and others).
+
+On Windows, Ruby is installed using [RubyInstaller](https://rubyinstaller.org)
+and supports only MRI at the moment.
+
+`WORKSPACE`:
+```bazel
+load("@rules_ruby//ruby:deps.bzl", "rb_download")
+
+rb_download(
+    version = "2.7.5"
+)
+```
+    """,
 )
