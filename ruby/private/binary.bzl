@@ -34,9 +34,9 @@ def generate_rb_binary_script(ctx, binary, args):
         script = ctx.actions.declare_file("{}.rb.cmd".format(ctx.label.name))
         toolchain_bindir = toolchain_bindir.replace("/", "\\")
         if binary:
-            template = _CMD_RUBY_SCRIPT
-        else:
             template = _CMD_BINARY_SCRIPT
+        else:
+            template = _CMD_RUBY_SCRIPT
     else:
         script = ctx.actions.declare_file("{}.rb.sh".format(ctx.label.name))
         template = _SH_SCRIPT
