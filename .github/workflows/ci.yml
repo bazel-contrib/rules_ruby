@@ -11,6 +11,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        ruby:
+          - 2.7.6
+          - 3.0.4
         os:
           - ubuntu-latest
           - macos-latest
@@ -21,7 +24,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - if: matrix.os == 'windows-latest'
-        run: echo "startup --output_user_root=D:/_bazel" >> .bazelrc
+        run: echo "startup --output_user_root=D:/" >> .bazelrc
+      - run: echo 'RUBY_VERSION = "${{ matrix.ruby }}"' > ruby_version.bzl
       - run: bazel build ...
       - run: bazel run lib/gem:print-version
       - run: bazel run :rubocop

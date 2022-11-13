@@ -26,7 +26,7 @@ def _rb_bundle_impl(repository_ctx):
         [bundle, "install"],
         environment = {
             "BUNDLE_BIN": repr(binstubs_path),
-            "BUNDLE_GEMFILE": repr(gemfile),
+            "BUNDLE_GEMFILE": gemfile.basename,
             "BUNDLE_SHEBANG": repr(ruby),
         },
         working_directory = repr(gemfile.dirname),
