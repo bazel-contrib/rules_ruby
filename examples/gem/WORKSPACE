@@ -10,9 +10,10 @@ rb_download(version = RUBY_VERSION)
 
 rb_bundle(
     name = "bundle",
-    gemfile = "//:Gemfile",
     srcs = [
+        "//:Gemfile.lock",
         "//:gem.gemspec",
         "//:lib/gem/version.rb",
-    ]
+    ],
+    gemfile = "//:Gemfile",
 )

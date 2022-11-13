@@ -14,12 +14,15 @@ jobs:
         ruby:
           - 2.7.6
           - 3.0.4
+          - jruby-9.3.9.0
           - truffleruby-22.3.0
         os:
           - ubuntu-latest
           - macos-latest
           - windows-latest
         exclude:
+          - os: windows-latest
+            ruby: jruby-9.3.9.0
           - os: windows-latest
             ruby: truffleruby-22.3.0
     defaults:
