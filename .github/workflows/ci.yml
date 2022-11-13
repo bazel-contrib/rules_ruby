@@ -14,10 +14,14 @@ jobs:
         ruby:
           - 2.7.6
           - 3.0.4
+          - truffleruby-22.3.0
         os:
           - ubuntu-latest
           - macos-latest
           - windows-latest
+        exclude:
+          - os: windows-latest
+            ruby: truffleruby-22.3.0
     defaults:
       run:
         working-directory: examples/gem

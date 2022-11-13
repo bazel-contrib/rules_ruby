@@ -36,6 +36,7 @@ def _rb_gem_build_impl(ctx):
         executable = toolchain.ruby,
         arguments = [args],
         outputs = [ctx.outputs.gem],
+        use_default_shell_env = True,
     )
 
 rb_gem_build = rule(
