@@ -11,9 +11,11 @@ def _rb_bundle_impl(repository_ctx):
     if repository_ctx.os.name.startswith("windows"):
         bundle = repository_ctx.path(Label("@rules_ruby_dist//:dist/bin/bundle.cmd"))
         ruby = repository_ctx.path(Label("@rules_ruby_dist//:dist/bin/ruby.exe"))
+        path_separator = ";"
     else:
         bundle = repository_ctx.path(Label("@rules_ruby_dist//:dist/bin/bundle"))
         ruby = repository_ctx.path(Label("@rules_ruby_dist//:dist/bin/ruby"))
+        path_separator = ":"
 
     repository_ctx.template(
         "BUILD",
@@ -28,6 +30,7 @@ def _rb_bundle_impl(repository_ctx):
             "BUNDLE_BIN": repr(binstubs_path),
             "BUNDLE_GEMFILE": gemfile.basename,
             "BUNDLE_SHEBANG": repr(ruby),
+            "PATH": path_separator.join([repr(ruby.dirname), repository_ctx.os.environ["PATH"]]),
         },
         working_directory = repr(gemfile.dirname),
     )

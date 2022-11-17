@@ -26,6 +26,13 @@ def _rb_download_impl(repository_ctx):
         ])
 
         repository_ctx.delete("ruby-installer.exe")
+
+        binpath = repository_ctx.path("dist/bin")
+        if not binpath.get_child("bundle.cmd").exists:
+            repository_ctx.symlink(
+                "{}/bundle.bat".format(binpath),
+                "{}/bundle.cmd".format(binpath),
+            )
     else:
         repository_ctx.report_progress("Downloading ruby-build %s" % repository_ctx.attr.ruby_build_version)
         repository_ctx.download_and_extract(
