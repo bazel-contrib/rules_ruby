@@ -32,12 +32,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - if: matrix.os == 'windows-latest'
-        run: echo "startup --output_user_root=D:/" >> .bazelrc
+        run: echo "startup --output_user_root=D:/_bazel" >> .bazelrc
       - run: echo 'RUBY_VERSION = "${{ matrix.ruby }}"' > ruby_version.bzl
       - run: bazel build ...
       - run: bazel run lib/gem:print-version
       - run: bazel run :rubocop
       - run: bazel test spec/...
+      - if: failure() && runner.debug == '1'
+        uses: mxschmitt/action-tmate@v3
 
   stardoc:
     name: Stardoc
