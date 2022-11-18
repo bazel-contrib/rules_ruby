@@ -29,7 +29,7 @@ Gem file to push to RubyGems. You would usually use an output of `rb_gem_build()
     doc = """
 Pushes a built Ruby gem.
 
-Suppose you have the following simple Ruby gem, where `rb_library()` is used
+Suppose you have the following Ruby gem, where `rb_library()` is used
 in `BUILD` files to define the packages for the gem and `rb_gem_build()` is used
 to build a Ruby gem package from the sources.
 

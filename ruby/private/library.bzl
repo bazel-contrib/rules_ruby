@@ -22,7 +22,7 @@ List of other Ruby libraries the target depends on.
     doc = """
 Builds a Ruby library.
 
-Suppose you have the following simple Ruby gem:
+Suppose you have the following Ruby gem:
 
 ```output
 |-- BUILD

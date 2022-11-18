@@ -99,7 +99,7 @@ Use a built-in `args` attribute to pass extra arguments to the script.
     doc = """
 Runs a Ruby binary.
 
-Suppose you have the following simple Ruby gem, where `rb_library()` is used
+Suppose you have the following Ruby gem, where `rb_library()` is used
 in `BUILD` files to define the packages for the gem.
 
 ```output

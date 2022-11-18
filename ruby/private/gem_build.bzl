@@ -72,7 +72,7 @@ List of other Ruby libraries the target depends on.
     doc = """
 Builds a Ruby gem.
 
-Suppose you have the following simple Ruby gem, where `rb_library()` is used
+Suppose you have the following Ruby gem, where `rb_library()` is used
 in `BUILD` files to define the packages for the gem.
 
 ```output
