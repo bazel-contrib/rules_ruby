@@ -13,7 +13,7 @@ rb_binary(<a href="#rb_binary-name">name</a>, <a href="#rb_binary-bin">bin</a>, 
 
 Runs a Ruby binary.
 
-Suppose you have the following simple Ruby gem, where `rb_library()` is used
+Suppose you have the following Ruby gem, where `rb_library()` is used
 in `BUILD` files to define the packages for the gem.
 
 ```output
@@ -142,7 +142,7 @@ rb_gem_build(<a href="#rb_gem_build-name">name</a>, <a href="#rb_gem_build-deps"
 
 Builds a Ruby gem.
 
-Suppose you have the following simple Ruby gem, where `rb_library()` is used
+Suppose you have the following Ruby gem, where `rb_library()` is used
 in `BUILD` files to define the packages for the gem.
 
 ```output
@@ -252,7 +252,7 @@ rb_gem_push(<a href="#rb_gem_push-name">name</a>, <a href="#rb_gem_push-src">src
 
 Pushes a built Ruby gem.
 
-Suppose you have the following simple Ruby gem, where `rb_library()` is used
+Suppose you have the following Ruby gem, where `rb_library()` is used
 in `BUILD` files to define the packages for the gem and `rb_gem_build()` is used
 to build a Ruby gem package from the sources.
 
@@ -336,7 +336,7 @@ rb_library(<a href="#rb_library-name">name</a>, <a href="#rb_library-deps">deps<
 
 Builds a Ruby library.
 
-Suppose you have the following simple Ruby gem:
+Suppose you have the following Ruby gem:
 
 ```output
 |-- BUILD
@@ -436,7 +436,7 @@ rb_test(<a href="#rb_test-name">name</a>, <a href="#rb_test-bin">bin</a>, <a hre
 
 Runs a Ruby test.
 
-Suppose you have the following simple Ruby gem, where `rb_library()` is used
+Suppose you have the following Ruby gem, where `rb_library()` is used
 in `BUILD` files to define the packages for the gem.
 
 ```output
@@ -493,6 +493,7 @@ rb_test(
         "@bundle",
     ],
 )
+```
 
 ```output
 $ bazel test spec/...
