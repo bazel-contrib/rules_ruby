@@ -47,6 +47,7 @@ GEM
     unicode-display_width (2.2.0)
 
 PLATFORMS
+  java
   ruby
   universal-java-17
   universal-java-18

@@ -18,6 +18,7 @@ The following toolchains are known to work and tested.
 | MRI 3.0          | 🟩    | 🟩    | 🟩      |
 | MRI 2.7          | 🟩    | 🟩    | 🟩      |
 | JRuby 9.3        | 🟩    | 🟩    | 🟥      |
+| JRuby 9.4        | 🟩    | 🟩    | 🟥      |
 | TruffleRuby 22.3 | 🟩    | 🟩    | 🟥      |
 
 On Linux and macOS, [ruby-build](https://github.com/rbenv/ruby-build) is used to
