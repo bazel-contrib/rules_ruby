@@ -26,6 +26,8 @@ jobs:
           - os: windows-latest
             ruby: jruby-9.3.9.0
           - os: windows-latest
+            ruby: jruby-9.4.0.0
+          - os: windows-latest
             ruby: truffleruby-22.3.0
     defaults:
       run:
