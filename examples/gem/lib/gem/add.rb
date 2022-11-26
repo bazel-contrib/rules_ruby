@@ -12,3 +12,9 @@ module GEM
     end
   end
 end
+
+if __FILE__ == $PROGRAM_NAME
+  raise 'Pass two numbers to sum' unless ARGV.size == 2
+
+  puts GEM::Add.new(*ARGV.map(&:to_i)).result
+end

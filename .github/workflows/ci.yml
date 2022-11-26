@@ -38,6 +38,7 @@ jobs:
         run: echo "startup --output_user_root=D:/_bazel" >> .bazelrc
       - run: echo 'RUBY_VERSION = "${{ matrix.ruby }}"' > ruby_version.bzl
       - run: bazel build ...
+      - run: bazel run lib/gem:add-numbers 2
       - run: bazel run lib/gem:print-version
       - run: bazel run :rubocop
       - run: bazel test spec/...

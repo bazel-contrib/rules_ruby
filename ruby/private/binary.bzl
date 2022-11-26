@@ -18,7 +18,7 @@ _CMD_RUBY_SCRIPT = """
 @ruby {args} %*
 """
 
-def generate_rb_binary_script(ctx, binary, args):
+def generate_rb_binary_script(ctx, binary, args = []):
     windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
     is_windows = ctx.target_platform_has_constraint(windows_constraint)
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
@@ -57,7 +57,7 @@ def generate_rb_binary_script(ctx, binary, args):
     return script
 
 def rb_binary_impl(ctx):
-    script = generate_rb_binary_script(ctx, ctx.executable.main, ctx.attr.args)
+    script = generate_rb_binary_script(ctx, ctx.executable.main)
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
     if not ctx.attr.main:
         transitive_srcs.append(ctx.toolchains["@rules_ruby//ruby:toolchain_type"].ruby)
