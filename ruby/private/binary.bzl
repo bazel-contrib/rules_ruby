@@ -2,23 +2,12 @@ load("//ruby/private:providers.bzl", "get_transitive_srcs")
 
 _SH_SCRIPT = """
 export PATH={toolchain_bindir}:$PATH
-{binary} {args} $@
+ruby {binary} {args} $@
 """
 
-# We have to explicitly set PATH on Windows because bundler
-# binstubs rely on calling Ruby available globally.
-# https://github.com/rubygems/rubygems/issues/3381#issuecomment-645026943
-
-_CMD_BINARY_SCRIPT = """
+_CMD_SCRIPT = """
 @set PATH={toolchain_bindir};%PATH%
-@call {binary}.cmd {args} %*
-"""
-
-# Calling ruby.exe directly throws strange error so we rely on PATH instead.
-
-_CMD_RUBY_SCRIPT = """
-@set PATH={toolchain_bindir};%PATH%
-@ruby {args} %*
+@ruby {binary} {args} %*
 """
 
 def generate_rb_binary_script(ctx, binary, args = []):
@@ -30,16 +19,13 @@ def generate_rb_binary_script(ctx, binary, args = []):
     if binary:
         binary_path = binary.path
     else:
-        binary_path = toolchain.ruby.path
+        binary_path = ""
 
     if is_windows:
         binary_path = binary_path.replace("/", "\\")
-        script = ctx.actions.declare_file("{}.rb.cmd".format(ctx.label.name))
         toolchain_bindir = toolchain_bindir.replace("/", "\\")
-        if binary:
-            template = _CMD_BINARY_SCRIPT
-        else:
-            template = _CMD_RUBY_SCRIPT
+        script = ctx.actions.declare_file("{}.rb.cmd".format(ctx.label.name))
+        template = _CMD_SCRIPT
     else:
         script = ctx.actions.declare_file("{}.rb.sh".format(ctx.label.name))
         template = _SH_SCRIPT

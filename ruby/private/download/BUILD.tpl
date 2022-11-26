@@ -20,10 +20,7 @@ filegroup(
 
 filegroup(
     name = "gem",
-    srcs = select({
-        "@platforms//os:windows": ["dist/bin/gem.cmd"],
-        "//conditions:default": ["dist/bin/gem"],
-    }),
+    srcs = ["dist/bin/gem"],
 )
 
 toolchain_type(
