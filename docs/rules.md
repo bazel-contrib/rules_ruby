@@ -73,6 +73,44 @@ INFO: Build completed successfully, 4 total actions
 Version is: 0.1.0
 ```
 
+You can also run general purpose Ruby scripts that rely on a Ruby interpreter in PATH:
+
+`lib/gem/add.rb`:
+```ruby
+#!/usr/bin/env ruby
+
+a, b = *ARGV
+puts Integer(a) + Integer(b)
+```
+
+`lib/gem/BUILD`:
+```bazel
+load("@rules_ruby//ruby:defs.bzl", "rb_binary", "rb_library")
+
+rb_library(
+    name = "add",
+    srcs = ["add.rb"],
+)
+
+rb_binary(
+    name = "add-numbers",
+    main = "add.rb",
+    deps = [":add"],
+)
+
+```output
+bazel run lib/gem:add-numbers 1 2
+INFO: Analyzed target //lib/gem:add-numbers (1 packages loaded, 3 targets configured).
+INFO: Found 1 target...
+Target //lib/gem:add-numbers up-to-date:
+  bazel-bin/lib/gem/add-numbers.rb.sh
+INFO: Elapsed time: 0.092s, Critical Path: 0.00s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+INFO: Build completed successfully, 1 total action
+3
+```
+
 You can also run a Ruby binary script available in Gemfile dependencies,
 by passing `bin` argument with a path to a Bundler binary stub:
 

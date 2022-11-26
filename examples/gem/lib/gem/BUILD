@@ -19,10 +19,8 @@ rb_library(
 
 rb_binary(
     name = "add-numbers",
-    args = [
-        "lib/gem/add.rb",
-        "1",  # pass 1 argument here and 1 extra in CI
-    ],
+    args = ["1"],  # pass 1 argument here and 1 extra in CI
+    main = "add.rb",
     deps = [":add"],
 )
 
