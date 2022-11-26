@@ -186,9 +186,10 @@ rb_binary(
     main = "add.rb",
     deps = [":add"],
 )
+```
 
 ```output
-bazel run lib/gem:add-numbers 1 2
+$ bazel run lib/gem:add-numbers 1 2
 INFO: Analyzed target //lib/gem:add-numbers (1 packages loaded, 3 targets configured).
 INFO: Found 1 target...
 Target //lib/gem:add-numbers up-to-date:
