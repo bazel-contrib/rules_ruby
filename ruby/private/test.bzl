@@ -15,7 +15,7 @@ List of Ruby source files used to build the library.
 List of other Ruby libraries the target depends on.
             """,
         ),
-        "bin": attr.label(
+        "main": attr.label(
             executable = True,
             allow_single_file = True,
             cfg = "exec",
@@ -71,7 +71,7 @@ rb_test(
     name = "add",
     srcs = ["add_spec.rb"],
     args = ["spec/add_spec.rb"],
-    bin = "@bundle//:bin/rspec",
+    main = "@bundle//:bin/rspec",
     deps = [
         ":spec_helper",
         "//:gem",
@@ -83,7 +83,7 @@ rb_test(
     name = "subtract",
     srcs = ["subtract_spec.rb"],
     args = ["spec/subtract_spec.rb"],
-    bin = "@bundle//:bin/rspec",
+    main = "@bundle//:bin/rspec",
     deps = [
         ":spec_helper",
         "//:gem",

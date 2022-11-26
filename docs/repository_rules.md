@@ -39,7 +39,7 @@ package(default_visibility = ["//:__subpackages__"])
 
 rb_binary(
     name = "rubocop",
-    bin = "@bundle//:bin/rubocop",
+    main = "@bundle//:bin/rubocop",
     deps = ["@bundle"],
 )
 ```
