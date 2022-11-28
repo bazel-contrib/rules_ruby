@@ -5,3 +5,9 @@ test --test_output=errors
 # TruffleRuby needs $HOME for File#expand_path to work.
 build --action_env=HOME
 test --test_env=HOME
+
+# Allows to run tests with rdbg:
+# 1. Add breakpoint with `binding.break`.
+# 2. Run tests: `bazel test --config debug spec:add`.
+# 3. Connect to debugger: `bazel-gem/external/bundle/bin/rdbg -A`.
+test:debug --cache_test_results=no --test_output=streamed --run_under="@bundle//:bin/rdbg --nonstop --open --command"
