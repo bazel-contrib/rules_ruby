@@ -1,4 +1,4 @@
-load("//ruby/private:binary.bzl", "generate_rb_binary_script")
+load("//ruby/private:binary.bzl", "COMMON_ATTRS", "generate_rb_binary_script")
 
 def _rb_gem_push_impl(ctx):
     script = generate_rb_binary_script(
@@ -13,18 +13,16 @@ def _rb_gem_push_impl(ctx):
 rb_gem_push = rule(
     _rb_gem_push_impl,
     executable = True,
-    attrs = {
-        "src": attr.label(
+    attrs = dict(
+        COMMON_ATTRS,
+        src = attr.label(
             allow_single_file = [".gem"],
             mandatory = True,
             doc = """
 Gem file to push to RubyGems. You would usually use an output of `rb_gem_build()` target here.
             """,
         ),
-        "_windows_constraint": attr.label(
-            default = "@platforms//os:windows",
-        ),
-    },
+    ),
     toolchains = ["@rules_ruby//ruby:toolchain_type"],
     doc = """
 Pushes a built Ruby gem.

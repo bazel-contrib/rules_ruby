@@ -1,14 +1,18 @@
 load("//ruby/private:providers.bzl", "get_transitive_srcs")
 
-_SH_SCRIPT = """
-export PATH={toolchain_bindir}:$PATH
-ruby {binary} {args} $@
-"""
-
-_CMD_SCRIPT = """
-@set PATH={toolchain_bindir};%PATH%
-@ruby {binary} {args} %*
-"""
+COMMON_ATTRS = {
+    "_binary_cmd_tpl": attr.label(
+        allow_single_file = True,
+        default = "@rules_ruby//ruby/private:binary/binary.cmd.tpl",
+    ),
+    "_binary_sh_tpl": attr.label(
+        allow_single_file = True,
+        default = "@rules_ruby//ruby/private:binary/binary.sh.tpl",
+    ),
+    "_windows_constraint": attr.label(
+        default = "@platforms//os:windows",
+    ),
+}
 
 def generate_rb_binary_script(ctx, binary, args = []):
     windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
@@ -25,22 +29,23 @@ def generate_rb_binary_script(ctx, binary, args = []):
         binary_path = binary_path.replace("/", "\\")
         toolchain_bindir = toolchain_bindir.replace("/", "\\")
         script = ctx.actions.declare_file("{}.rb.cmd".format(ctx.label.name))
-        template = _CMD_SCRIPT
+        template = ctx.file._binary_cmd_tpl
     else:
         script = ctx.actions.declare_file("{}.rb.sh".format(ctx.label.name))
-        template = _SH_SCRIPT
+        template = ctx.file._binary_sh_tpl
 
     args = " ".join(args)
     args = ctx.expand_location(args)
 
-    ctx.actions.write(
+    ctx.actions.expand_template(
+        template = template,
         output = script,
         is_executable = True,
-        content = template.format(
-            args = args,
-            binary = binary_path,
-            toolchain_bindir = toolchain_bindir,
-        ),
+        substitutions = {
+            "{args}": args,
+            "{binary}": binary_path,
+            "{toolchain_bindir}": toolchain_bindir,
+        },
     )
 
     return script
@@ -57,19 +62,20 @@ def rb_binary_impl(ctx):
 rb_binary = rule(
     implementation = rb_binary_impl,
     executable = True,
-    attrs = {
-        "srcs": attr.label_list(
+    attrs = dict(
+        COMMON_ATTRS,
+        srcs = attr.label_list(
             allow_files = True,
             doc = """
 List of Ruby source files used to build the library.
             """,
         ),
-        "deps": attr.label_list(
+        deps = attr.label_list(
             doc = """
 List of other Ruby libraries the target depends on.
             """,
         ),
-        "main": attr.label(
+        main = attr.label(
             executable = True,
             allow_single_file = True,
             cfg = "exec",
@@ -80,10 +86,7 @@ If omitted, it defaults to the Ruby interpreter.
 Use a built-in `args` attribute to pass extra arguments to the script.
             """,
         ),
-        "_windows_constraint": attr.label(
-            default = "@platforms//os:windows",
-        ),
-    },
+    ),
     toolchains = ["@rules_ruby//ruby:toolchain_type"],
     doc = """
 Runs a Ruby binary.
