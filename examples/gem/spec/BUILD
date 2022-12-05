@@ -22,6 +22,7 @@ rb_test(
     srcs = ["env_spec.rb"],
     args = ["spec/env_spec.rb"],
     env = {"EXAMPLE": "ENV"},
+    env_inherit = ["LANG"],
     main = "@bundle//:bin/rspec",
     deps = [
         ":spec_helper",

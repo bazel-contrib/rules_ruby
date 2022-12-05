@@ -28,6 +28,11 @@ Use a built-in `args` attribute to pass extra arguments to the script.
 Environment variables to use during execution.
         """,
     ),
+    "env_inherit": attr.string_list(
+        doc = """
+List of environment variable names to be inherited by the test runner.
+        """,
+    ),
     "_binary_cmd_tpl": attr.label(
         allow_single_file = True,
         default = "@rules_ruby//ruby/private:binary/binary.cmd.tpl",
@@ -86,7 +91,10 @@ def rb_binary_impl(ctx):
 
     return [
         DefaultInfo(executable = script, runfiles = runfiles),
-        RunEnvironmentInfo(environment = ctx.attr.env),
+        RunEnvironmentInfo(
+            environment = ctx.attr.env,
+            inherited_environment = ctx.attr.env_inherit,
+        ),
     ]
 
 rb_binary = rule(
