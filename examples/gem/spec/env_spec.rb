@@ -6,6 +6,6 @@ RSpec.describe ENV do
   end
 
   specify do
-    expect(ENV['LANG']).not_to be_empty
+    expect(ENV).to have_key('USER').or have_key('USERNAME')
   end
 end
