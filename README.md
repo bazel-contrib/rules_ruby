@@ -2,7 +2,9 @@
 
 ## Overview
 
-This repository hosts [Ruby](https://www.ruby-lang.org) language rules for [Bazel](https://bazel.build).
+This repository hosts [Ruby](https://www.ruby-lang.org) language ruleset for [Bazel](https://bazel.build).
+
+The ruleset is known to work with Bazel 5 and 6.
 
 ## Getting Started
 
@@ -14,6 +16,7 @@ The following toolchains are known to work and tested.
 
 | Ruby             | Linux | macOS | Windows |
 |------------------|-------|-------|---------|
+| MRI 3.2          | 🟩    | 🟩    | 🟥      |
 | MRI 3.1          | 🟩    | 🟩    | 🟩      |
 | MRI 3.0          | 🟩    | 🟩    | 🟩      |
 | MRI 2.7          | 🟩    | 🟩    | 🟩      |
