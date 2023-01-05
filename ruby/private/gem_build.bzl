@@ -2,7 +2,7 @@ load("//ruby/private:providers.bzl", "get_transitive_data", "get_transitive_srcs
 
 def _rb_gem_build_impl(ctx):
     gem_builder = ctx.actions.declare_file("{}_gem_builder.rb".format(ctx.label.name))
-    inputs = get_transitive_srcs(ctx.files.srcs + [gem_builder], ctx.attr.deps).to_list()
+    inputs = get_transitive_srcs([gem_builder], ctx.attr.deps).to_list()
     inputs += get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
