@@ -20,6 +20,7 @@ def _rb_download_impl(repository_ctx):
         result = repository_ctx.execute([
             "./ruby-installer.exe",
             "/components=ruby,msys2",
+            "/currentuser",
             "/dir=dist",
             "/tasks=nomodpath,noassocfiles",
             "/verysilent",
