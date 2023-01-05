@@ -7,7 +7,7 @@
 ## rb_binary
 
 <pre>
-rb_binary(<a href="#rb_binary-name">name</a>, <a href="#rb_binary-deps">deps</a>, <a href="#rb_binary-env">env</a>, <a href="#rb_binary-env_inherit">env_inherit</a>, <a href="#rb_binary-main">main</a>, <a href="#rb_binary-srcs">srcs</a>)
+rb_binary(<a href="#rb_binary-name">name</a>, <a href="#rb_binary-data">data</a>, <a href="#rb_binary-deps">deps</a>, <a href="#rb_binary-env">env</a>, <a href="#rb_binary-env_inherit">env_inherit</a>, <a href="#rb_binary-main">main</a>, <a href="#rb_binary-srcs">srcs</a>)
 </pre>
 
 
@@ -165,6 +165,7 @@ Inspecting 4 files
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_binary-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="rb_binary-data"></a>data |  List of non-Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_binary-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_binary-env"></a>env |  Environment variables to use during execution.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | <code>{}</code> |
 | <a id="rb_binary-env_inherit"></a>env_inherit |  List of environment variable names to be inherited by the test runner.   | List of strings | optional | <code>[]</code> |
@@ -177,7 +178,7 @@ Inspecting 4 files
 ## rb_gem_build
 
 <pre>
-rb_gem_build(<a href="#rb_gem_build-name">name</a>, <a href="#rb_gem_build-deps">deps</a>, <a href="#rb_gem_build-gemspec">gemspec</a>, <a href="#rb_gem_build-srcs">srcs</a>)
+rb_gem_build(<a href="#rb_gem_build-name">name</a>, <a href="#rb_gem_build-data">data</a>, <a href="#rb_gem_build-deps">deps</a>, <a href="#rb_gem_build-gemspec">gemspec</a>)
 </pre>
 
 
@@ -277,9 +278,9 @@ INFO: Build completed successfully, 2 total actions
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_gem_build-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="rb_gem_build-data"></a>data |  List of non-Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_gem_build-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_gem_build-gemspec"></a>gemspec |  Gemspec file to use for gem building.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
-| <a id="rb_gem_build-srcs"></a>srcs |  List of Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 
 
 <a id="rb_gem_push"></a>
@@ -287,7 +288,7 @@ INFO: Build completed successfully, 2 total actions
 ## rb_gem_push
 
 <pre>
-rb_gem_push(<a href="#rb_gem_push-name">name</a>, <a href="#rb_gem_push-deps">deps</a>, <a href="#rb_gem_push-env">env</a>, <a href="#rb_gem_push-env_inherit">env_inherit</a>, <a href="#rb_gem_push-main">main</a>, <a href="#rb_gem_push-src">src</a>, <a href="#rb_gem_push-srcs">srcs</a>)
+rb_gem_push(<a href="#rb_gem_push-name">name</a>, <a href="#rb_gem_push-data">data</a>, <a href="#rb_gem_push-deps">deps</a>, <a href="#rb_gem_push-env">env</a>, <a href="#rb_gem_push-env_inherit">env_inherit</a>, <a href="#rb_gem_push-main">main</a>, <a href="#rb_gem_push-src">src</a>, <a href="#rb_gem_push-srcs">srcs</a>)
 </pre>
 
 
@@ -363,6 +364,7 @@ Successfully registered gem: example (0.1.0)
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_gem_push-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="rb_gem_push-data"></a>data |  List of non-Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_gem_push-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_gem_push-env"></a>env |  Environment variables to use during execution.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | <code>{}</code> |
 | <a id="rb_gem_push-env_inherit"></a>env_inherit |  List of environment variable names to be inherited by the test runner.   | List of strings | optional | <code>[]</code> |
@@ -376,7 +378,7 @@ Successfully registered gem: example (0.1.0)
 ## rb_library
 
 <pre>
-rb_library(<a href="#rb_library-name">name</a>, <a href="#rb_library-deps">deps</a>, <a href="#rb_library-srcs">srcs</a>)
+rb_library(<a href="#rb_library-name">name</a>, <a href="#rb_library-data">data</a>, <a href="#rb_library-deps">deps</a>, <a href="#rb_library-srcs">srcs</a>)
 </pre>
 
 
@@ -409,10 +411,6 @@ package(default_visibility = ["//:__subpackages__"])
 
 rb_library(
     name = "gem",
-    srcs = [
-        "Gemfile",
-        "gem.gemspec",
-    ],
     deps = ["//lib:gem"],
 )
 ```
@@ -467,6 +465,7 @@ using other rules.
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_library-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="rb_library-data"></a>data |  List of non-Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_library-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_library-srcs"></a>srcs |  List of Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 
@@ -476,7 +475,7 @@ using other rules.
 ## rb_test
 
 <pre>
-rb_test(<a href="#rb_test-name">name</a>, <a href="#rb_test-deps">deps</a>, <a href="#rb_test-env">env</a>, <a href="#rb_test-env_inherit">env_inherit</a>, <a href="#rb_test-main">main</a>, <a href="#rb_test-srcs">srcs</a>)
+rb_test(<a href="#rb_test-name">name</a>, <a href="#rb_test-data">data</a>, <a href="#rb_test-deps">deps</a>, <a href="#rb_test-env">env</a>, <a href="#rb_test-env_inherit">env_inherit</a>, <a href="#rb_test-main">main</a>, <a href="#rb_test-srcs">srcs</a>)
 </pre>
 
 
@@ -561,6 +560,7 @@ Executed 2 out of 2 tests: 2 tests pass.
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_test-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="rb_test-data"></a>data |  List of non-Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_test-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_test-env"></a>env |  Environment variables to use during execution.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | <code>{}</code> |
 | <a id="rb_test-env_inherit"></a>env_inherit |  List of environment variable names to be inherited by the test runner.   | List of strings | optional | <code>[]</code> |

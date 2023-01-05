@@ -1,8 +1,8 @@
-load("//ruby/private:providers.bzl", "get_transitive_srcs")
+load("//ruby/private:providers.bzl", "get_transitive_data", "get_transitive_srcs")
 
 COMMON_ATTRS = {
     "srcs": attr.label_list(
-        allow_files = True,
+        allow_files = [".rb", ".gemspec", "Gemfile", "Gemfile.lock"],
         doc = """
 List of Ruby source files used to build the library.
         """,
@@ -10,6 +10,12 @@ List of Ruby source files used to build the library.
     "deps": attr.label_list(
         doc = """
 List of other Ruby libraries the target depends on.
+        """,
+    ),
+    "data": attr.label_list(
+        allow_files = True,
+        doc = """
+List of non-Ruby source files used to build the library.
         """,
     ),
     "main": attr.label(
@@ -84,10 +90,11 @@ def generate_rb_binary_script(ctx, binary, args = []):
 
 def rb_binary_impl(ctx):
     script = generate_rb_binary_script(ctx, ctx.executable.main)
+    transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
     if not ctx.attr.main:
         transitive_srcs.append(ctx.toolchains["@rules_ruby//ruby:toolchain_type"].ruby)
-    runfiles = ctx.runfiles(transitive_srcs)
+    runfiles = ctx.runfiles(transitive_data + transitive_srcs)
 
     return [
         DefaultInfo(executable = script, runfiles = runfiles),

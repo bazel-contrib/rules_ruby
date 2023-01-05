@@ -1,14 +1,23 @@
-load("//ruby/private:providers.bzl", "RubyFiles", "get_transitive_srcs")
+load(
+    "//ruby/private:providers.bzl",
+    "RubyFiles",
+    "get_transitive_data",
+    "get_transitive_srcs",
+)
 
 def _rb_library_impl(ctx):
-    transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps)
-    return [RubyFiles(transitive_srcs = transitive_srcs)]
+    return [
+        RubyFiles(
+            transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps),
+            transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps),
+        ),
+    ]
 
 rb_library = rule(
     implementation = _rb_library_impl,
     attrs = {
         "srcs": attr.label_list(
-            allow_files = True,
+            allow_files = [".rb", ".gemspec", "Gemfile", "Gemfile.lock"],
             doc = """
 List of Ruby source files used to build the library.
             """,
@@ -16,6 +25,12 @@ List of Ruby source files used to build the library.
         "deps": attr.label_list(
             doc = """
 List of other Ruby libraries the target depends on.
+            """,
+        ),
+        "data": attr.label_list(
+            allow_files = True,
+            doc = """
+List of non-Ruby source files used to build the library.
             """,
         ),
     },
@@ -49,10 +64,6 @@ package(default_visibility = ["//:__subpackages__"])
 
 rb_library(
     name = "gem",
-    srcs = [
-        "Gemfile",
-        "gem.gemspec",
-    ],
     deps = ["//lib:gem"],
 )
 ```

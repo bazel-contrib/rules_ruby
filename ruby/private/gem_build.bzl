@@ -1,8 +1,9 @@
-load("//ruby/private:providers.bzl", "get_transitive_srcs")
+load("//ruby/private:providers.bzl", "get_transitive_data", "get_transitive_srcs")
 
 def _rb_gem_build_impl(ctx):
     gem_builder = ctx.actions.declare_file("{}_gem_builder.rb".format(ctx.label.name))
-    inputs = get_transitive_srcs(ctx.files.srcs + [gem_builder], ctx.attr.deps)
+    inputs = get_transitive_srcs(ctx.files.srcs + [gem_builder], ctx.attr.deps).to_list()
+    inputs += get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
     # Inputs manifest is a dictionary where:
@@ -15,7 +16,7 @@ def _rb_gem_build_impl(ctx):
     #     "bazel-out/darwin_arm64-fastbuild/bin/rb/LICENSE": "rb/LICENSE",
     #   }
     inputs_manifest = {}
-    for src in inputs.to_list():
+    for src in inputs:
         inputs_manifest[src.path] = src.short_path
 
     ctx.actions.expand_template(
@@ -32,7 +33,7 @@ def _rb_gem_build_impl(ctx):
     args = ctx.actions.args()
     args.add(gem_builder)
     ctx.actions.run(
-        inputs = inputs,
+        inputs = depset(inputs),
         executable = toolchain.ruby,
         arguments = [args],
         outputs = [ctx.outputs.gem],
@@ -43,21 +44,21 @@ rb_gem_build = rule(
     _rb_gem_build_impl,
     attrs = {
         "gemspec": attr.label(
-            allow_single_file = True,
+            allow_single_file = [".gemspec"],
             mandatory = True,
             doc = """
 Gemspec file to use for gem building.
             """,
         ),
-        "srcs": attr.label_list(
-            allow_files = True,
-            doc = """
-List of Ruby source files used to build the library.
-            """,
-        ),
         "deps": attr.label_list(
             doc = """
 List of other Ruby libraries the target depends on.
+            """,
+        ),
+        "data": attr.label_list(
+            allow_files = True,
+            doc = """
+List of non-Ruby source files used to build the library.
             """,
         ),
         "_gem_builder_tpl": attr.label(

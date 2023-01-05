@@ -4,5 +4,5 @@ package(default_visibility = ["//visibility:public"])
 
 rb_library(
     name = "bundle",
-    srcs = glob(["**/*"])
+    data = glob(["**/*"]),
 )

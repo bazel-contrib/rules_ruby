@@ -57,7 +57,7 @@ List of Ruby source files used to build the library.
             """,
         ),
         "gemfile": attr.label(
-            allow_single_file = True,
+            allow_single_file = ["Gemfile"],
             doc = """
 Gemfile to install dependencies from.
             """,
