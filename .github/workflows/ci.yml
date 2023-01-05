@@ -35,8 +35,7 @@ jobs:
         working-directory: examples/gem
     steps:
       - uses: actions/checkout@v3
-      - if: matrix.os == 'windows-latest'
-        run: echo "startup --output_user_root=D:/_bazel" >> .bazelrc
+      - uses: p0deje/setup-bazel@596e834564ad0c9ee0dd65bf4417e41f14f5c3a8
       - run: echo 'RUBY_VERSION = "${{ matrix.ruby }}"' > ruby_version.bzl
       - run: bazel build ...
       - run: bazel run lib/gem:add-numbers 2
