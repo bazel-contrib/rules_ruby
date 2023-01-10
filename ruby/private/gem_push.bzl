@@ -1,27 +1,33 @@
-load("//ruby/private:binary.bzl", "COMMON_ATTRS", "generate_rb_binary_script")
+load("//ruby/private:binary.bzl", "generate_rb_binary_script", BINARY_ATTRS = "ATTRS")
+load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
 
 def _rb_gem_push_impl(ctx):
     script = generate_rb_binary_script(
         ctx,
         ctx.toolchains["@rules_ruby//ruby:toolchain_type"].gem,
-        ["push", ctx.file.src.short_path],
+        ["push", ctx.file.gem.short_path],
     )
 
-    runfiles = ctx.runfiles([ctx.file.src, ctx.toolchains["@rules_ruby//ruby:toolchain_type"].gem])
+    runfiles = ctx.runfiles([ctx.file.gem, ctx.toolchains["@rules_ruby//ruby:toolchain_type"].gem])
     return [DefaultInfo(executable = script, runfiles = runfiles)]
 
 rb_gem_push = rule(
     _rb_gem_push_impl,
     executable = True,
     attrs = dict(
-        COMMON_ATTRS,
-        src = attr.label(
+        LIBRARY_ATTRS,
+        gem = attr.label(
             allow_single_file = [".gem"],
             mandatory = True,
             doc = """
 Gem file to push to RubyGems. You would usually use an output of `rb_gem_build()` target here.
             """,
         ),
+        env = BINARY_ATTRS["env"],
+        env_inherit = BINARY_ATTRS["env_inherit"],
+        _binary_cmd_tpl = BINARY_ATTRS["_binary_cmd_tpl"],
+        _binary_sh_tpl = BINARY_ATTRS["_binary_sh_tpl"],
+        _windows_constraint = BINARY_ATTRS["_windows_constraint"],
     ),
     toolchains = ["@rules_ruby//ruby:toolchain_type"],
     doc = """
@@ -72,7 +78,7 @@ rb_gem_build(
 
 rb_gem_push(
     name = "gem-release",
-    src = ":gem-build",
+    gem = ":gem-build",
 )
 ```
 

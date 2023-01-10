@@ -1,4 +1,6 @@
-require_relative "spec_helper"
+# frozen_string_literal: true
+
+require_relative 'spec_helper'
 
 RSpec.describe GEM::Subtract do
   describe '#result' do

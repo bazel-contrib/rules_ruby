@@ -1,23 +1,12 @@
-load("//ruby/private:providers.bzl", "get_transitive_data", "get_transitive_srcs")
+load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
+load(
+    "//ruby/private:providers.bzl",
+    "RubyFiles",
+    "get_transitive_data",
+    "get_transitive_srcs",
+)
 
-COMMON_ATTRS = {
-    "srcs": attr.label_list(
-        allow_files = [".rb", ".gemspec", "Gemfile", "Gemfile.lock"],
-        doc = """
-List of Ruby source files used to build the library.
-        """,
-    ),
-    "deps": attr.label_list(
-        doc = """
-List of other Ruby libraries the target depends on.
-        """,
-    ),
-    "data": attr.label_list(
-        allow_files = True,
-        doc = """
-List of non-Ruby source files used to build the library.
-        """,
-    ),
+ATTRS = {
     "main": attr.label(
         executable = True,
         allow_single_file = True,
@@ -30,14 +19,10 @@ Use a built-in `args` attribute to pass extra arguments to the script.
         """,
     ),
     "env": attr.string_dict(
-        doc = """
-Environment variables to use during execution.
-        """,
+        doc = "Environment variables to use during execution.",
     ),
     "env_inherit": attr.string_list(
-        doc = """
-List of environment variable names to be inherited by the test runner.
-        """,
+        doc = "List of environment variable names to be inherited by the test runner.",
     ),
     "_binary_cmd_tpl": attr.label(
         allow_single_file = True,
@@ -98,6 +83,10 @@ def rb_binary_impl(ctx):
 
     return [
         DefaultInfo(executable = script, runfiles = runfiles),
+        RubyFiles(
+            transitive_data = depset(transitive_data),
+            transitive_srcs = depset(transitive_srcs),
+        ),
         RunEnvironmentInfo(
             environment = ctx.attr.env,
             inherited_environment = ctx.attr.env_inherit,
@@ -107,7 +96,12 @@ def rb_binary_impl(ctx):
 rb_binary = rule(
     implementation = rb_binary_impl,
     executable = True,
-    attrs = dict(COMMON_ATTRS),
+    attrs = dict(
+        ATTRS,
+        srcs = LIBRARY_ATTRS["srcs"],
+        data = LIBRARY_ATTRS["data"],
+        deps = LIBRARY_ATTRS["deps"],
+    ),
     toolchains = ["@rules_ruby//ruby:toolchain_type"],
     doc = """
 Runs a Ruby binary.
@@ -231,9 +225,8 @@ rb_library(
 )
 
 rb_binary(
-    name = "rubocop",
-    args = ["lib"],
-    main = "@bundle//:bin/rubocop",
+    name = "rake",
+    main = "@bundle//:bin/rake",
     deps = [
         ":gem",
         "@bundle",
@@ -242,19 +235,16 @@ rb_binary(
 ```
 
 ```output
-$ bazel run :rubocop
-INFO: Analyzed target //:rubocop (4 packages loaded, 32 targets configured).
+$ bazel run :rake -- --version
+INFO: Analyzed target //:rake (0 packages loaded, 0 targets configured).
 INFO: Found 1 target...
-Target //:rubocop up-to-date:
-  bazel-bin/rubocop.rb.sh
-INFO: Elapsed time: 0.326s, Critical Path: 0.00s
-INFO: 2 processes: 2 internal.
-INFO: Build completed successfully, 2 total actions
-INFO: Build completed successfully, 2 total actions
-Inspecting 4 files
-....
-
-4 files inspected, no offenses detected
+Target //:rake up-to-date:
+  bazel-bin/rake.rb.sh
+INFO: Elapsed time: 0.073s, Critical Path: 0.00s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+INFO: Running command line: bazel-bin/rake.rb.sh --version
+rake, version 10.5.0
 ```
     """,
 )

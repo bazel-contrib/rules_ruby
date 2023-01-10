@@ -1,5 +1,7 @@
 load("@rules_ruby//ruby:defs.bzl", "rb_library", "rb_test")
 
+package(default_visibility = ["//:__pkg__"])
+
 rb_library(
     name = "spec_helper",
     srcs = ["spec_helper.rb"],

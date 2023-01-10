@@ -1,8 +1,10 @@
-require_relative "spec_helper"
+# frozen_string_literal: true
+
+require_relative 'spec_helper'
 
 RSpec.describe ENV do
   specify do
-    expect(ENV['EXAMPLE']).to eq('ENV')
+    expect(ENV.fetch('EXAMPLE')).to eq('ENV')
   end
 
   specify do

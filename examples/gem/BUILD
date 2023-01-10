@@ -4,6 +4,7 @@ load(
     "rb_gem_build",
     "rb_gem_push",
     "rb_library",
+    "rb_test",
 )
 
 package(default_visibility = ["//:__subpackages__"])
@@ -19,11 +20,25 @@ rb_library(
 )
 
 rb_binary(
-    name = "rubocop",
-    args = ["lib"],
-    main = "@bundle//:bin/rubocop",
+    name = "rake",
+    main = "@bundle//:bin/rake",
     deps = [
         ":gem",
+        "@bundle",
+    ],
+)
+
+rb_test(
+    name = "rubocop",
+    data = [".rubocop.yml"],
+    main = "@bundle//:bin/rubocop",
+    tags = ["no-sandbox"],
+    deps = [
+        ":gem",
+        "//spec:add",
+        "//spec:env",
+        "//spec:file",
+        "//spec:subtract",
         "@bundle",
     ],
 )
@@ -36,5 +51,5 @@ rb_gem_build(
 
 rb_gem_push(
     name = "gem-release",
-    src = ":gem-build",
+    gem = ":gem-build",
 )

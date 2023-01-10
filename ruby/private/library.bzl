@@ -5,6 +5,20 @@ load(
     "get_transitive_srcs",
 )
 
+ATTRS = {
+    "srcs": attr.label_list(
+        allow_files = [".rb", ".gemspec", "Gemfile", "Gemfile.lock"],
+        doc = "List of Ruby source files used to build the library.",
+    ),
+    "deps": attr.label_list(
+        doc = "List of other Ruby libraries the target depends on.",
+    ),
+    "data": attr.label_list(
+        allow_files = True,
+        doc = "List of non-Ruby source files used to build the library.",
+    ),
+}
+
 def _rb_library_impl(ctx):
     return [
         RubyFiles(
@@ -15,27 +29,9 @@ def _rb_library_impl(ctx):
 
 rb_library = rule(
     implementation = _rb_library_impl,
-    attrs = {
-        "srcs": attr.label_list(
-            allow_files = [".rb", ".gemspec", "Gemfile", "Gemfile.lock"],
-            doc = """
-List of Ruby source files used to build the library.
-            """,
-        ),
-        "deps": attr.label_list(
-            doc = """
-List of other Ruby libraries the target depends on.
-            """,
-        ),
-        "data": attr.label_list(
-            allow_files = True,
-            doc = """
-List of non-Ruby source files used to build the library.
-            """,
-        ),
-    },
+    attrs = ATTRS,
     doc = """
-Builds a Ruby library.
+Defines a Ruby library.
 
 Suppose you have the following Ruby gem:
 

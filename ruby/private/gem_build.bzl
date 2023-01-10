@@ -1,9 +1,10 @@
-load("//ruby/private:providers.bzl", "get_transitive_data", "get_transitive_srcs")
+load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
+load("//ruby/private:providers.bzl", "RubyFiles", "get_transitive_data", "get_transitive_srcs")
 
 def _rb_gem_build_impl(ctx):
     gem_builder = ctx.actions.declare_file("{}_gem_builder.rb".format(ctx.label.name))
-    inputs = get_transitive_srcs([gem_builder], ctx.attr.deps).to_list()
-    inputs += get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
+    transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
+    transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
     # Inputs manifest is a dictionary where:
@@ -15,6 +16,7 @@ def _rb_gem_build_impl(ctx):
     #     "rb/Gemfile": "rb/Gemfile",
     #     "bazel-out/darwin_arm64-fastbuild/bin/rb/LICENSE": "rb/LICENSE",
     #   }
+    inputs = transitive_data + transitive_srcs + [gem_builder]
     inputs_manifest = {}
     for src in inputs:
         inputs_manifest[src.path] = src.short_path
@@ -40,32 +42,27 @@ def _rb_gem_build_impl(ctx):
         use_default_shell_env = True,
     )
 
+    return [
+        RubyFiles(
+            transitive_data = depset(transitive_data),
+            transitive_srcs = depset(transitive_srcs),
+        ),
+    ]
+
 rb_gem_build = rule(
     _rb_gem_build_impl,
-    attrs = {
-        "gemspec": attr.label(
+    attrs = dict(
+        LIBRARY_ATTRS,
+        gemspec = attr.label(
             allow_single_file = [".gemspec"],
             mandatory = True,
-            doc = """
-Gemspec file to use for gem building.
-            """,
+            doc = "Gemspec file to use for gem building.",
         ),
-        "deps": attr.label_list(
-            doc = """
-List of other Ruby libraries the target depends on.
-            """,
-        ),
-        "data": attr.label_list(
-            allow_files = True,
-            doc = """
-List of non-Ruby source files used to build the library.
-            """,
-        ),
-        "_gem_builder_tpl": attr.label(
+        _gem_builder_tpl = attr.label(
             allow_single_file = True,
             default = "@rules_ruby//ruby/private:gem_build/gem_builder.rb.tpl",
         ),
-    },
+    ),
     outputs = {
         "gem": "%{name}.gem",
     },
