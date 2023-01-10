@@ -35,6 +35,19 @@ rb_test(
 )
 
 rb_test(
+    name = "file",
+    srcs = ["file_spec.rb"],
+    args = ["spec/file_spec.rb"],
+    data = ["support/file.txt"],
+    main = "@bundle//:bin/rspec",
+    deps = [
+        ":spec_helper",
+        "//:gem",
+        "@bundle",
+    ],
+)
+
+rb_test(
     name = "subtract",
     srcs = ["subtract_spec.rb"],
     args = ["spec/subtract_spec.rb"],
