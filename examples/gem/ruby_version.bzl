@@ -1,1 +1,1 @@
-RUBY_VERSION = "2.7.6"
+RUBY_VERSION = "jruby-9.4.0.0"
