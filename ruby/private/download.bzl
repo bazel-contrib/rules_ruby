@@ -43,7 +43,11 @@ def _rb_download_impl(repository_ctx):
         )
 
         repository_ctx.report_progress("Installing Ruby %s" % repository_ctx.attr.version)
-        result = repository_ctx.execute(["ruby-build/bin/ruby-build", repository_ctx.attr.version, "dist"], timeout = 1200)
+        result = repository_ctx.execute(
+            ["ruby-build/bin/ruby-build", "--verbose", repository_ctx.attr.version, "dist"],
+            timeout = 1200,
+            quiet = not repository_ctx.os.environ.get("RUBY_RULES_DEBUG", default = False),
+        )
 
         repository_ctx.delete("ruby-build")
 

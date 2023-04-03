@@ -33,6 +33,7 @@ def _rb_bundle_impl(repository_ctx):
             "PATH": path_separator.join([repr(ruby.dirname), repository_ctx.os.environ["PATH"]]),
         },
         working_directory = repr(gemfile.dirname),
+        quiet = not repository_ctx.os.environ.get("RUBY_RULES_DEBUG", default = False),
     )
 
     if result.return_code != 0:
