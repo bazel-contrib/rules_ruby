@@ -1,10 +1,10 @@
 _RUBY_BUILD_URL = "https://github.com/rbenv/ruby-build/archive/refs/tags/v{version}.tar.gz"
 _RUBY_INSTALLER_URL = "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-{version}-1/rubyinstaller-devkit-{version}-1-x64.exe"
 
-def rb_download(version):
+def rb_download(**kwargs):
     _rb_download(
         name = "rules_ruby_dist",
-        version = version,
+        **kwargs
     )
     native.register_toolchains("@rules_ruby_dist//:toolchain")
 

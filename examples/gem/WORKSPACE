@@ -6,7 +6,10 @@ local_repository(
 load("@rules_ruby//ruby:deps.bzl", "rb_bundle", "rb_download")
 load("ruby_version.bzl", "RUBY_VERSION")
 
-rb_download(version = RUBY_VERSION)
+rb_download(
+    ruby_build_version = "20230428",
+    version = RUBY_VERSION,
+)
 
 rb_bundle(
     name = "bundle",
