@@ -68,27 +68,46 @@ def generate_rb_binary_script(ctx, binary, args = []):
             "{args}": args,
             "{binary}": binary_path,
             "{toolchain_bindir}": toolchain_bindir,
+            "{ruby_binary_name}": toolchain.ruby.basename,
         },
     )
 
     return script
 
 def rb_binary_impl(ctx):
+    env = {}
     script = generate_rb_binary_script(ctx, ctx.executable.main)
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
+    tools = []
+    java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
+    ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
+
     if not ctx.attr.main:
-        transitive_srcs.append(ctx.toolchains["@rules_ruby//ruby:toolchain_type"].ruby)
-    runfiles = ctx.runfiles(transitive_data + transitive_srcs)
+        tools.append(ruby_toolchain.ruby)
+
+    if ruby_toolchain.version.startswith("jruby"):
+        env["JAVA_HOME"] = java_toolchain.java_runtime.java_home
+        tools.extend(java_toolchain.java_runtime.files.to_list())
+
+    for file in transitive_srcs:
+        if file.basename == "Gemfile":
+            env["BUNDLE_GEMFILE"] = file.path
+
+    runfiles = ctx.runfiles(transitive_data + transitive_srcs + tools)
+    env.update(ctx.attr.env)
 
     return [
-        DefaultInfo(executable = script, runfiles = runfiles),
+        DefaultInfo(
+            executable = script,
+            runfiles = runfiles,
+        ),
         RubyFiles(
             transitive_data = depset(transitive_data),
             transitive_srcs = depset(transitive_srcs),
         ),
         RunEnvironmentInfo(
-            environment = ctx.attr.env,
+            environment = env,
             inherited_environment = ctx.attr.env_inherit,
         ),
     ]
@@ -102,7 +121,10 @@ rb_binary = rule(
         data = LIBRARY_ATTRS["data"],
         deps = LIBRARY_ATTRS["deps"],
     ),
-    toolchains = ["@rules_ruby//ruby:toolchain_type"],
+    toolchains = [
+        "@rules_ruby//ruby:toolchain_type",
+        "@bazel_tools//tools/jdk:runtime_toolchain_type",
+    ],
     doc = """
 Runs a Ruby binary.
 

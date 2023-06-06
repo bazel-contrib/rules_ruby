@@ -6,5 +6,6 @@ end
 
 if __FILE__ == $PROGRAM_NAME
   puts "Ruby is: #{RUBY_ENGINE}/#{RUBY_VERSION}"
+  puts "Java version is: #{ENV_JAVA['java.version']}" if Object.const_defined?(:ENV_JAVA)
   puts "Version is: #{GEM::VERSION}"
 end

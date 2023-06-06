@@ -1,2 +1,2 @@
 @set PATH={toolchain_bindir};%PATH%
-@ruby {binary} {args} %*
+@{ruby_binary_name} {binary} {args} %*

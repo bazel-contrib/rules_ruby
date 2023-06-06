@@ -5,8 +5,8 @@ package(default_visibility = ["//visibility:public"])
 filegroup(
     name = "ruby",
     srcs = select({
-        "@platforms//os:windows": ["dist/bin/ruby.exe"],
-        "//conditions:default": ["dist/bin/ruby"],
+        "@platforms//os:windows": ["dist/bin/{ruby_binary_name}.exe"],
+        "//conditions:default": ["dist/bin/{ruby_binary_name}"],
     }),
 )
 
@@ -20,7 +20,7 @@ filegroup(
 
 filegroup(
     name = "gem",
-    srcs = ["dist/bin/gem"],
+    srcs = ["dist/bin/{gem_binary_name}"],
 )
 
 toolchain_type(
@@ -33,4 +33,5 @@ rb_toolchain(
     bundle = ":bundle",
     gem = ":gem",
     bindir = "{bindir}",
+    version = "{version}",
 )

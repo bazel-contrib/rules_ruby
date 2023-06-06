@@ -1,4 +1,4 @@
-def rb_toolchain(name, ruby, bundle, gem, bindir):
+def rb_toolchain(name, ruby, bundle, gem, bindir, version):
     toolchain_name = "%s_toolchain" % name
 
     _rb_toolchain(
@@ -7,6 +7,7 @@ def rb_toolchain(name, ruby, bundle, gem, bindir):
         bundle = bundle,
         gem = gem,
         bindir = bindir,
+        version = version,
     )
 
     native.toolchain(
@@ -21,6 +22,7 @@ def _rb_toolchain_impl(ctx):
         bundle = ctx.executable.bundle,
         gem = ctx.executable.gem,
         bindir = ctx.attr.bindir,
+        version = ctx.attr.version,
     )
 
 _rb_toolchain = rule(
@@ -46,6 +48,9 @@ _rb_toolchain = rule(
         ),
         "bindir": attr.string(
             doc = "Path to Ruby bin/ directory",
+        ),
+        "version": attr.string(
+            doc = "Ruby version",
         ),
     },
 )

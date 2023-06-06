@@ -2,14 +2,35 @@ load("//ruby/private:binary.bzl", "generate_rb_binary_script", BINARY_ATTRS = "A
 load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
 
 def _rb_gem_push_impl(ctx):
+    env = {}
+    java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
+    ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
+    srcs = [ctx.file.gem]
+    tools = [ruby_toolchain.gem]
+
+    if ruby_toolchain.version.startswith("jruby"):
+        env["JAVA_HOME"] = java_toolchain.java_runtime.java_home
+        tools.extend(java_toolchain.java_runtime.files.to_list())
+
     script = generate_rb_binary_script(
         ctx,
-        ctx.toolchains["@rules_ruby//ruby:toolchain_type"].gem,
+        ruby_toolchain.gem,
         ["push", ctx.file.gem.short_path],
     )
 
-    runfiles = ctx.runfiles([ctx.file.gem, ctx.toolchains["@rules_ruby//ruby:toolchain_type"].gem])
-    return [DefaultInfo(executable = script, runfiles = runfiles)]
+    runfiles = ctx.runfiles(srcs + tools)
+    env.update(ctx.attr.env)
+
+    return [
+        DefaultInfo(
+            executable = script,
+            runfiles = runfiles,
+        ),
+        RunEnvironmentInfo(
+            environment = env,
+            inherited_environment = ctx.attr.env_inherit,
+        ),
+    ]
 
 rb_gem_push = rule(
     _rb_gem_push_impl,
@@ -29,7 +50,10 @@ Gem file to push to RubyGems. You would usually use an output of `rb_gem_build()
         _binary_sh_tpl = BINARY_ATTRS["_binary_sh_tpl"],
         _windows_constraint = BINARY_ATTRS["_windows_constraint"],
     ),
-    toolchains = ["@rules_ruby//ruby:toolchain_type"],
+    toolchains = [
+        "@rules_ruby//ruby:toolchain_type",
+        "@bazel_tools//tools/jdk:runtime_toolchain_type",
+    ],
     doc = """
 Pushes a built Ruby gem.
 

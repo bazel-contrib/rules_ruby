@@ -7,15 +7,22 @@ _BINSTUB_CMD = """@ruby -x "%~f0" %*
 def _rb_bundle_impl(repository_ctx):
     binstubs_path = repository_ctx.path("bin")
     gemfile = repository_ctx.path(repository_ctx.attr.gemfile)
+    toolchain_path = repository_ctx.path(Label("@rules_ruby_dist//:BUILD")).dirname
 
     if repository_ctx.os.name.startswith("windows"):
-        bundle = repository_ctx.path(Label("@rules_ruby_dist//:dist/bin/bundle.cmd"))
-        ruby = repository_ctx.path(Label("@rules_ruby_dist//:dist/bin/ruby.exe"))
+        bundle = repository_ctx.path("%s/dist/bin/bundle.cmd" % toolchain_path)
         path_separator = ";"
+        if repository_ctx.path("%s/dist/bin/jruby.exe" % toolchain_path).exists:
+            ruby = repository_ctx.path("%s/dist/bin/jruby.exe" % toolchain_path)
+        else:
+            ruby = repository_ctx.path("%s/dist/bin/ruby.exe" % toolchain_path)
     else:
-        bundle = repository_ctx.path(Label("@rules_ruby_dist//:dist/bin/bundle"))
-        ruby = repository_ctx.path(Label("@rules_ruby_dist//:dist/bin/ruby"))
+        bundle = repository_ctx.path("%s/dist/bin/bundle" % toolchain_path)
         path_separator = ":"
+        if repository_ctx.path("%s/dist/bin/jruby" % toolchain_path).exists:
+            ruby = repository_ctx.path("%s/dist/bin/jruby" % toolchain_path)
+        else:
+            ruby = repository_ctx.path("%s/dist/bin/ruby" % toolchain_path)
 
     repository_ctx.template(
         "BUILD",

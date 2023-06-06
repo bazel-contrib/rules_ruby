@@ -2,10 +2,22 @@ load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
 load("//ruby/private:providers.bzl", "RubyFiles", "get_transitive_data", "get_transitive_srcs")
 
 def _rb_gem_build_impl(ctx):
+    env = {}
+    windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
+    is_windows = ctx.target_platform_has_constraint(windows_constraint)
+    tools = depset([])
+
     gem_builder = ctx.actions.declare_file("{}_gem_builder.rb".format(ctx.label.name))
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
-    toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
+    java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
+    ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
+
+    if ruby_toolchain.version.startswith("jruby"):
+        env["JAVA_HOME"] = java_toolchain.java_runtime.java_home
+        tools = java_toolchain.java_runtime.files
+        if is_windows:
+            env["PATH"] = ruby_toolchain.ruby.dirname
 
     # Inputs manifest is a dictionary where:
     #   - key is a path where a file is available (https://bazel.build/rules/lib/File#path)
@@ -36,10 +48,12 @@ def _rb_gem_build_impl(ctx):
     args.add(gem_builder)
     ctx.actions.run(
         inputs = depset(inputs),
-        executable = toolchain.ruby,
+        executable = ruby_toolchain.ruby,
         arguments = [args],
         outputs = [ctx.outputs.gem],
-        use_default_shell_env = True,
+        env = env,
+        use_default_shell_env = not is_windows,
+        tools = tools,
     )
 
     return [
@@ -62,11 +76,17 @@ rb_gem_build = rule(
             allow_single_file = True,
             default = "@rules_ruby//ruby/private:gem_build/gem_builder.rb.tpl",
         ),
+        _windows_constraint = attr.label(
+            default = "@platforms//os:windows",
+        ),
     ),
     outputs = {
         "gem": "%{name}.gem",
     },
-    toolchains = ["@rules_ruby//ruby:toolchain_type"],
+    toolchains = [
+        "@rules_ruby//ruby:toolchain_type",
+        "@bazel_tools//tools/jdk:runtime_toolchain_type",
+    ],
     doc = """
 Builds a Ruby gem.
 

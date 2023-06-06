@@ -11,7 +11,10 @@ rb_test = rule(
         data = LIBRARY_ATTRS["data"],
         deps = LIBRARY_ATTRS["deps"],
     ),
-    toolchains = ["@rules_ruby//ruby:toolchain_type"],
+    toolchains = [
+        "@rules_ruby//ruby:toolchain_type",
+        "@bazel_tools//tools/jdk:runtime_toolchain_type",
+    ],
     doc = """
 Runs a Ruby test.
 
