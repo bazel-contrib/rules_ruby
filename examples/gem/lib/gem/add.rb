@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'i18n'
+
 module GEM
   class Add # :nodoc:
     def initialize(a, b) # rubocop:disable Naming/MethodParameterName

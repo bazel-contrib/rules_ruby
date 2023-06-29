@@ -21,7 +21,10 @@ rb_binary(
     name = "add-numbers",
     args = ["1"],  # pass 1 argument here and 1 extra in CI
     main = "add.rb",
-    deps = [":add"],
+    deps = [
+        ":add",
+        "@bundle",
+    ],
 )
 
 rb_binary(

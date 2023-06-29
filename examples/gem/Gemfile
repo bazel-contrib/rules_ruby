@@ -4,3 +4,5 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'debug', '>= 1.0.0', platforms: %i[mri mswin64]
+gem 'rspec', '~> 3.0'
+gem 'rubocop', '~> 1.10'

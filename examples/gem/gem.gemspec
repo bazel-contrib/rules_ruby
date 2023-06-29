@@ -21,7 +21,6 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
   s.required_ruby_version = Gem::Requirement.new('>= 2.6')
 
+  s.add_dependency 'i18n', '~> 1.14'
   s.add_dependency 'rake', '~> 10'
-  s.add_development_dependency 'rspec', '~> 3.0'
-  s.add_development_dependency 'rubocop', '~> 1.10'
 end
