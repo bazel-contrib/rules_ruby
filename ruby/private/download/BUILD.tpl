@@ -23,10 +23,6 @@ filegroup(
     srcs = ["dist/bin/{gem_binary_name}"],
 )
 
-toolchain_type(
-    name = "toolchain_type",
-)
-
 rb_toolchain(
     name = "toolchain",
     ruby = ":ruby",

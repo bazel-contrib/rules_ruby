@@ -1,21 +1,3 @@
-def rb_toolchain(name, ruby, bundle, gem, bindir, version):
-    toolchain_name = "%s_toolchain" % name
-
-    _rb_toolchain(
-        name = toolchain_name,
-        ruby = ruby,
-        bundle = bundle,
-        gem = gem,
-        bindir = bindir,
-        version = version,
-    )
-
-    native.toolchain(
-        name = name,
-        toolchain = ":%s" % toolchain_name,
-        toolchain_type = "@rules_ruby//ruby:toolchain_type",
-    )
-
 def _rb_toolchain_impl(ctx):
     return platform_common.ToolchainInfo(
         ruby = ctx.executable.ruby,
@@ -25,7 +7,7 @@ def _rb_toolchain_impl(ctx):
         version = ctx.attr.version,
     )
 
-_rb_toolchain = rule(
+rb_toolchain = rule(
     implementation = _rb_toolchain_impl,
     attrs = {
         "ruby": attr.label(
