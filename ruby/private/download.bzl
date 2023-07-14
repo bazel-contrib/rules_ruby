@@ -2,7 +2,7 @@ _JRUBY_BINARY_URL = "https://repo1.maven.org/maven2/org/jruby/jruby-dist/{versio
 _RUBY_BUILD_URL = "https://github.com/rbenv/ruby-build/archive/refs/tags/v{version}.tar.gz"
 _RUBY_INSTALLER_URL = "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-{version}-1/rubyinstaller-devkit-{version}-1-x64.exe"
 
-def rb_download(version = None, **kwargs):
+def rb_register_toolchains(version = None, **kwargs):
     """
     Register a Ruby toolchain and lazily download the Ruby Interpreter.
 
@@ -15,7 +15,7 @@ def rb_download(version = None, **kwargs):
     ```bazel
     load("@rules_ruby//ruby:deps.bzl", "rb_download")
 
-    rb_download(
+    rb_register_toolchains(
         version = "2.7.5"
     )
     ```
@@ -30,6 +30,12 @@ def rb_download(version = None, **kwargs):
             toolchain_type = "@rules_ruby//ruby:toolchain_type",
         )
         native.register_toolchains("@{}//:all".format(proxy_repo_name))
+
+def rb_download(version = None, **kwargs):
+    """
+    Alias for `rb_register_toolchains`.
+    """
+    rb_register_toolchains(version = version, **kwargs)
 
 def _rb_toolchain_repository_proxy_impl(repository_ctx):
     repository_ctx.file(

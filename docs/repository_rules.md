@@ -64,21 +64,7 @@ rb_binary(
 rb_download(<a href="#rb_download-version">version</a>, <a href="#rb_download-kwargs">kwargs</a>)
 </pre>
 
-    Register a Ruby toolchain and lazily download the Ruby Interpreter.
-
-* _(For MRI on Linux and macOS)_ Installed using [ruby-build](https://github.com/rbenv/ruby-build).
-* _(For MRI on Windows)_ Installed using [RubyInstaller](https://rubyinstaller.org).
-* _(For JRuby on any OS)_ Downloaded and installed directly from [official website](https://www.jruby.org).
-* _(For TruffleRuby on Linux and macOS)_ Installed using [ruby-build](https://github.com/rbenv/ruby-build).
-
-`WORKSPACE`:
-```bazel
-load("@rules_ruby//ruby:deps.bzl", "rb_download")
-
-rb_download(
-    version = "2.7.5"
-)
-```
+    Alias for `rb_register_toolchains`.
 
 **PARAMETERS**
 
@@ -108,7 +94,7 @@ rb_register_toolchains(<a href="#rb_register_toolchains-version">version</a>, <a
 ```bazel
 load("@rules_ruby//ruby:deps.bzl", "rb_download")
 
-rb_download(
+rb_register_toolchains(
     version = "2.7.5"
 )
 ```
