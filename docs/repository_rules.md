@@ -61,10 +61,10 @@ rb_binary(
 ## rb_download
 
 <pre>
-rb_download(<a href="#rb_download-kwargs">kwargs</a>)
+rb_download(<a href="#rb_download-version">version</a>, <a href="#rb_download-kwargs">kwargs</a>)
 </pre>
 
-    Downloads an Ruby interpreter and registers it toolchain.
+    Register a Ruby toolchain and lazily download the Ruby Interpreter.
 
 * _(For MRI on Linux and macOS)_ Installed using [ruby-build](https://github.com/rbenv/ruby-build).
 * _(For MRI on Windows)_ Installed using [RubyInstaller](https://rubyinstaller.org).
@@ -85,6 +85,40 @@ rb_download(
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
+| <a id="rb_download-version"></a>version |  <p align="center"> - </p>   |  <code>None</code> |
 | <a id="rb_download-kwargs"></a>kwargs |  <p align="center"> - </p>   |  none |
+
+
+<a id="rb_register_toolchains"></a>
+
+## rb_register_toolchains
+
+<pre>
+rb_register_toolchains(<a href="#rb_register_toolchains-version">version</a>, <a href="#rb_register_toolchains-kwargs">kwargs</a>)
+</pre>
+
+    Register a Ruby toolchain and lazily download the Ruby Interpreter.
+
+* _(For MRI on Linux and macOS)_ Installed using [ruby-build](https://github.com/rbenv/ruby-build).
+* _(For MRI on Windows)_ Installed using [RubyInstaller](https://rubyinstaller.org).
+* _(For JRuby on any OS)_ Downloaded and installed directly from [official website](https://www.jruby.org).
+* _(For TruffleRuby on Linux and macOS)_ Installed using [ruby-build](https://github.com/rbenv/ruby-build).
+
+`WORKSPACE`:
+```bazel
+load("@rules_ruby//ruby:deps.bzl", "rb_download")
+
+rb_download(
+    version = "2.7.5"
+)
+```
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="rb_register_toolchains-version"></a>version |  <p align="center"> - </p>   |  <code>None</code> |
+| <a id="rb_register_toolchains-kwargs"></a>kwargs |  <p align="center"> - </p>   |  none |
 
 
