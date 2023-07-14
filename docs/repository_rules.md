@@ -56,25 +56,6 @@ rb_binary(
 | <a id="rb_bundle-srcs"></a>srcs |  List of Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 
 
-<a id="rb_download"></a>
-
-## rb_download
-
-<pre>
-rb_download(<a href="#rb_download-version">version</a>, <a href="#rb_download-kwargs">kwargs</a>)
-</pre>
-
-    Alias for `rb_register_toolchains`.
-
-**PARAMETERS**
-
-
-| Name  | Description | Default Value |
-| :------------- | :------------- | :------------- |
-| <a id="rb_download-version"></a>version |  <p align="center"> - </p>   |  <code>None</code> |
-| <a id="rb_download-kwargs"></a>kwargs |  <p align="center"> - </p>   |  none |
-
-
 <a id="rb_register_toolchains"></a>
 
 ## rb_register_toolchains

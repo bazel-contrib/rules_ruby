@@ -31,12 +31,6 @@ def rb_register_toolchains(version = None, **kwargs):
         )
         native.register_toolchains("@{}//:all".format(proxy_repo_name))
 
-def rb_download(version = None, **kwargs):
-    """
-    Alias for `rb_register_toolchains`.
-    """
-    rb_register_toolchains(version = version, **kwargs)
-
 def _rb_toolchain_repository_proxy_impl(repository_ctx):
     repository_ctx.file(
         "WORKSPACE",
