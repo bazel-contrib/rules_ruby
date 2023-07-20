@@ -4,6 +4,14 @@ _BINSTUB_CMD = """@ruby -x "%~f0" %*
 {}
 """
 
+# clear inherited environment variables so gems are installed to the default installation path
+_BUNDLE_WRAPPER_CMD = """
+#!/bin/bash
+unset BUNDLE_PATH
+unset GEM_HOME
+exec {bundle} "$@"
+"""
+
 def _rb_bundle_impl(repository_ctx):
     binstubs_path = repository_ctx.path("bin")
     gemfile = repository_ctx.path(repository_ctx.attr.gemfile)
@@ -30,9 +38,12 @@ def _rb_bundle_impl(repository_ctx):
         executable = False,
     )
 
+    bundle_wrapper = repository_ctx.path("bin/bundle_wrapper")
+    repository_ctx.file(bundle_wrapper, content=_BUNDLE_WRAPPER_CMD.format(bundle=bundle))
+
     repository_ctx.report_progress("Running bundle install")
     result = repository_ctx.execute(
-        [bundle, "install"],
+        [bundle_wrapper, "install"],
         environment = {
             "BUNDLE_BIN": repr(binstubs_path),
             "BUNDLE_GEMFILE": gemfile.basename,
