@@ -36,6 +36,7 @@ def _rb_bundle_impl(repository_ctx):
         environment = {
             "BUNDLE_BIN": repr(binstubs_path),
             "BUNDLE_GEMFILE": gemfile.basename,
+            "BUNDLE_IGNORE_CONFIG": "1",
             "BUNDLE_SHEBANG": repr(ruby),
             "PATH": path_separator.join([repr(ruby.dirname), repository_ctx.os.environ["PATH"]]),
         },
