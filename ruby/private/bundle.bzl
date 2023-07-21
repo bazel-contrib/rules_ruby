@@ -12,6 +12,15 @@ unset GEM_HOME
 exec {bundle} "$@"
 """
 
+_BUNDLE_WRAPPER_CMD_WINDOWS = """
+@echo off
+setlocal
+set BUNDLE_PATH=
+set GEM_HOME=
+call {bundle} %*
+endlocal
+"""
+
 def _rb_bundle_impl(repository_ctx):
     binstubs_path = repository_ctx.path("bin")
     gemfile = repository_ctx.path(repository_ctx.attr.gemfile)
@@ -19,6 +28,9 @@ def _rb_bundle_impl(repository_ctx):
 
     if repository_ctx.os.name.startswith("windows"):
         bundle = repository_ctx.path("%s/dist/bin/bundle.cmd" % toolchain_path)
+        bundle_wrapper = repository_ctx.path("bin/bundle_wrapper.cmd")
+        repository_ctx.file(bundle_wrapper, content=_BUNDLE_WRAPPER_CMD_WINDOWS.format(bundle=bundle))
+
         path_separator = ";"
         if repository_ctx.path("%s/dist/bin/jruby.exe" % toolchain_path).exists:
             ruby = repository_ctx.path("%s/dist/bin/jruby.exe" % toolchain_path)
@@ -26,6 +38,9 @@ def _rb_bundle_impl(repository_ctx):
             ruby = repository_ctx.path("%s/dist/bin/ruby.exe" % toolchain_path)
     else:
         bundle = repository_ctx.path("%s/dist/bin/bundle" % toolchain_path)
+        bundle_wrapper = repository_ctx.path("bin/bundle_wrapper")
+        repository_ctx.file(bundle_wrapper, content=_BUNDLE_WRAPPER_CMD.format(bundle=bundle))
+
         path_separator = ":"
         if repository_ctx.path("%s/dist/bin/jruby" % toolchain_path).exists:
             ruby = repository_ctx.path("%s/dist/bin/jruby" % toolchain_path)
@@ -37,9 +52,6 @@ def _rb_bundle_impl(repository_ctx):
         repository_ctx.attr._build_tpl,
         executable = False,
     )
-
-    bundle_wrapper = repository_ctx.path("bin/bundle_wrapper")
-    repository_ctx.file(bundle_wrapper, content=_BUNDLE_WRAPPER_CMD.format(bundle=bundle))
 
     repository_ctx.report_progress("Running bundle install")
     result = repository_ctx.execute(
