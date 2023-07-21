@@ -34,7 +34,7 @@ def rb_register_toolchains(version = None, **kwargs):
 def _rb_toolchain_repository_proxy_impl(repository_ctx):
     repository_ctx.file(
         "WORKSPACE",
-        """workspace(name = "{}")""".format(repository_ctx.name)
+        """workspace(name = "{}")""".format(repository_ctx.name),
     )
 
     build_file_template = """
@@ -64,7 +64,7 @@ rb_toolchain_repository_proxy = repository_rule(
     doc = (
         "A proxy repository that contains the toolchain declaration; this indirection " +
         "allows the Ruby toolchain to be downloaded lazily."
-    )
+    ),
 )
 
 def _rb_download_impl(repository_ctx):
@@ -165,7 +165,7 @@ Ruby version to install.
             """,
         ),
         "ruby_build_version": attr.string(
-            default = "20230428",
+            default = "20230717",
             doc = """
 Version of [ruby-build](https://github.com/rbenv/ruby-build/releases)
 to install. You normally don't need to change this, unless `version` you pass is a new one

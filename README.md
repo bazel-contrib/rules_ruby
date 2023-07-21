@@ -24,10 +24,9 @@ The following toolchains are known to work and tested on CI.
 | MRI 3.2          | 🟩    | 🟩    | 🟩      |
 | MRI 3.1          | 🟩    | 🟩    | 🟩      |
 | MRI 3.0          | 🟩    | 🟩    | 🟩      |
-| MRI 2.7          | 🟩    | 🟩    | 🟩      |
 | JRuby 9.4        | 🟩    | 🟩    | 🟩      |
 | JRuby 9.3        | 🟩    | 🟩    | 🟩      |
-| TruffleRuby 22.3 | 🟩    | 🟩    | 🟥      |
+| TruffleRuby 23.0 | 🟩    | 🟩    | 🟥      |
 
 ### MRI
 
