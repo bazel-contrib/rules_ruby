@@ -14,8 +14,9 @@ def _rb_gem_push_impl(ctx):
 
     script = generate_rb_binary_script(
         ctx,
-        ruby_toolchain.gem,
-        ["push", ctx.file.gem.short_path],
+        binary = ruby_toolchain.gem,
+        bundler = False,
+        args = ["push", ctx.file.gem.short_path],
     )
 
     runfiles = ctx.runfiles(srcs + tools)

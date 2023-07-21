@@ -37,7 +37,7 @@ Use a built-in `args` attribute to pass extra arguments to the script.
     ),
 }
 
-def generate_rb_binary_script(ctx, binary, args = []):
+def generate_rb_binary_script(ctx, binary, bundler = False, args = []):
     windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
     is_windows = ctx.target_platform_has_constraint(windows_constraint)
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
@@ -57,6 +57,11 @@ def generate_rb_binary_script(ctx, binary, args = []):
         script = ctx.actions.declare_file("{}.rb.sh".format(ctx.label.name))
         template = ctx.file._binary_sh_tpl
 
+    if bundler:
+        bundler_command = "bundle exec"
+    else:
+        bundler_command = ""
+
     args = " ".join(args)
     args = ctx.expand_location(args)
 
@@ -68,6 +73,7 @@ def generate_rb_binary_script(ctx, binary, args = []):
             "{args}": args,
             "{binary}": binary_path,
             "{toolchain_bindir}": toolchain_bindir,
+            "{bundler_command}": bundler_command,
             "{ruby_binary_name}": toolchain.ruby.basename,
         },
     )
@@ -75,8 +81,8 @@ def generate_rb_binary_script(ctx, binary, args = []):
     return script
 
 def rb_binary_impl(ctx):
+    bundler = False
     env = {}
-    script = generate_rb_binary_script(ctx, ctx.executable.main)
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
     tools = []
@@ -94,8 +100,15 @@ def rb_binary_impl(ctx):
         if file.basename == "Gemfile":
             env["BUNDLE_GEMFILE"] = file.path
 
+    for dep in ctx.attr.deps:
+        if dep.label.workspace_name == "bundle":
+            bundler = True
+            env["BUNDLE_PATH"] = dep.label.workspace_root
+
     runfiles = ctx.runfiles(transitive_data + transitive_srcs + tools)
     env.update(ctx.attr.env)
+
+    script = generate_rb_binary_script(ctx, ctx.executable.main, bundler)
 
     return [
         DefaultInfo(

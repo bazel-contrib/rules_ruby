@@ -6,6 +6,7 @@ _BINSTUB_CMD = """@ruby -x "%~f0" %*
 
 def _rb_bundle_impl(repository_ctx):
     binstubs_path = repository_ctx.path("bin")
+    bundle_path = repository_ctx.path(".")
     gemfile = repository_ctx.path(repository_ctx.attr.gemfile)
     toolchain_path = repository_ctx.path(Label("@rules_ruby_dist//:BUILD")).dirname
 
@@ -37,6 +38,7 @@ def _rb_bundle_impl(repository_ctx):
             "BUNDLE_BIN": repr(binstubs_path),
             "BUNDLE_GEMFILE": gemfile.basename,
             "BUNDLE_IGNORE_CONFIG": "1",
+            "BUNDLE_PATH": repr(bundle_path),
             "BUNDLE_SHEBANG": repr(ruby),
             "PATH": path_separator.join([repr(ruby.dirname), repository_ctx.os.environ["PATH"]]),
         },
