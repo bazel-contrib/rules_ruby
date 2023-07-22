@@ -7,6 +7,9 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  JAVA_OPTS: -Djdk.io.File.enableADS=true
+
 jobs:
   examples-gem:
     name: Examples / Gem

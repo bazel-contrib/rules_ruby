@@ -10,6 +10,7 @@ test --test_env=HOME
 
 # JRuby 9.3 fails with "Errno::EACCES: Permission denied - NUL" on Windows:
 # https://github.com/jruby/jruby/issues/7182#issuecomment-1112953015.
+build --action_env=JAVA_OPTS="-Djdk.io.File.enableADS=true"
 test --test_env=JAVA_OPTS="-Djdk.io.File.enableADS=true"
 
 # Allows to run tests with rdbg:
