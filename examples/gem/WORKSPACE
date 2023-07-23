@@ -7,7 +7,6 @@ load("@rules_ruby//ruby:deps.bzl", "rb_bundle", "rb_register_toolchains")
 load("ruby_version.bzl", "RUBY_VERSION")
 
 rb_register_toolchains(
-    ruby_build_version = "20230428",
     version = RUBY_VERSION,
 )
 
