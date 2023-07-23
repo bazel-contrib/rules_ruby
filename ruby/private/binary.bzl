@@ -44,7 +44,7 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = []):
     toolchain_bindir = toolchain.bindir
 
     if binary:
-        binary_path = binary.path
+        binary_path = binary.short_path
     else:
         binary_path = ""
 
@@ -93,17 +93,17 @@ def rb_binary_impl(ctx):
         tools.append(ruby_toolchain.ruby)
 
     if ruby_toolchain.version.startswith("jruby"):
-        env["JAVA_HOME"] = java_toolchain.java_runtime.java_home
+        env["JAVA_HOME"] = java_toolchain.java_runtime.java_home_runfiles_path
         tools.extend(java_toolchain.java_runtime.files.to_list())
 
     for file in transitive_srcs:
         if file.basename == "Gemfile":
-            env["BUNDLE_GEMFILE"] = file.path
+            env["BUNDLE_GEMFILE"] = file.short_path
 
     for dep in ctx.attr.deps:
         if dep.label.workspace_name == "bundle":
             bundler = True
-            env["BUNDLE_PATH"] = dep.label.workspace_root
+            env["BUNDLE_PATH"] = "../" + dep.label.workspace_name
 
     runfiles = ctx.runfiles(transitive_data + transitive_srcs + tools)
     env.update(ctx.attr.env)
