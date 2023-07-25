@@ -25,8 +25,15 @@ The following toolchains are known to work and tested on CI.
 | MRI 3.1          | 🟩    | 🟩    | 🟩      |
 | MRI 3.0          | 🟩    | 🟩    | 🟩      |
 | JRuby 9.4        | 🟩    | 🟩    | 🟩      |
-| JRuby 9.3        | 🟩    | 🟩    | 🟩      |
 | TruffleRuby 23.0 | 🟩    | 🟩    | 🟥      |
+
+The following toolchains were previously known to work but *no longer tested on CI*.
+
+| Ruby             | Linux | macOS | Windows |
+|------------------|-------|-------|---------|
+| MRI 2.7          | 🟩    | 🟩    | 🟩      |
+| JRuby 9.3        | 🟩    | 🟩    | 🟩      |
+| TruffleRuby 22.0 | 🟩    | 🟩    | 🟥      |
 
 ### MRI
 
