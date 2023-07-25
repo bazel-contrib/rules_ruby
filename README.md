@@ -40,28 +40,27 @@ On Windows, [RubyInstaller][6] is used to install MRI.
 On all operating systems, JRuby is downloaded manually.
 It uses Bazel runtime Java toolchain as JDK.
 
-*Note: You might need to expose `HOME` variable for JRuby to work.
-See [`examples/gem/.bazelrc`][7] to learn how to do that.
-This is to be fixed in https://github.com/jruby/jruby/issues/5661.*
-
-*Note: If you get `Errno::EACCES: Permission denied - NUL` error on Windows,
-you might need to configure JDK to allow access.
-See [`examples/gem/.bazelrc`][7] to learn how to do that.
-This is described in https://github.com/jruby/jruby/issues/7182#issuecomment-1112953015.*
-
 ### TruffleRuby
 
 On Linux and macOS, [ruby-build][5] is used to install TruffleRuby.
 Windows is not supported.
 
-*Note: You might need to expose `HOME` variable for JRuby to work.
-See [`examples/gem/.bazelrc`][7] to learn how to do that.
-This is to be fixed in https://github.com/oracle/truffleruby/issues/2784.*
-
 ### Other
 
 On Linux and macOS, you can potentially use any Ruby distribution that is supported by [ruby-build][5].
 However, some are known not to work or work only partially (e.g. mRuby has no bundler support).
+
+## Known Issues
+
+* JRuby/TruffleRuby might need `HOME` variable exposed.
+  See [`examples/gem/.bazelrc`][7] to learn how to do that.
+  This is to be fixed in https://github.com/jruby/jruby/issues/5661 and https://github.com/oracle/truffleruby/issues/2784.
+* JRuby might fail with `Errno::EACCES: Permission denied - NUL` error on Windows.
+  You need to configure JDK to allow proper access.
+  See [`examples/gem/.bazelrc`][7] to learn how to do that.
+  This is described in https://github.com/jruby/jruby/issues/7182#issuecomment-1112953015.
+* RuboCop < 1.55 crashes with `LoadError` on Windows.
+  This is fixed in https://github.com/rubocop/rubocop/pull/12062.
 
 [1]: https://www.ruby-lang.org
 [2]: https://bazel.build
