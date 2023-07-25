@@ -30,6 +30,7 @@ rb_binary(
 
 rb_test(
     name = "rubocop",
+    size = "small",
     data = [".rubocop.yml"],
     main = "@bundle//:bin/rubocop",
     tags = ["no-sandbox"],

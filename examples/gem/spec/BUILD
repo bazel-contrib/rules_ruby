@@ -9,6 +9,7 @@ rb_library(
 
 rb_test(
     name = "add",
+    size = "small",
     srcs = ["add_spec.rb"],
     args = ["spec/add_spec.rb"],
     main = "@bundle//:bin/rspec",
@@ -21,6 +22,7 @@ rb_test(
 
 rb_test(
     name = "env",
+    size = "small",
     srcs = ["env_spec.rb"],
     args = ["spec/env_spec.rb"],
     env = {"EXAMPLE": "ENV"},
@@ -38,6 +40,7 @@ rb_test(
 
 rb_test(
     name = "file",
+    size = "small",
     srcs = ["file_spec.rb"],
     args = ["spec/file_spec.rb"],
     data = ["support/file.txt"],
@@ -51,6 +54,7 @@ rb_test(
 
 rb_test(
     name = "subtract",
+    size = "small",
     srcs = ["subtract_spec.rb"],
     args = ["spec/subtract_spec.rb"],
     main = "@bundle//:bin/rspec",
