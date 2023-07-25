@@ -203,5 +203,6 @@ test --test_env=JAVA_OPTS="-Djdk.io.File.enableADS=true"
 # Allows to run tests with rdbg:
 # 1. Add breakpoint with `binding.break`.
 # 2. Run tests: `bazel test --config debug spec:add`.
-# 3. Connect to debugger: `bazel-gem/external/bundle/bin/rdbg -A`.
+# 3. Connect to debugger:
+#    BUNDLE_PATH="bazel-gem/external/bundle" bazel-gem/external/bundle/bin/rdbg -A
 test:debug --run_under="@bundle//:bin/rdbg --nonstop --open --command"

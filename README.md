@@ -60,14 +60,17 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
 ## Known Issues
 
 * JRuby/TruffleRuby might need `HOME` variable exposed.
-  See [`examples/gem/.bazelrc`][7] to learn how to do that.
-  This is to be fixed in https://github.com/jruby/jruby/issues/5661 and https://github.com/oracle/truffleruby/issues/2784.
+  See [`eamples/gem/.bazelrc`][7] to learn how to do that.
+  This is to be fixed in [`jruby/jruby#5661`][9] and [`oracle/truffleruby#2784`][10].
 * JRuby might fail with `Errno::EACCES: Permission denied - NUL` error on Windows.
   You need to configure JDK to allow proper access.
   See [`examples/gem/.bazelrc`][7] to learn how to do that.
-  This is described in https://github.com/jruby/jruby/issues/7182#issuecomment-1112953015.
+  This is described in [`jruby/jruby#7182`][11].
 * RuboCop < 1.55 crashes with `LoadError` on Windows.
-  This is fixed in https://github.com/rubocop/rubocop/pull/12062.
+  This is fixed in [`rubocop/rubocop#12062`][12].
+* REPL doesn't work when used with `bazel test`.
+  To work it around, use a debugger with remote client support such as [`ruby/debug`][8] .
+  See [`examples/gem/.bazelrc`][7] to learn how to do that.
 
 [1]: https://www.ruby-lang.org
 [2]: https://bazel.build
@@ -76,3 +79,8 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
 [5]: https://github.com/rbenv/ruby-build
 [6]: https://rubyinstaller.org
 [7]: examples/gem/.bazelrc
+[8]: https://github.com/ruby/debug
+[9]: https://github.com/jruby/jruby/issues/5661
+[10]: https://github.com/oracle/truffleruby/issues/2784
+[11]: https://github.com/jruby/jruby/issues/7182#issuecomment-1112953015
+[12]: https://github.com/rubocop/rubocop/pull/12062
