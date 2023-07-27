@@ -103,7 +103,8 @@ def rb_binary_impl(ctx):
             env["BUNDLE_GEMFILE"] = file.short_path
 
     for dep in transitive_deps:
-        if dep.label.workspace_name == "bundle":
+        # TODO: Do not depend on workspace name to determine bundle
+        if dep.label.workspace_name.endswith("bundle"):
             bundler = True
             env["BUNDLE_PATH"] = "../" + dep.label.workspace_name
 
