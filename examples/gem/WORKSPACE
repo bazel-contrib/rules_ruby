@@ -17,5 +17,8 @@ rb_bundle(
         "//:gem.gemspec",
         "//:lib/gem/version.rb",
     ],
+    env = {
+        "BUNDLE_BUILD__FOO": "bar",
+    },
     gemfile = "//:Gemfile",
 )

@@ -31,17 +31,20 @@ def _rb_bundle_impl(repository_ctx):
         executable = False,
     )
 
+    env = {
+        "BUNDLE_BIN": repr(binstubs_path),
+        "BUNDLE_GEMFILE": gemfile.basename,
+        "BUNDLE_IGNORE_CONFIG": "1",
+        "BUNDLE_PATH": repr(bundle_path),
+        "BUNDLE_SHEBANG": repr(ruby),
+        "PATH": path_separator.join([repr(ruby.dirname), repository_ctx.os.environ["PATH"]]),
+    }
+    env.update(repository_ctx.attr.env)
+
     repository_ctx.report_progress("Running bundle install")
     result = repository_ctx.execute(
         [bundle, "install"],
-        environment = {
-            "BUNDLE_BIN": repr(binstubs_path),
-            "BUNDLE_GEMFILE": gemfile.basename,
-            "BUNDLE_IGNORE_CONFIG": "1",
-            "BUNDLE_PATH": repr(bundle_path),
-            "BUNDLE_SHEBANG": repr(ruby),
-            "PATH": path_separator.join([repr(ruby.dirname), repository_ctx.os.environ["PATH"]]),
-        },
+        environment = env,
         working_directory = repr(gemfile.dirname),
         quiet = not repository_ctx.os.environ.get("RUBY_RULES_DEBUG", default = False),
     )
@@ -72,6 +75,9 @@ List of Ruby source files used to build the library.
             doc = """
 Gemfile to install dependencies from.
             """,
+        ),
+        "env": attr.string_dict(
+            doc = "Environment variables to use during installation.",
         ),
         "_build_tpl": attr.label(
             allow_single_file = True,
