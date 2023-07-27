@@ -1,8 +1,9 @@
 load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
 load(
     "//ruby/private:providers.bzl",
-    "RubyFiles",
+    "RubyFilesInfo",
     "get_transitive_data",
+    "get_transitive_deps",
     "get_transitive_srcs",
 )
 
@@ -84,6 +85,7 @@ def rb_binary_impl(ctx):
     bundler = False
     env = {}
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
+    transitive_deps = get_transitive_deps(ctx.attr.deps).to_list()
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
     tools = []
     java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
@@ -100,7 +102,7 @@ def rb_binary_impl(ctx):
         if file.basename == "Gemfile":
             env["BUNDLE_GEMFILE"] = file.short_path
 
-    for dep in ctx.attr.deps:
+    for dep in transitive_deps:
         if dep.label.workspace_name == "bundle":
             bundler = True
             env["BUNDLE_PATH"] = "../" + dep.label.workspace_name
@@ -115,8 +117,9 @@ def rb_binary_impl(ctx):
             executable = script,
             runfiles = runfiles,
         ),
-        RubyFiles(
+        RubyFilesInfo(
             transitive_data = depset(transitive_data),
+            transitive_deps = depset(transitive_deps),
             transitive_srcs = depset(transitive_srcs),
         ),
         RunEnvironmentInfo(

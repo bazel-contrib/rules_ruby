@@ -5,6 +5,10 @@ package(default_visibility = ["//:__pkg__"])
 rb_library(
     name = "spec_helper",
     srcs = ["spec_helper.rb"],
+    deps = [
+        "//:gem",
+        "@bundle",
+    ],
 )
 
 rb_test(
@@ -13,11 +17,7 @@ rb_test(
     srcs = ["add_spec.rb"],
     args = ["spec/add_spec.rb"],
     main = "@bundle//:bin/rspec",
-    deps = [
-        ":spec_helper",
-        "//:gem",
-        "@bundle",
-    ],
+    deps = [":spec_helper"],
 )
 
 rb_test(
@@ -31,11 +31,7 @@ rb_test(
         "USERNAME",  # Windows
     ],
     main = "@bundle//:bin/rspec",
-    deps = [
-        ":spec_helper",
-        "//:gem",
-        "@bundle",
-    ],
+    deps = [":spec_helper"],
 )
 
 rb_test(
@@ -45,11 +41,7 @@ rb_test(
     args = ["spec/file_spec.rb"],
     data = ["support/file.txt"],
     main = "@bundle//:bin/rspec",
-    deps = [
-        ":spec_helper",
-        "//:gem",
-        "@bundle",
-    ],
+    deps = [":spec_helper"],
 )
 
 rb_test(
@@ -58,9 +50,5 @@ rb_test(
     srcs = ["subtract_spec.rb"],
     args = ["spec/subtract_spec.rb"],
     main = "@bundle//:bin/rspec",
-    deps = [
-        ":spec_helper",
-        "//:gem",
-        "@bundle",
-    ],
+    deps = [":spec_helper"],
 )

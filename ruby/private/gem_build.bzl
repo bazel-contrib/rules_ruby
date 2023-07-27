@@ -1,5 +1,11 @@
 load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
-load("//ruby/private:providers.bzl", "RubyFiles", "get_transitive_data", "get_transitive_srcs")
+load(
+    "//ruby/private:providers.bzl",
+    "RubyFilesInfo",
+    "get_transitive_data",
+    "get_transitive_deps",
+    "get_transitive_srcs",
+)
 
 def _rb_gem_build_impl(ctx):
     env = {}
@@ -9,6 +15,7 @@ def _rb_gem_build_impl(ctx):
 
     gem_builder = ctx.actions.declare_file("{}_gem_builder.rb".format(ctx.label.name))
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
+    transitive_deps = get_transitive_deps(ctx.attr.deps)
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
     java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
@@ -57,8 +64,9 @@ def _rb_gem_build_impl(ctx):
     )
 
     return [
-        RubyFiles(
+        RubyFilesInfo(
             transitive_data = depset(transitive_data),
+            transitive_deps = transitive_deps,
             transitive_srcs = depset(transitive_srcs),
         ),
     ]

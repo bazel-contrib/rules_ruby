@@ -1,7 +1,8 @@
 load(
     "//ruby/private:providers.bzl",
-    "RubyFiles",
+    "RubyFilesInfo",
     "get_transitive_data",
+    "get_transitive_deps",
     "get_transitive_srcs",
 )
 
@@ -21,8 +22,9 @@ ATTRS = {
 
 def _rb_library_impl(ctx):
     return [
-        RubyFiles(
+        RubyFilesInfo(
             transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps),
+            transitive_deps = get_transitive_deps(ctx.attr.deps),
             transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps),
         ),
     ]
