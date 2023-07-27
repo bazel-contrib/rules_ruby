@@ -38,7 +38,7 @@ Use a built-in `args` attribute to pass extra arguments to the script.
     ),
 }
 
-def get_relative_path_to_workspace_root(path):
+def get_relative_path_to_external(path):
     nest_level = len(path.split("/"))
     return "../" * nest_level
 
@@ -110,7 +110,7 @@ def rb_binary_impl(ctx):
         # TODO: Do not depend on workspace name to determine bundle
         if dep.label.workspace_name.endswith("bundle"):
             bundler = True
-            env["BUNDLE_PATH"] = get_relative_path_to_workspace_root(env["BUNDLE_GEMFILE"]) + dep.label.workspace_name
+            env["BUNDLE_PATH"] = get_relative_path_to_external(env["BUNDLE_GEMFILE"]) + dep.label.workspace_name
 
     runfiles = ctx.runfiles(transitive_data + transitive_srcs + tools)
     env.update(ctx.attr.env)
