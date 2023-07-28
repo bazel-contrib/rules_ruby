@@ -110,6 +110,8 @@ def rb_binary_impl(ctx):
         # TODO: Do not depend on workspace name to determine bundle
         if dep.label.workspace_name.endswith("bundle"):
             bundler = True
+            # temporary workaround for Gemfile in subdirectories because location of Gemfile
+            # sets the root of the project, which bundler uses to resolve relative paths
             env["BUNDLE_PATH"] = get_relative_path_to_external(env["BUNDLE_GEMFILE"]) + dep.label.workspace_name
 
     runfiles = ctx.runfiles(transitive_data + transitive_srcs + tools)
