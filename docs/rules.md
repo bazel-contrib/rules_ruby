@@ -121,21 +121,10 @@ load("@rules_ruby//ruby:defs.bzl", "rb_binary", "rb_library")
 
 package(default_visibility = ["//:__subpackages__"])
 
-rb_library(
-    name = "gem",
-    srcs = [
-        "Gemfile",
-        "Gemfile.lock",
-        "gem.gemspec",
-    ],
-    deps = ["//lib:gem"],
-)
-
 rb_binary(
     name = "rake",
     main = "@bundle//:bin/rake",
     deps = [
-        ":gem",
         "@bundle",
     ],
 )
@@ -174,7 +163,7 @@ rake, version 10.5.0
 ## rb_gem_build
 
 <pre>
-rb_gem_build(<a href="#rb_gem_build-name">name</a>, <a href="#rb_gem_build-data">data</a>, <a href="#rb_gem_build-deps">deps</a>, <a href="#rb_gem_build-gemspec">gemspec</a>, <a href="#rb_gem_build-srcs">srcs</a>)
+rb_gem_build(<a href="#rb_gem_build-name">name</a>, <a href="#rb_gem_build-bundle_envs">bundle_envs</a>, <a href="#rb_gem_build-data">data</a>, <a href="#rb_gem_build-deps">deps</a>, <a href="#rb_gem_build-gemspec">gemspec</a>, <a href="#rb_gem_build-srcs">srcs</a>)
 </pre>
 
 
@@ -274,6 +263,7 @@ INFO: Build completed successfully, 2 total actions
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_gem_build-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="rb_gem_build-bundle_envs"></a>bundle_envs |  List of environment variables to set when building the library.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | <code>{}</code> |
 | <a id="rb_gem_build-data"></a>data |  List of non-Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_gem_build-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_gem_build-gemspec"></a>gemspec |  Gemspec file to use for gem building.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
@@ -285,7 +275,7 @@ INFO: Build completed successfully, 2 total actions
 ## rb_gem_push
 
 <pre>
-rb_gem_push(<a href="#rb_gem_push-name">name</a>, <a href="#rb_gem_push-data">data</a>, <a href="#rb_gem_push-deps">deps</a>, <a href="#rb_gem_push-env">env</a>, <a href="#rb_gem_push-env_inherit">env_inherit</a>, <a href="#rb_gem_push-gem">gem</a>, <a href="#rb_gem_push-srcs">srcs</a>)
+rb_gem_push(<a href="#rb_gem_push-name">name</a>, <a href="#rb_gem_push-bundle_envs">bundle_envs</a>, <a href="#rb_gem_push-data">data</a>, <a href="#rb_gem_push-deps">deps</a>, <a href="#rb_gem_push-env">env</a>, <a href="#rb_gem_push-env_inherit">env_inherit</a>, <a href="#rb_gem_push-gem">gem</a>, <a href="#rb_gem_push-srcs">srcs</a>)
 </pre>
 
 
@@ -361,6 +351,7 @@ Successfully registered gem: example (0.1.0)
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_gem_push-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="rb_gem_push-bundle_envs"></a>bundle_envs |  List of environment variables to set when building the library.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | <code>{}</code> |
 | <a id="rb_gem_push-data"></a>data |  List of non-Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_gem_push-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_gem_push-env"></a>env |  Environment variables to use during execution.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | <code>{}</code> |
@@ -374,7 +365,7 @@ Successfully registered gem: example (0.1.0)
 ## rb_library
 
 <pre>
-rb_library(<a href="#rb_library-name">name</a>, <a href="#rb_library-data">data</a>, <a href="#rb_library-deps">deps</a>, <a href="#rb_library-srcs">srcs</a>)
+rb_library(<a href="#rb_library-name">name</a>, <a href="#rb_library-bundle_envs">bundle_envs</a>, <a href="#rb_library-data">data</a>, <a href="#rb_library-deps">deps</a>, <a href="#rb_library-srcs">srcs</a>)
 </pre>
 
 
@@ -461,6 +452,7 @@ using other rules.
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_library-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="rb_library-bundle_envs"></a>bundle_envs |  List of environment variables to set when building the library.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | <code>{}</code> |
 | <a id="rb_library-data"></a>data |  List of non-Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_library-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_library-srcs"></a>srcs |  List of Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
