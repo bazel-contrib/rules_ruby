@@ -4,7 +4,7 @@ load(
     "get_transitive_data",
     "get_transitive_deps",
     "get_transitive_srcs",
-    "get_bundle_envs",
+    "get_bundle_env",
 )
 
 ATTRS = {
@@ -19,9 +19,9 @@ ATTRS = {
         allow_files = True,
         doc = "List of non-Ruby source files used to build the library.",
     ),
-    "bundle_envs": attr.string_dict(
+    "bundle_env": attr.string_dict(
         default = {},
-        doc = "List of environment variables to set when building the library.",
+        doc = "List of bundle environment variables to set when building the library.",
     ),
 }
 
@@ -31,7 +31,7 @@ def _rb_library_impl(ctx):
             transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps),
             transitive_deps = get_transitive_deps(ctx.attr.deps),
             transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps),
-            bundle_envs = get_bundle_envs(ctx.attr.bundle_envs, ctx.attr.deps),
+            bundle_env = get_bundle_env(ctx.attr.bundle_env, ctx.attr.deps),
         ),
     ]
 

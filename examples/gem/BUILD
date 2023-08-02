@@ -23,7 +23,7 @@ rb_binary(
     name = "rake",
     main = "@bundle//:bin/rake",
     deps = [
-        ":gem",
+        "//lib:gem",
         "@bundle",
     ],
 )
@@ -35,7 +35,6 @@ rb_test(
     main = "@bundle//:bin/rubocop",
     tags = ["no-sandbox"],
     deps = [
-        ":gem",
         "//spec:add",
         "//spec:env",
         "//spec:file",

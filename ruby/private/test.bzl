@@ -59,7 +59,6 @@ rb_test(
     main = "@bundle//:bin/rspec",
     deps = [
         ":spec_helper",
-        "//:gem",
         "@bundle",
     ],
 )
@@ -71,7 +70,6 @@ rb_test(
     main = "@bundle//:bin/rspec",
     deps = [
         ":spec_helper",
-        "//:gem",
         "@bundle",
     ],
 )
@@ -96,19 +94,9 @@ argument with a path to a Bundler binary stub.
 
 `BUILD`:
 ```bazel
-load("@rules_ruby//ruby:defs.bzl", "rb_library", "rb_test")
+load("@rules_ruby//ruby:defs.bzl", "rb_test")
 
 package(default_visibility = ["//:__subpackages__"])
-
-rb_library(
-    name = "gem",
-    srcs = [
-        "Gemfile",
-        "Gemfile.lock",
-        "gem.gemspec",
-    ],
-    deps = ["//lib:gem"],
-)
 
 rb_test(
     name = "rubocop",
@@ -116,7 +104,7 @@ rb_test(
     main = "@bundle//:bin/rubocop",
     tags = ["no-sandbox"],
     deps = [
-        ":gem",
+        "//lib:gem",
         "@bundle",
     ],
 )

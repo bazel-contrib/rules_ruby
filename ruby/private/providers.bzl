@@ -1,6 +1,6 @@
 RubyFilesInfo = provider(
     "Provider for Ruby files",
-    fields = ["transitive_data", "transitive_deps", "transitive_srcs", "bundle_envs"],
+    fields = ["transitive_data", "transitive_deps", "transitive_srcs", "bundle_env"],
 )
 
 # https://bazel.build/rules/depsets
@@ -46,7 +46,7 @@ def get_transitive_deps(deps):
         transitive = [dep[RubyFilesInfo].transitive_deps for dep in deps],
     )
 
-def get_bundle_envs(envs, deps):
+def get_bundle_env(envs, deps):
   """Obtain the BUNDLE_* environment variables for a target and its transitive dependencies.
 
   Args:
@@ -55,13 +55,14 @@ def get_bundle_envs(envs, deps):
   Returns:
     a collection of the transitive environment variables
   """
-  bundle_envs = {}
+  bundle_env = {}
 
-  for dep in deps:
-    bundle_envs.update(dep[RubyFilesInfo].bundle_envs)
+  transitive_deps = get_transitive_deps(deps).to_list()
+  for dep in transitive_deps:
+    bundle_env.update(dep[RubyFilesInfo].bundle_env)
 
   for env in envs:
     if env.startswith("BUNDLE_"):
-      bundle_envs[env] = envs[env]
+      bundle_env[env] = envs[env]
 
-  return bundle_envs
+  return bundle_env

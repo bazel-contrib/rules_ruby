@@ -41,10 +41,10 @@ def _rb_bundle_impl(repository_ctx):
     }
     env.update(repository_ctx.attr.env)
 
-    bundle_envs = {k: v for k, v in env.items() if k.startswith("BUNDLE_")}
+    bundle_env = {k: v for k, v in env.items() if k.startswith("BUNDLE_")}
     repository_ctx.file(
         "defs.bzl",
-        "BUNDLE_ENVS = %s" % bundle_envs,
+        "BUNDLE_ENV = %s" % bundle_env,
     )
 
     repository_ctx.report_progress("Running bundle install")

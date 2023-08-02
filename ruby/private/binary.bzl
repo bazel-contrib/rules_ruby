@@ -5,7 +5,7 @@ load(
     "get_transitive_data",
     "get_transitive_deps",
     "get_transitive_srcs",
-    "get_bundle_envs",
+    "get_bundle_env",
 )
 
 ATTRS = {
@@ -106,8 +106,8 @@ def rb_binary_impl(ctx):
 
     runfiles = ctx.runfiles(transitive_data + transitive_srcs + tools)
 
-    bundle_envs = get_bundle_envs(ctx.attr.env, transitive_deps)
-    env.update(bundle_envs)
+    bundle_env = get_bundle_env(ctx.attr.env, ctx.attr.deps)
+    env.update(bundle_env)
     env.update(ctx.attr.env)
 
     script = generate_rb_binary_script(ctx, ctx.executable.main, bundler)
@@ -121,7 +121,7 @@ def rb_binary_impl(ctx):
             transitive_data = depset(transitive_data),
             transitive_deps = depset(transitive_deps),
             transitive_srcs = depset(transitive_srcs),
-            bundle_envs = bundle_envs,
+            bundle_env = bundle_env,
         ),
         RunEnvironmentInfo(
             environment = env,
@@ -249,7 +249,7 @@ by passing `bin` argument with a path to a Bundler binary stub:
 
 `BUILD`:
 ```bazel
-load("@rules_ruby//ruby:defs.bzl", "rb_binary", "rb_library")
+load("@rules_ruby//ruby:defs.bzl", "rb_binary")
 
 package(default_visibility = ["//:__subpackages__"])
 
@@ -257,6 +257,7 @@ rb_binary(
     name = "rake",
     main = "@bundle//:bin/rake",
     deps = [
+        "//lib:gem",
         "@bundle",
     ],
 )
