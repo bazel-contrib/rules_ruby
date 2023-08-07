@@ -220,24 +220,17 @@ You can now package everything into a `.gem` file by defining a target:
 
 `BUILD`:
 ```bazel
-load("@rules_ruby//ruby:defs.bzl", "rb_gem_build", "rb_library")
+load("@rules_ruby//ruby:defs.bzl", "rb_gem_build")
 
 package(default_visibility = ["//:__subpackages__"])
-
-rb_library(
-    name = "gem",
-    srcs = [
-        "Gemfile",
-        "Gemfile.lock",
-        "gem.gemspec",
-    ],
-    deps = ["//lib:gem"],
-)
 
 rb_gem_build(
     name = "gem-build",
     gemspec = "gem.gemspec",
-    deps = [":gem"],
+    deps = [
+        "//lib:gem",
+        "@bundle",
+    ],
 )
 ```
 
@@ -305,24 +298,14 @@ You can now release the built `.gem` file to RubyGems by defining a target:
 
 `BUILD`:
 ```bazel
-load("@rules_ruby//ruby:defs.bzl", "rb_gem_build", "rb_gem_push", "rb_library")
+load("@rules_ruby//ruby:defs.bzl", "rb_gem_build", "rb_gem_push")
 
 package(default_visibility = ["//:__subpackages__"])
-
-rb_library(
-    name = "gem",
-    srcs = [
-        "Gemfile",
-        "Gemfile.lock",
-        "gem.gemspec",
-    ],
-    deps = ["//lib:gem"],
-)
 
 rb_gem_build(
     name = "gem-build",
     gemspec = "gem.gemspec",
-    deps = [":gem"],
+    deps = ["//lib:gem"],
 )
 
 rb_gem_push(
