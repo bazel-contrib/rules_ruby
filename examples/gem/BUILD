@@ -3,7 +3,6 @@ load(
     "rb_binary",
     "rb_gem_build",
     "rb_gem_push",
-    "rb_library",
     "rb_test",
 )
 
