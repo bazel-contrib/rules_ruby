@@ -5,6 +5,7 @@ load(
     "get_transitive_data",
     "get_transitive_deps",
     "get_transitive_srcs",
+    "get_bundle_env",
 )
 
 def _rb_gem_build_impl(ctx):
@@ -17,6 +18,7 @@ def _rb_gem_build_impl(ctx):
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
     transitive_deps = get_transitive_deps(ctx.attr.deps)
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
+    bundle_env = get_bundle_env({}, ctx.attr.deps)
     java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
@@ -35,7 +37,7 @@ def _rb_gem_build_impl(ctx):
     #     "rb/Gemfile": "rb/Gemfile",
     #     "bazel-out/darwin_arm64-fastbuild/bin/rb/LICENSE": "rb/LICENSE",
     #   }
-    inputs = transitive_data + transitive_srcs + [gem_builder]
+    inputs = transitive_data + transitive_srcs + [gem_builder] + [ctx.file.gemspec]
     inputs_manifest = {}
     for src in inputs:
         inputs_manifest[src.path] = src.short_path
@@ -68,6 +70,7 @@ def _rb_gem_build_impl(ctx):
             transitive_data = depset(transitive_data),
             transitive_deps = transitive_deps,
             transitive_srcs = depset(transitive_srcs),
+            bundle_env = bundle_env,
         ),
     ]
 
@@ -148,24 +151,17 @@ You can now package everything into a `.gem` file by defining a target:
 
 `BUILD`:
 ```bazel
-load("@rules_ruby//ruby:defs.bzl", "rb_gem_build", "rb_library")
+load("@rules_ruby//ruby:defs.bzl", "rb_gem_build")
 
 package(default_visibility = ["//:__subpackages__"])
-
-rb_library(
-    name = "gem",
-    srcs = [
-        "Gemfile",
-        "Gemfile.lock",
-        "gem.gemspec",
-    ],
-    deps = ["//lib:gem"],
-)
 
 rb_gem_build(
     name = "gem-build",
     gemspec = "gem.gemspec",
-    deps = [":gem"],
+    deps = [
+        "//lib:gem",
+        "@bundle",
+    ],
 )
 ```
 

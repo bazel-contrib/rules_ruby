@@ -3,27 +3,16 @@ load(
     "rb_binary",
     "rb_gem_build",
     "rb_gem_push",
-    "rb_library",
     "rb_test",
 )
 
 package(default_visibility = ["//:__subpackages__"])
 
-rb_library(
-    name = "gem",
-    srcs = [
-        "Gemfile",
-        "Gemfile.lock",
-        "gem.gemspec",
-    ],
-    deps = ["//lib:gem"],
-)
-
 rb_binary(
     name = "rake",
     main = "@bundle//:bin/rake",
     deps = [
-        ":gem",
+        "//lib:gem",
         "@bundle",
     ],
 )
@@ -35,7 +24,7 @@ rb_test(
     main = "@bundle//:bin/rubocop",
     tags = ["no-sandbox"],
     deps = [
-        ":gem",
+        "//lib:gem",
         "//spec:add",
         "//spec:env",
         "//spec:file",
@@ -47,7 +36,10 @@ rb_test(
 rb_gem_build(
     name = "gem-build",
     gemspec = "gem.gemspec",
-    deps = [":gem"],
+    deps = [
+        "//lib:gem",
+        "@bundle",
+    ],
 )
 
 rb_gem_push(

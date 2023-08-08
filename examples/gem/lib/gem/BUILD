@@ -23,7 +23,6 @@ rb_binary(
     main = "add.rb",
     deps = [
         ":add",
-        "//:gem",
         "@bundle",
     ],
 )

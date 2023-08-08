@@ -5,6 +5,7 @@ load(
     "get_transitive_data",
     "get_transitive_deps",
     "get_transitive_srcs",
+    "get_bundle_env",
 )
 
 ATTRS = {
@@ -37,10 +38,6 @@ Use a built-in `args` attribute to pass extra arguments to the script.
         default = "@platforms//os:windows",
     ),
 }
-
-def get_relative_path_to_external(path):
-    nest_level = len(path.split("/"))
-    return "../" * nest_level
 
 def generate_rb_binary_script(ctx, binary, bundler = False, args = []):
     windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
@@ -102,19 +99,15 @@ def rb_binary_impl(ctx):
         env["JAVA_HOME"] = java_toolchain.java_runtime.java_home_runfiles_path
         tools.extend(java_toolchain.java_runtime.files.to_list())
 
-    for file in transitive_srcs:
-        if file.basename == "Gemfile":
-            env["BUNDLE_GEMFILE"] = file.short_path
-
     for dep in transitive_deps:
         # TODO: Do not depend on workspace name to determine bundle
         if dep.label.workspace_name.endswith("bundle"):
             bundler = True
-            # temporary workaround for Gemfile in subdirectories because location of Gemfile
-            # sets the root of the project, which bundler uses to resolve relative paths
-            env["BUNDLE_PATH"] = get_relative_path_to_external(env["BUNDLE_GEMFILE"]) + dep.label.workspace_name
 
     runfiles = ctx.runfiles(transitive_data + transitive_srcs + tools)
+
+    bundle_env = get_bundle_env(ctx.attr.env, ctx.attr.deps)
+    env.update(bundle_env)
     env.update(ctx.attr.env)
 
     script = generate_rb_binary_script(ctx, ctx.executable.main, bundler)
@@ -128,6 +121,7 @@ def rb_binary_impl(ctx):
             transitive_data = depset(transitive_data),
             transitive_deps = depset(transitive_deps),
             transitive_srcs = depset(transitive_srcs),
+            bundle_env = bundle_env,
         ),
         RunEnvironmentInfo(
             environment = env,
@@ -255,25 +249,15 @@ by passing `bin` argument with a path to a Bundler binary stub:
 
 `BUILD`:
 ```bazel
-load("@rules_ruby//ruby:defs.bzl", "rb_binary", "rb_library")
+load("@rules_ruby//ruby:defs.bzl", "rb_binary")
 
 package(default_visibility = ["//:__subpackages__"])
-
-rb_library(
-    name = "gem",
-    srcs = [
-        "Gemfile",
-        "Gemfile.lock",
-        "gem.gemspec",
-    ],
-    deps = ["//lib:gem"],
-)
 
 rb_binary(
     name = "rake",
     main = "@bundle//:bin/rake",
     deps = [
-        ":gem",
+        "//lib:gem",
         "@bundle",
     ],
 )

@@ -7,7 +7,7 @@ _BINSTUB_CMD = """@ruby -x "%~f0" %*
 def _rb_bundle_impl(repository_ctx):
     binstubs_path = repository_ctx.path("bin")
     bundle_path = repository_ctx.path(".")
-    gemfile = repository_ctx.path(repository_ctx.attr.gemfile)
+    gemfile_path = repository_ctx.path(repository_ctx.attr.gemfile)
     toolchain_path = repository_ctx.path(Label("@rules_ruby_dist//:BUILD")).dirname
 
     if repository_ctx.os.name.startswith("windows"):
@@ -33,7 +33,7 @@ def _rb_bundle_impl(repository_ctx):
 
     env = {
         "BUNDLE_BIN": repr(binstubs_path),
-        "BUNDLE_GEMFILE": gemfile.basename,
+        "BUNDLE_GEMFILE": repr(gemfile_path),
         "BUNDLE_IGNORE_CONFIG": "1",
         "BUNDLE_PATH": repr(bundle_path),
         "BUNDLE_SHEBANG": repr(ruby),
@@ -41,11 +41,17 @@ def _rb_bundle_impl(repository_ctx):
     }
     env.update(repository_ctx.attr.env)
 
+    bundle_env = {k: v for k, v in env.items() if k.startswith("BUNDLE_")}
+    repository_ctx.file(
+        "defs.bzl",
+        "BUNDLE_ENV = %s" % bundle_env,
+    )
+
     repository_ctx.report_progress("Running bundle install")
     result = repository_ctx.execute(
         [bundle, "install"],
         environment = env,
-        working_directory = repr(gemfile.dirname),
+        working_directory = repr(gemfile_path.dirname),
         quiet = not repository_ctx.os.environ.get("RUBY_RULES_DEBUG", default = False),
     )
 

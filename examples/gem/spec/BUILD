@@ -6,7 +6,7 @@ rb_library(
     name = "spec_helper",
     srcs = ["spec_helper.rb"],
     deps = [
-        "//:gem",
+        "//lib:gem",
         "@bundle",
     ],
 )
