@@ -37,7 +37,7 @@ def _rb_gem_build_impl(ctx):
     #     "rb/Gemfile": "rb/Gemfile",
     #     "bazel-out/darwin_arm64-fastbuild/bin/rb/LICENSE": "rb/LICENSE",
     #   }
-    inputs = transitive_data + transitive_srcs + [gem_builder]
+    inputs = transitive_data + transitive_srcs + [gem_builder] + [ctx.file.gemspec]
     inputs_manifest = {}
     for src in inputs:
         inputs_manifest[src.path] = src.short_path

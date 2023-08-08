@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
 
   s.summary = 'Example'
   s.description = 'Example gem'
-  s.files = ['Gemfile'] + Dir['lib/**/*']
+  s.files = Dir['lib/**/*']
 
   s.require_paths = ['lib']
   s.required_ruby_version = Gem::Requirement.new('>= 2.6')
