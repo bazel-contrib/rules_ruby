@@ -1,0 +1,19 @@
+# See CONTRIBUTING.md for instructions.
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+repos:
+  # Check formatting and lint for starlark code
+  - repo: https://github.com/keith/pre-commit-buildifier
+    rev: 6.3.3
+    hooks:
+      - id: buildifier
+      - id: buildifier-lint
+  # Check that commit messages follow https://www.conventionalcommits.org
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.0.0
+    hooks:
+      - id: conventional-pre-commit
+        stages:
+          - commit-msg
+        args: []

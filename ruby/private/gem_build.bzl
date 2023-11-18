@@ -1,11 +1,13 @@
+"Implementation details for rb_gem_build"
+
 load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
 load(
     "//ruby/private:providers.bzl",
     "RubyFilesInfo",
+    "get_bundle_env",
     "get_transitive_data",
     "get_transitive_deps",
     "get_transitive_srcs",
-    "get_bundle_env",
 )
 
 def _rb_gem_build_impl(ctx):
