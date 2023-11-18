@@ -23,8 +23,8 @@ rb_test(
 
 rb_test(
     name = "env",
-    timeout = "moderate",
     size = "small",
+    timeout = "moderate",
     srcs = ["env_spec.rb"],
     args = ["spec/env_spec.rb"],
     env = {"EXAMPLE": "ENV"},
@@ -38,8 +38,8 @@ rb_test(
 
 rb_test(
     name = "file",
-    timeout = "moderate",
     size = "small",
+    timeout = "moderate",
     srcs = ["file_spec.rb"],
     args = ["spec/file_spec.rb"],
     data = ["support/file.txt"],
