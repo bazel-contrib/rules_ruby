@@ -85,9 +85,9 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = []):
 def rb_binary_impl(ctx):
     bundler = False
     env = {}
-    transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
-    transitive_deps = get_transitive_deps(ctx.attr.deps).to_list()
-    transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
+    transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps)
+    transitive_deps = get_transitive_deps(ctx.attr.deps)
+    transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps)
     tools = []
     java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
@@ -99,12 +99,24 @@ def rb_binary_impl(ctx):
         env["JAVA_HOME"] = java_toolchain.java_runtime.java_home_runfiles_path
         tools.extend(java_toolchain.java_runtime.files.to_list())
 
-    for dep in transitive_deps:
+    # TODO: avoid expanding the depset to a list, it may be expensive in a large graph
+    for dep in transitive_deps.to_list():
         # TODO: Do not depend on workspace name to determine bundle
         if dep.label.workspace_name.endswith("bundle"):
             bundler = True
 
-    runfiles = ctx.runfiles(transitive_data + transitive_srcs + tools)
+    # Propagate files needed at runtime when this binary is executed
+    # See https://bazel.build/extending/rules#runfiles
+    runfiles = ctx.runfiles(files = tools + ctx.files.srcs)
+    transitive_runfiles = []
+    for runfiles_attr in (
+        ctx.attr.srcs,
+        ctx.attr.deps,
+        ctx.attr.data,
+    ):
+        for target in runfiles_attr:
+            transitive_runfiles.append(target[DefaultInfo].default_runfiles)
+    runfiles = runfiles.merge_all(transitive_runfiles)
 
     bundle_env = get_bundle_env(ctx.attr.env, ctx.attr.deps)
     env.update(bundle_env)
@@ -118,9 +130,9 @@ def rb_binary_impl(ctx):
             runfiles = runfiles,
         ),
         RubyFilesInfo(
-            transitive_data = depset(transitive_data),
-            transitive_deps = depset(transitive_deps),
-            transitive_srcs = depset(transitive_srcs),
+            transitive_data = transitive_data,
+            transitive_deps = transitive_deps,
+            transitive_srcs = transitive_srcs,
             bundle_env = bundle_env,
         ),
         RunEnvironmentInfo(

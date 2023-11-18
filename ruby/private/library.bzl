@@ -17,7 +17,7 @@ ATTRS = {
     ),
     "data": attr.label_list(
         allow_files = True,
-        doc = "List of non-Ruby source files used to build the library.",
+        doc = "List of runtime dependencies needed by a program that depends on this library.",
     ),
     "bundle_env": attr.string_dict(
         default = {},
@@ -26,7 +26,16 @@ ATTRS = {
 }
 
 def _rb_library_impl(ctx):
+    runfiles = ctx.runfiles(files = ctx.files.srcs + ctx.files.data)
+    transitive_runfiles = []
+    for runfiles_attr in (ctx.attr.deps, ctx.attr.data):
+        for target in runfiles_attr:
+            transitive_runfiles.append(target[DefaultInfo].default_runfiles)
+    runfiles = runfiles.merge_all(transitive_runfiles)
     return [
+        DefaultInfo(
+            runfiles = runfiles,
+        ),
         RubyFilesInfo(
             transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps),
             transitive_deps = get_transitive_deps(ctx.attr.deps),
