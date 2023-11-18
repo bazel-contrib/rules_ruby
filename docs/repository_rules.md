@@ -1,6 +1,6 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
-
+Public API for repository rules
 
 <a id="rb_bundle"></a>
 
@@ -81,12 +81,13 @@ rb_register_toolchains(
 )
 ```
 
+
 **PARAMETERS**
 
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="rb_register_toolchains-version"></a>version |  <p align="center"> - </p>   |  <code>None</code> |
-| <a id="rb_register_toolchains-kwargs"></a>kwargs |  <p align="center"> - </p>   |  none |
+| <a id="rb_register_toolchains-version"></a>version |  a semver version of Matz Ruby Interpreter, or a string like [interpreter type]-[version]   |  <code>None</code> |
+| <a id="rb_register_toolchains-kwargs"></a>kwargs |  additional parameters to the downloader for this interpreter type   |  none |
 
 

@@ -1,15 +1,15 @@
-load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
+# This load statement must be in the docs/ package rather than anything users depend on
+# so that the dependency on stardoc doesn't leak to them.
+load("@aspect_bazel_lib//lib:docs.bzl", "stardoc_with_diff_test", "update_docs")
 
-stardoc(
+stardoc_with_diff_test(
     name = "rules",
-    out = "rules.md",
-    input = "//ruby:defs.bzl",
-    deps = ["//:ruby"],
+    bzl_library_target = "//ruby:defs",
 )
 
-stardoc(
+stardoc_with_diff_test(
     name = "repository_rules",
-    out = "repository_rules.md",
-    input = "//ruby:deps.bzl",
-    deps = ["//:ruby"],
+    bzl_library_target = "//ruby:deps",
 )
+
+update_docs(name = "update")

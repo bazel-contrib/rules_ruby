@@ -1,6 +1,6 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
-
+Public API for rules
 
 <a id="rb_binary"></a>
 
