@@ -45,3 +45,10 @@ jobs:
       - run: bazel test ...
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
+        
+  ruleset:
+    name: Ruleset
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: bazel test ...
