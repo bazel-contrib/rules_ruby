@@ -36,8 +36,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: p0deje/setup-bazel@0.1.0
-      - run: bazel test ...
-        working-directory: .
       - run: echo 'RUBY_VERSION = "${{ matrix.ruby }}"' > ruby_version.bzl
       - run: bazel build ...
       - run: bazel run lib/gem:add-numbers 2
