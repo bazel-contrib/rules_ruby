@@ -1,3 +1,5 @@
+"Implementation details for calling the bundler"
+
 # https://github.com/rubygems/rubygems/blob/f8c76eae24bbeabb9c9cb5387dbd89df45566eb9/bundler/lib/bundler/installer.rb#L147
 _BINSTUB_CMD = """@ruby -x "%~f0" %*
 @exit /b %ERRORLEVEL%

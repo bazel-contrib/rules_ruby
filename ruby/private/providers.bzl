@@ -1,3 +1,4 @@
+"Providers for Interoperability between rules"
 RubyFilesInfo = provider(
     "Provider for Ruby files",
     fields = ["transitive_data", "transitive_deps", "transitive_srcs", "bundle_env"],
@@ -47,22 +48,22 @@ def get_transitive_deps(deps):
     )
 
 def get_bundle_env(envs, deps):
-  """Obtain the BUNDLE_* environment variables for a target and its transitive dependencies.
+    """Obtain the BUNDLE_* environment variables for a target and its transitive dependencies.
 
-  Args:
-    envs: a list of environment variables
-    deps: a list of targets that are direct dependencies
-  Returns:
-    a collection of the transitive environment variables
-  """
-  bundle_env = {}
+    Args:
+      envs: a list of environment variables
+      deps: a list of targets that are direct dependencies
+    Returns:
+      a collection of the transitive environment variables
+    """
+    bundle_env = {}
 
-  transitive_deps = get_transitive_deps(deps).to_list()
-  for dep in transitive_deps:
-    bundle_env.update(dep[RubyFilesInfo].bundle_env)
+    transitive_deps = get_transitive_deps(deps).to_list()
+    for dep in transitive_deps:
+        bundle_env.update(dep[RubyFilesInfo].bundle_env)
 
-  for env in envs:
-    if env.startswith("BUNDLE_"):
-      bundle_env[env] = envs[env]
+    for env in envs:
+        if env.startswith("BUNDLE_"):
+            bundle_env[env] = envs[env]
 
-  return bundle_env
+    return bundle_env

@@ -1,11 +1,13 @@
+"Implementation details for rb_binary"
+
 load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
 load(
     "//ruby/private:providers.bzl",
     "RubyFilesInfo",
+    "get_bundle_env",
     "get_transitive_data",
     "get_transitive_deps",
     "get_transitive_srcs",
-    "get_bundle_env",
 )
 
 ATTRS = {
@@ -39,6 +41,7 @@ Use a built-in `args` attribute to pass extra arguments to the script.
     ),
 }
 
+# buildifier: disable=function-docstring
 def generate_rb_binary_script(ctx, binary, bundler = False, args = []):
     windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
     is_windows = ctx.target_platform_has_constraint(windows_constraint)
@@ -82,6 +85,7 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = []):
 
     return script
 
+# buildifier: disable=function-docstring
 def rb_binary_impl(ctx):
     bundler = False
     env = {}

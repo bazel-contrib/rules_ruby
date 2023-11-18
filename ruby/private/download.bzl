@@ -1,3 +1,4 @@
+"Repository rule for fetching Ruby interpreters"
 _JRUBY_BINARY_URL = "https://repo1.maven.org/maven2/org/jruby/jruby-dist/{version}/jruby-dist-{version}-bin.tar.gz"
 _RUBY_BUILD_URL = "https://github.com/rbenv/ruby-build/archive/refs/tags/v{version}.tar.gz"
 _RUBY_INSTALLER_URL = "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-{version}-1/rubyinstaller-devkit-{version}-1-x64.exe"
@@ -19,6 +20,10 @@ def rb_register_toolchains(version = None, **kwargs):
         version = "2.7.5"
     )
     ```
+
+    Args:
+        version: a semver version of Matz Ruby Interpreter, or a string like [interpreter type]-[version]
+        **kwargs: additional parameters to the downloader for this interpreter type
     """
     repo_name = "rules_ruby_dist"
     proxy_repo_name = "rules_ruby_toolchains"
