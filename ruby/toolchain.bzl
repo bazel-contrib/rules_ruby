@@ -1,3 +1,5 @@
+"Define a Bazel toolchain for a Ruby interpreter"
+
 def _rb_toolchain_impl(ctx):
     return platform_common.ToolchainInfo(
         ruby = ctx.executable.ruby,

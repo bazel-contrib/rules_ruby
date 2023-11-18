@@ -1,3 +1,5 @@
+"Public API for rules"
+
 load("//ruby/private:binary.bzl", _rb_binary = "rb_binary")
 load("//ruby/private:gem_build.bzl", _rb_gem_build = "rb_gem_build")
 load("//ruby/private:gem_push.bzl", _rb_gem_push = "rb_gem_push")

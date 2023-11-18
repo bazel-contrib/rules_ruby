@@ -1,3 +1,5 @@
+"Implementation details for rb_test"
+
 load("//ruby/private:binary.bzl", "ATTRS", "rb_binary_impl")
 load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
 
