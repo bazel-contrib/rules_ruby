@@ -14,6 +14,7 @@ rb_library(
 rb_test(
     name = "add",
     size = "small",
+    timeout = "moderate",
     srcs = ["add_spec.rb"],
     args = ["spec/add_spec.rb"],
     main = "@bundle//:bin/rspec",
@@ -22,6 +23,7 @@ rb_test(
 
 rb_test(
     name = "env",
+    timeout = "moderate",
     size = "small",
     srcs = ["env_spec.rb"],
     args = ["spec/env_spec.rb"],
@@ -36,6 +38,7 @@ rb_test(
 
 rb_test(
     name = "file",
+    timeout = "moderate",
     size = "small",
     srcs = ["file_spec.rb"],
     args = ["spec/file_spec.rb"],
