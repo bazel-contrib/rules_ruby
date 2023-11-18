@@ -28,6 +28,7 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
+        bzlmodEnabled: [true, false]
         exclude:
           - os: windows-latest
             ruby: 3.3.0-preview3
@@ -39,11 +40,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: p0deje/setup-bazel@0.1.0
-      - run: echo 'RUBY_VERSION = "${{ matrix.ruby }}"' > ruby_version.bzl
-      - run: bazel build ...
-      - run: bazel run lib/gem:add-numbers 2
-      - run: bazel run lib/gem:print-version
-      - run: bazel test ...
+
+      - name: Set bzlmod flag
+        # Store the --enable_bzlmod flag that we add to the test command below
+        # only when we're running bzlmod in our test matrix.
+        id: set_bzlmod_flag
+        if: matrix.bzlmodEnabled
+        run: echo "bzlmod_flag=--enable_bzlmod" >> $GITHUB_OUTPUT
+
+      - id: set_ruby_version
+        run: echo 'RUBY_VERSION = "${{ matrix.ruby }}"' > ruby_version.bzl
+
+      - run: bazel test ${{ steps.set_bzlmod_flag.outputs.bzlmod_flag }} //...
+      - run: bazel run ${{ steps.set_bzlmod_flag.outputs.bzlmod_flag }} lib/gem:add-numbers 2
+      - run: bazel run ${{ steps.set_bzlmod_flag.outputs.bzlmod_flag }} lib/gem:print-version
+
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
 

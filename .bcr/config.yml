@@ -1,0 +1,6 @@
+# See https://github.com/bazel-contrib/publish-to-bcr#a-note-on-release-automation
+# Our releases are created by github actions based on pushing a tag, so they don't have an author.
+# This person's fork of BCR will be used to originate pull requests.
+fixedReleaser:
+  login: alexeagle
+  email: alex@aspect.dev
