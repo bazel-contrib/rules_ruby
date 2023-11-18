@@ -170,7 +170,7 @@ Ruby version to install.
             """,
         ),
         "ruby_build_version": attr.string(
-            default = "20230717",
+            default = "20231114",
             doc = """
 Version of [ruby-build](https://github.com/rbenv/ruby-build/releases)
 to install. You normally don't need to change this, unless `version` you pass is a new one
