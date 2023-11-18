@@ -36,6 +36,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: p0deje/setup-bazel@0.1.0
+      - run: bazel test ...
+        working-directory: .
       - run: echo 'RUBY_VERSION = "${{ matrix.ruby }}"' > ruby_version.bzl
       - run: bazel build ...
       - run: bazel run lib/gem:add-numbers 2
@@ -43,10 +45,3 @@ jobs:
       - run: bazel test ...
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
-
-  stardoc:
-    name: Stardoc
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: bazel build docs/...
