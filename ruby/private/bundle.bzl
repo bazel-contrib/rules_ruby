@@ -10,7 +10,7 @@ def _rb_bundle_impl(repository_ctx):
     binstubs_path = repository_ctx.path("bin")
     bundle_path = repository_ctx.path(".")
     gemfile_path = repository_ctx.path(repository_ctx.attr.gemfile)
-    toolchain_path = repository_ctx.path(Label("@rules_ruby_dist//:BUILD")).dirname
+    toolchain_path = repository_ctx.path(repository_ctx.attr.toolchain).dirname
 
     if repository_ctx.os.name.startswith("windows"):
         bundle = repository_ctx.path("%s/dist/bin/bundle.cmd" % toolchain_path)
@@ -77,6 +77,9 @@ rb_bundle = repository_rule(
             doc = """
 List of Ruby source files used to build the library.
             """,
+        ),
+        "toolchain": attr.label(
+            mandatory = True,
         ),
         "gemfile": attr.label(
             allow_single_file = ["Gemfile"],

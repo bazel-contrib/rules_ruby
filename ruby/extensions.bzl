@@ -1,12 +1,14 @@
 "Module extensions used by bzlmod"
-load(":deps.bzl", "rb_register_toolchains", "rb_bundle")
+
 load("//ruby/private:download.bzl", "DEFAULT_RUBY_REPOSITORY")
+load(":deps.bzl", "rb_bundle", "rb_register_toolchains")
 
 ruby_bundle = tag_class(attrs = {
     "name": attr.string(doc = "Resulting repository name for the bundle"),
     "srcs": attr.label_list(),
     "env": attr.string_dict(),
     "gemfile": attr.label(),
+    "toolchain": attr.label(),
 })
 
 ruby_toolchain = tag_class(attrs = {
@@ -23,6 +25,7 @@ def _ruby_module_extension(module_ctx):
                 srcs = bundle.srcs,
                 env = bundle.env,
                 gemfile = bundle.gemfile,
+                toolchain = bundle.toolchain,
             )
 
         for toolchain in mod.tags.toolchain:
