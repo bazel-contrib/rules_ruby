@@ -20,6 +20,7 @@ rb_binary(
 rb_test(
     name = "rubocop",
     size = "small",
+    timeout = "moderate",  # JRuby startup can be slow
     data = [".rubocop.yml"],
     main = "@bundle//:bin/rubocop",
     tags = ["no-sandbox"],
