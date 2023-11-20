@@ -23,11 +23,13 @@ def rb_register_toolchains(name = DEFAULT_RUBY_REPOSITORY, version = None, regis
     ```
 
     Args:
+        name: base name of resulting repositories, by default "rules_ruby"
         version: a semver version of Matz Ruby Interpreter, or a string like [interpreter type]-[version]
+        register: whether to register the resulting toolchains, should be False under bzlmod
         **kwargs: additional parameters to the downloader for this interpreter type
     """
     repo_name = name + "_dist"
-    proxy_repo_name = name  + "_toolchains"
+    proxy_repo_name = name + "_toolchains"
     if repo_name not in native.existing_rules().values():
         _rb_download(name = repo_name, version = version, **kwargs)
         rb_toolchain_repository_proxy(
