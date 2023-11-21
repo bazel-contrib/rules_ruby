@@ -7,54 +7,18 @@ Public API for repository rules
 ## rb_bundle
 
 <pre>
-rb_bundle(<a href="#rb_bundle-name">name</a>, <a href="#rb_bundle-env">env</a>, <a href="#rb_bundle-gemfile">gemfile</a>, <a href="#rb_bundle-repo_mapping">repo_mapping</a>, <a href="#rb_bundle-srcs">srcs</a>)
+rb_bundle(<a href="#rb_bundle-toolchain">toolchain</a>, <a href="#rb_bundle-kwargs">kwargs</a>)
 </pre>
 
 
-Installs Bundler dependencies and registers an external repository
-that can be used by other targets.
 
-`WORKSPACE`:
-```bazel
-load("@rules_ruby//ruby:deps.bzl", "rb_bundle")
-
-rb_bundle(
-    name = "bundle",
-    gemfile = "//:Gemfile",
-    srcs = [
-        "//:gem.gemspec",
-        "//:lib/gem/version.rb",
-    ]
-)
-```
-
-All the installed gems can be accessed using `@bundle` target and additionally
-gems binary files can also be used:
-
-`BUILD`:
-```bazel
-load("@rules_ruby//ruby:defs.bzl", "rb_binary")
-
-package(default_visibility = ["//:__subpackages__"])
-
-rb_binary(
-    name = "rubocop",
-    main = "@bundle//:bin/rubocop",
-    deps = ["@bundle"],
-)
-```
-    
-
-**ATTRIBUTES**
+**PARAMETERS**
 
 
-| Name  | Description | Type | Mandatory | Default |
-| :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="rb_bundle-name"></a>name |  A unique name for this repository.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="rb_bundle-env"></a>env |  Environment variables to use during installation.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | <code>{}</code> |
-| <a id="rb_bundle-gemfile"></a>gemfile |  Gemfile to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="rb_bundle-repo_mapping"></a>repo_mapping |  A dictionary from local repository name to global repository name. This allows controls over workspace dependency resolution for dependencies of this repository.&lt;p&gt;For example, an entry <code>"@foo": "@bar"</code> declares that, for any time this repository depends on <code>@foo</code> (such as a dependency on <code>@foo//some:target</code>, it should actually resolve that dependency within globally-declared <code>@bar</code> (<code>@bar//some:target</code>).   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | required |  |
-| <a id="rb_bundle-srcs"></a>srcs |  List of Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="rb_bundle-toolchain"></a>toolchain |  <p align="center"> - </p>   |  <code>"@rules_ruby_dist//:BUILD"</code> |
+| <a id="rb_bundle-kwargs"></a>kwargs |  <p align="center"> - </p>   |  none |
 
 
 <a id="rb_register_toolchains"></a>
@@ -62,7 +26,7 @@ rb_binary(
 ## rb_register_toolchains
 
 <pre>
-rb_register_toolchains(<a href="#rb_register_toolchains-version">version</a>, <a href="#rb_register_toolchains-kwargs">kwargs</a>)
+rb_register_toolchains(<a href="#rb_register_toolchains-name">name</a>, <a href="#rb_register_toolchains-version">version</a>, <a href="#rb_register_toolchains-register">register</a>, <a href="#rb_register_toolchains-kwargs">kwargs</a>)
 </pre>
 
     Register a Ruby toolchain and lazily download the Ruby Interpreter.
@@ -87,7 +51,9 @@ rb_register_toolchains(
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
+| <a id="rb_register_toolchains-name"></a>name |  base name of resulting repositories, by default "rules_ruby"   |  <code>"rules_ruby"</code> |
 | <a id="rb_register_toolchains-version"></a>version |  a semver version of Matz Ruby Interpreter, or a string like [interpreter type]-[version]   |  <code>None</code> |
+| <a id="rb_register_toolchains-register"></a>register |  whether to register the resulting toolchains, should be False under bzlmod   |  <code>True</code> |
 | <a id="rb_register_toolchains-kwargs"></a>kwargs |  additional parameters to the downloader for this interpreter type   |  none |
 
 

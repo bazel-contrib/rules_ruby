@@ -2,8 +2,9 @@
 _JRUBY_BINARY_URL = "https://repo1.maven.org/maven2/org/jruby/jruby-dist/{version}/jruby-dist-{version}-bin.tar.gz"
 _RUBY_BUILD_URL = "https://github.com/rbenv/ruby-build/archive/refs/tags/v{version}.tar.gz"
 _RUBY_INSTALLER_URL = "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-{version}-1/rubyinstaller-devkit-{version}-1-x64.exe"
+DEFAULT_RUBY_REPOSITORY = "rules_ruby"
 
-def rb_register_toolchains(version = None, **kwargs):
+def rb_register_toolchains(name = DEFAULT_RUBY_REPOSITORY, version = None, register = True, **kwargs):
     """
     Register a Ruby toolchain and lazily download the Ruby Interpreter.
 
@@ -22,11 +23,13 @@ def rb_register_toolchains(version = None, **kwargs):
     ```
 
     Args:
+        name: base name of resulting repositories, by default "rules_ruby"
         version: a semver version of Matz Ruby Interpreter, or a string like [interpreter type]-[version]
+        register: whether to register the resulting toolchains, should be False under bzlmod
         **kwargs: additional parameters to the downloader for this interpreter type
     """
-    repo_name = "rules_ruby_dist"
-    proxy_repo_name = "rules_ruby_toolchains"
+    repo_name = name + "_dist"
+    proxy_repo_name = name + "_toolchains"
     if repo_name not in native.existing_rules().values():
         _rb_download(name = repo_name, version = version, **kwargs)
         rb_toolchain_repository_proxy(
@@ -34,7 +37,8 @@ def rb_register_toolchains(version = None, **kwargs):
             toolchain = "@{}//:toolchain".format(repo_name),
             toolchain_type = "@rules_ruby//ruby:toolchain_type",
         )
-        native.register_toolchains("@{}//:all".format(proxy_repo_name))
+        if register:
+            native.register_toolchains("@{}//:all".format(proxy_repo_name))
 
 def _rb_toolchain_repository_proxy_impl(repository_ctx):
     repository_ctx.file(
