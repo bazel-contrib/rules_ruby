@@ -17,7 +17,12 @@ SHA=$(shasum -a 256 $ARCHIVE | awk '{print $1}')
 cat << EOF
 ## Using Bzlmod with Bazel 6
 
-TODO: https://github.com/p0deje/rules_ruby/issues/12
+1. Enable with \`common --enable_bzlmod\` in \`.bazelrc\`.
+2. Add to your \`MODULE.bazel\` file:
+
+\`\`\`starlark
+bazel_dep(name = "rules_ruby", version = "${TAG:1}")
+\`\`\`
 
 ## Using WORKSPACE
 
