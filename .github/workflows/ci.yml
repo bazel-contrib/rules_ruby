@@ -12,7 +12,7 @@ env:
 
 jobs:
   examples-gem:
-    name: Examples / Gem
+    name: Examples / Gem (WORKSPACE)
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -28,7 +28,6 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
-        bzlmodEnabled: [true, false]
         exclude:
           - os: windows-latest
             ruby: 3.3.0-preview3
@@ -40,21 +39,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: p0deje/setup-bazel@0.1.0
-
-      - name: Set bzlmod flag
-        # Store the --enable_bzlmod flag that we add to the test command below
-        # only when we're running bzlmod in our test matrix.
-        id: set_bzlmod_flag
-        if: matrix.bzlmodEnabled
-        run: echo "bzlmod_flag=--enable_bzlmod" >> $GITHUB_OUTPUT
-
-      - id: set_ruby_version
-        run: echo 'RUBY_VERSION = "${{ matrix.ruby }}"' > ruby_version.bzl
-
-      - run: bazel test ${{ steps.set_bzlmod_flag.outputs.bzlmod_flag }} //...
-      - run: bazel run ${{ steps.set_bzlmod_flag.outputs.bzlmod_flag }} lib/gem:add-numbers 2
-      - run: bazel run ${{ steps.set_bzlmod_flag.outputs.bzlmod_flag }} lib/gem:print-version
-
+      - run: echo 'RUBY_VERSION = "${{ matrix.ruby }}"' > ruby_version.bzl
+      - run: bazel test //...
+      - run: bazel run lib/gem:add-numbers 2
+      - run: bazel run lib/gem:print-version
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
 
@@ -71,18 +59,17 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
-
     defaults:
       run:
         working-directory: examples/gem
     steps:
       - uses: actions/checkout@v4
       - uses: p0deje/setup-bazel@0.1.0
-
-      - run: bazel test --enable_bzlmod //...
-      - run: bazel run --enable_bzlmod lib/gem:add-numbers 2
-      - run: bazel run --enable_bzlmod lib/gem:print-version
-
+        with:
+          bazelrc: common --enable_bzlmod
+      - run: bazel test //...
+      - run: bazel run lib/gem:add-numbers 2
+      - run: bazel run lib/gem:print-version
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
 
@@ -93,3 +80,5 @@ jobs:
       - uses: actions/checkout@v4
       - run: bazel run :buildifier.check
       - run: bazel test ...
+      - if: failure() && runner.debug == '1'
+        uses: mxschmitt/action-tmate@v3
