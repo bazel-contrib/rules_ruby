@@ -1,0 +1,2 @@
+# This file contains Bazel settings to apply on Release only.
+# It is referenced with a --bazelrc option in the call to bazel in release.yaml
