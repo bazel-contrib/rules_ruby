@@ -38,7 +38,7 @@ jobs:
         working-directory: examples/gem
     steps:
       - uses: actions/checkout@v4
-      - uses: p0deje/setup-bazel@0.1.0
+      - uses: p0deje/setup-bazel@0.3.0
       - run: echo 'RUBY_VERSION = "${{ matrix.ruby }}"' > ruby_version.bzl
       - run: bazel test //...
       - run: bazel run lib/gem:add-numbers 2
@@ -64,7 +64,7 @@ jobs:
         working-directory: examples/gem
     steps:
       - uses: actions/checkout@v4
-      - uses: p0deje/setup-bazel@0.1.0
+      - uses: p0deje/setup-bazel@0.3.0
         with:
           bazelrc: common --enable_bzlmod
       - run: bazel test //...
