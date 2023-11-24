@@ -19,6 +19,7 @@ GEM
     io-console (0.5.11)
     irb (1.5.0)
       reline (>= 0.3.0)
+    jar-dependencies (0.4.1)
     json (2.6.3)
     json (2.6.3-java)
     language_server-protocol (3.17.0.3)
@@ -26,6 +27,10 @@ GEM
     parser (3.2.2.3)
       ast (~> 2.4.1)
       racc
+    psych (5.1.1.1)
+      stringio
+    psych (5.1.1.1-java)
+      jar-dependencies (>= 0.1.7)
     racc (1.7.1)
     racc (1.7.1-java)
     rainbow (3.1.1)
@@ -61,6 +66,7 @@ GEM
     rubocop-ast (1.29.0)
       parser (>= 3.2.1.0)
     ruby-progressbar (1.13.0)
+    stringio (3.0.9)
     unicode-display_width (2.4.2)
 
 PLATFORMS
@@ -75,6 +81,7 @@ PLATFORMS
 DEPENDENCIES
   debug (>= 1.0.0)
   example!
+  psych (~> 5.1)
   rspec (~> 3.0)
   rubocop (~> 1.10, >= 1.55)
 

@@ -131,9 +131,13 @@ def _install_via_rubyinstaller(repository_ctx):
         "/tasks=nomodpath,noassocfiles",
         "/verysilent",
     ])
-
     repository_ctx.delete("ruby-installer.exe")
+    if result.return_code != 0:
+        fail("%s\n%s" % (result.stdout, result.stderr))
 
+    # https://github.com/oneclick/rubyinstaller2/issues/79
+    repository_ctx.report_progress("Setting up MSYS2")
+    result = repository_ctx.execute(["./dist/bin/ridk.cmd", "exec", "bash", "-lc", "true"])
     if result.return_code != 0:
         fail("%s\n%s" % (result.stdout, result.stderr))
 
