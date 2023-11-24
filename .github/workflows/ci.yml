@@ -1,7 +1,7 @@
 name: CI
 on:
-  - push
   - pull_request
+  - push
 
 concurrency:
   group: ${{ github.ref }}
@@ -11,9 +11,19 @@ env:
   JAVA_OPTS: -Djdk.io.File.enableADS=true
 
 jobs:
+  ruleset:
+    name: Ruleset
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bazel run :buildifier.check
+      - run: bazel test ...
+      - if: failure() && runner.debug == '1'
+        uses: mxschmitt/action-tmate@v3
+
   examples-gem:
-    name: Examples / Gem (WORKSPACE)
-    runs-on: ${{ matrix.os }}
+    name: Examples / Gem
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false
       matrix:
@@ -25,13 +35,31 @@ jobs:
           - jruby-9.4.5.0
           - truffleruby-23.1.1
         os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
+          - ubuntu
+          - macos
+          - windows
+        mode:
+          - bzlmod
+          - WORKSPACE
         exclude:
-          - os: windows-latest
+          # RubyInstaller doesn't ship previews.
+          - os: windows
             ruby: 3.3.0-preview3
-          - os: windows-latest
+          # TruffleRuby doesn't work on Windows.
+          - os: windows
+            ruby: truffleruby-23.1.1
+          # https://github.com/p0deje/rules_ruby/issues/23
+          - mode: bzlmod
+            ruby: 3.0.6
+          - mode: bzlmod
+            ruby: 3.1.4
+          - mode: bzlmod
+            ruby: 3.2.2
+          - mode: bzlmod
+            ruby: 3.3.0-preview3
+          - mode: bzlmod
+            ruby: 3.0.6
+          - mode: bzlmod
             ruby: truffleruby-23.1.1
     defaults:
       run:
@@ -39,46 +67,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: p0deje/setup-bazel@0.3.0
-      - run: echo 'RUBY_VERSION = "${{ matrix.ruby }}"' > ruby_version.bzl
-      - run: bazel test //...
-      - run: bazel run lib/gem:add-numbers 2
-      - run: bazel run lib/gem:print-version
-      - if: failure() && runner.debug == '1'
-        uses: mxschmitt/action-tmate@v3
-
-  # bzlmod is a job rather than a dimension on the matrix above, because it doesn't test different
-  # interpreters, see https://github.com/p0deje/rules_ruby/issues/23
-  # (Also, it reduces our CI load by avoiding a new dimension on that matrix)
-  bzlmod:
-    name: Examples / Gem (bzlmod)
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
-    defaults:
-      run:
-        working-directory: examples/gem
-    steps:
-      - uses: actions/checkout@v4
-      - uses: p0deje/setup-bazel@0.3.0
         with:
-          bazelrc: common --enable_bzlmod
-      - run: bazel test //...
+          bazelrc: |
+            build --announce_rc
+            ${{ matrix.mode == 'bzlmod' && 'common --enable_bzlmod' || '' }}
+      - run: echo 'RUBY_VERSION = "${{ matrix.ruby }}"' > ruby_version.bzl
+      - run: bazel test ...
       - run: bazel run lib/gem:add-numbers 2
       - run: bazel run lib/gem:print-version
-      - if: failure() && runner.debug == '1'
-        uses: mxschmitt/action-tmate@v3
-
-  ruleset:
-    name: Ruleset
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: bazel run :buildifier.check
-      - run: bazel test ...
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
