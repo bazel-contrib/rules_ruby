@@ -77,3 +77,14 @@ jobs:
       - run: bazel run lib/gem:print-version
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
+
+  release:
+    name: Release
+    if: startsWith(github.ref, 'refs/tag/v')
+    needs:
+      - ruleset
+      - examples-gem
+    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v5
+    with:
+      prerelease: false
+      release_files: rules_ruby-*.tar.gz
