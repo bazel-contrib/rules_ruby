@@ -115,6 +115,7 @@ def _install_jruby(repository_ctx):
     if repository_ctx.os.name.startswith("windows"):
         repository_ctx.symlink("dist/bin/bundle.bat", "dist/bin/bundle.cmd")
 
+# https://github.com/oneclick/rubyinstaller2/wiki/FAQ#q-how-do-i-perform-a-silentunattended-install-with-the-rubyinstaller
 def _install_via_rubyinstaller(repository_ctx):
     repository_ctx.report_progress("Downloading RubyInstaller")
     repository_ctx.download(
@@ -135,9 +136,7 @@ def _install_via_rubyinstaller(repository_ctx):
     if result.return_code != 0:
         fail("%s\n%s" % (result.stdout, result.stderr))
 
-    # https://github.com/oneclick/rubyinstaller2/issues/79
-    repository_ctx.report_progress("Setting up MSYS2")
-    result = repository_ctx.execute(["./dist/bin/ridk.cmd", "exec", "bash", "-lc", "true"])
+    result = repository_ctx.execute(["./dist/bin/ridk.cmd", "install", "1"])
     if result.return_code != 0:
         fail("%s\n%s" % (result.stdout, result.stderr))
 
