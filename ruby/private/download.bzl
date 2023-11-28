@@ -2,79 +2,6 @@
 _JRUBY_BINARY_URL = "https://repo1.maven.org/maven2/org/jruby/jruby-dist/{version}/jruby-dist-{version}-bin.tar.gz"
 _RUBY_BUILD_URL = "https://github.com/rbenv/ruby-build/archive/refs/tags/v{version}.tar.gz"
 _RUBY_INSTALLER_URL = "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-{version}-1/rubyinstaller-devkit-{version}-1-x64.exe"
-DEFAULT_RUBY_REPOSITORY = "rules_ruby"
-
-def rb_register_toolchains(name = DEFAULT_RUBY_REPOSITORY, version = None, register = True, **kwargs):
-    """
-    Register a Ruby toolchain and lazily download the Ruby Interpreter.
-
-    * _(For MRI on Linux and macOS)_ Installed using [ruby-build](https://github.com/rbenv/ruby-build).
-    * _(For MRI on Windows)_ Installed using [RubyInstaller](https://rubyinstaller.org).
-    * _(For JRuby on any OS)_ Downloaded and installed directly from [official website](https://www.jruby.org).
-    * _(For TruffleRuby on Linux and macOS)_ Installed using [ruby-build](https://github.com/rbenv/ruby-build).
-
-    `WORKSPACE`:
-    ```bazel
-    load("@rules_ruby//ruby:deps.bzl", "rb_download")
-
-    rb_register_toolchains(
-        version = "2.7.5"
-    )
-    ```
-
-    Args:
-        name: base name of resulting repositories, by default "rules_ruby"
-        version: a semver version of Matz Ruby Interpreter, or a string like [interpreter type]-[version]
-        register: whether to register the resulting toolchains, should be False under bzlmod
-        **kwargs: additional parameters to the downloader for this interpreter type
-    """
-    repo_name = name + "_dist"
-    proxy_repo_name = name + "_toolchains"
-    if repo_name not in native.existing_rules().values():
-        _rb_download(name = repo_name, version = version, **kwargs)
-        rb_toolchain_repository_proxy(
-            name = proxy_repo_name,
-            toolchain = "@{}//:toolchain".format(repo_name),
-            toolchain_type = "@rules_ruby//ruby:toolchain_type",
-        )
-        if register:
-            native.register_toolchains("@{}//:all".format(proxy_repo_name))
-
-def _rb_toolchain_repository_proxy_impl(repository_ctx):
-    repository_ctx.file(
-        "WORKSPACE",
-        """workspace(name = "{}")""".format(repository_ctx.name),
-    )
-
-    build_file_template = """
-toolchain(
-    name = "{name}",
-    toolchain = "{toolchain}",
-    toolchain_type = "{toolchain_type}",
-    visibility = ["//visibility:public"],
-)
-"""
-    repository_ctx.file(
-        "BUILD",
-        build_file_template.format(
-            name = repository_ctx.attr.name,
-            toolchain = repository_ctx.attr.toolchain,
-            toolchain_type = repository_ctx.attr.toolchain_type,
-        ),
-        executable = False,
-    )
-
-rb_toolchain_repository_proxy = repository_rule(
-    implementation = _rb_toolchain_repository_proxy_impl,
-    attrs = {
-        "toolchain": attr.string(mandatory = True),
-        "toolchain_type": attr.string(mandatory = True),
-    },
-    doc = (
-        "A proxy repository that contains the toolchain declaration; this indirection " +
-        "allows the Ruby toolchain to be downloaded lazily."
-    ),
-)
 
 def _rb_download_impl(repository_ctx):
     if repository_ctx.attr.version.startswith("jruby"):
@@ -167,7 +94,7 @@ def _install_via_ruby_build(repository_ctx):
     if result.return_code != 0:
         fail("%s\n%s" % (result.stdout, result.stderr))
 
-_rb_download = repository_rule(
+rb_download = repository_rule(
     implementation = _rb_download_impl,
     attrs = {
         "version": attr.string(
