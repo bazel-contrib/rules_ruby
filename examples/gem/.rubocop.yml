@@ -1,8 +1,10 @@
 AllCops:
   NewCops: enable
   SuggestExtensions: false
-  TargetRubyVersion: 2.6
+  TargetRubyVersion: 3.0
 
-# Avoid cop failure on Windows.
+# There is a difference in line endings between
+# GitHub Actions and Bazel CI.
+# https://github.com/p0deje/rules_ruby/issues/27
 Layout/EndOfLine:
-  EnforcedStyle: lf
+  Enabled: false
