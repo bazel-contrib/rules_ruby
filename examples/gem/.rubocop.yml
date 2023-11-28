@@ -2,3 +2,7 @@ AllCops:
   NewCops: enable
   SuggestExtensions: false
   TargetRubyVersion: 2.6
+
+# Avoid cop failure on Windows.
+Layout/EndOfLine:
+  EnforcedStyle: lf
