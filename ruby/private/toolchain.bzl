@@ -13,6 +13,7 @@ def rb_register_toolchains(name = DEFAULT_RUBY_REPOSITORY, version = None, regis
     * _(For MRI on Windows)_ Installed using [RubyInstaller](https://rubyinstaller.org).
     * _(For JRuby on any OS)_ Downloaded and installed directly from [official website](https://www.jruby.org).
     * _(For TruffleRuby on Linux and macOS)_ Installed using [ruby-build](https://github.com/rbenv/ruby-build).
+    * _(For "system") Ruby found on the PATH is used. Please note that builds are not hermetic in this case.
 
     `WORKSPACE`:
     ```bazel
@@ -25,14 +26,18 @@ def rb_register_toolchains(name = DEFAULT_RUBY_REPOSITORY, version = None, regis
 
     Args:
         name: base name of resulting repositories, by default "rules_ruby"
-        version: a semver version of Matz Ruby Interpreter, or a string like [interpreter type]-[version]
+        version: a semver version of Matz Ruby Interpreter, or a string like [interpreter type]-[version], or "system"
         register: whether to register the resulting toolchains, should be False under bzlmod
         **kwargs: additional parameters to the downloader for this interpreter type
     """
     repo_name = name + "_dist"
     proxy_repo_name = name + "_toolchains"
     if repo_name not in native.existing_rules().values():
-        _rb_download(name = repo_name, version = version, **kwargs)
+        _rb_download(
+            name = repo_name,
+            version = version,
+            **kwargs
+        )
         _rb_toolchain_repository_proxy(
             name = proxy_repo_name,
             toolchain = "@{}//:toolchain".format(repo_name),
