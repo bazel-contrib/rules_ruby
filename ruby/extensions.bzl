@@ -1,6 +1,6 @@
 "Module extensions used by bzlmod"
 
-load("//ruby/private:download.bzl", "DEFAULT_RUBY_REPOSITORY")
+load("//ruby/private:toolchain.bzl", "DEFAULT_RUBY_REPOSITORY")
 load(":deps.bzl", "rb_bundle", "rb_register_toolchains")
 
 ruby_bundle = tag_class(attrs = {

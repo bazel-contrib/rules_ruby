@@ -94,7 +94,7 @@ rb_register_toolchains(<a href="#rb_register_toolchains-name">name</a>, <a href=
 
 `WORKSPACE`:
 ```bazel
-load("@rules_ruby//ruby:deps.bzl", "rb_download")
+load("@rules_ruby//ruby:deps.bzl", "rb_register_toolchains")
 
 rb_register_toolchains(
     version = "2.7.5"

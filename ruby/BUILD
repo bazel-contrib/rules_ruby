@@ -26,7 +26,16 @@ bzl_library(
     srcs = ["deps.bzl"],
     deps = [
         "//ruby/private:bundle",
-        "//ruby/private:download",
+        "//ruby/private:toolchain",
+    ],
+)
+
+bzl_library(
+    name = "extensions",
+    srcs = ["extensions.bzl"],
+    deps = [
+        ":deps",
+        "//ruby/private:toolchain",
     ],
 )
 
