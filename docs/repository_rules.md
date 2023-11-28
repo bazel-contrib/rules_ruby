@@ -91,6 +91,7 @@ rb_register_toolchains(<a href="#rb_register_toolchains-name">name</a>, <a href=
 * _(For MRI on Windows)_ Installed using [RubyInstaller](https://rubyinstaller.org).
 * _(For JRuby on any OS)_ Downloaded and installed directly from [official website](https://www.jruby.org).
 * _(For TruffleRuby on Linux and macOS)_ Installed using [ruby-build](https://github.com/rbenv/ruby-build).
+* _(For "system") Ruby found on the PATH is used. Please note that builds are not hermetic in this case.
 
 `WORKSPACE`:
 ```bazel
@@ -108,7 +109,7 @@ rb_register_toolchains(
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
 | <a id="rb_register_toolchains-name"></a>name |  base name of resulting repositories, by default "rules_ruby"   |  <code>"rules_ruby"</code> |
-| <a id="rb_register_toolchains-version"></a>version |  a semver version of Matz Ruby Interpreter, or a string like [interpreter type]-[version]   |  <code>None</code> |
+| <a id="rb_register_toolchains-version"></a>version |  a semver version of Matz Ruby Interpreter, or a string like [interpreter type]-[version], or "system"   |  <code>None</code> |
 | <a id="rb_register_toolchains-register"></a>register |  whether to register the resulting toolchains, should be False under bzlmod   |  <code>True</code> |
 | <a id="rb_register_toolchains-kwargs"></a>kwargs |  additional parameters to the downloader for this interpreter type   |  none |
 

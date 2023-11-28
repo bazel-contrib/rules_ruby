@@ -6,6 +6,8 @@ _RUBY_INSTALLER_URL = "https://github.com/oneclick/rubyinstaller2/releases/downl
 def _rb_download_impl(repository_ctx):
     if repository_ctx.attr.version.startswith("jruby"):
         _install_jruby(repository_ctx)
+    elif repository_ctx.attr.version == "system":
+        _symlink_system_ruby(repository_ctx)
     elif repository_ctx.os.name.startswith("windows"):
         _install_via_rubyinstaller(repository_ctx)
     else:
@@ -93,6 +95,12 @@ def _install_via_ruby_build(repository_ctx):
 
     if result.return_code != 0:
         fail("%s\n%s" % (result.stdout, result.stderr))
+
+def _symlink_system_ruby(repository_ctx):
+    ruby = repository_ctx.which("ruby")
+    repository_ctx.symlink(ruby.dirname, "dist/bin")
+    if repository_ctx.os.name.startswith("windows"):
+        repository_ctx.symlink(ruby.dirname.dirname.get_child("lib"), "dist/lib")
 
 rb_download = repository_rule(
     implementation = _rb_download_impl,

@@ -34,6 +34,7 @@ jobs:
           - 3.3.0-preview3
           - jruby-9.4.5.0
           - truffleruby-23.1.1
+          - system
         os:
           - ubuntu
           - macos
@@ -49,6 +50,8 @@ jobs:
           - os: windows
             ruby: truffleruby-23.1.1
           # https://github.com/p0deje/rules_ruby/issues/23
+          - mode: bzlmod
+            ruby: system
           - mode: bzlmod
             ruby: 3.0.6
           - mode: bzlmod
@@ -72,6 +75,10 @@ jobs:
             build --announce_rc
             ${{ matrix.mode == 'bzlmod' && 'common --enable_bzlmod' || '' }}
       - run: echo 'RUBY_VERSION = "${{ matrix.ruby }}"' > ruby_version.bzl
+      - if: matrix.ruby == 'system'
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0.6'
       - run: bazel test ...
       - run: bazel run lib/gem:add-numbers 2
       - run: bazel run lib/gem:print-version
