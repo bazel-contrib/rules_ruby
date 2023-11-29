@@ -48,7 +48,7 @@ jobs:
           # TruffleRuby doesn't work on Windows.
           - os: windows
             ruby: truffleruby-23.1.1
-          # https://github.com/p0deje/rules_ruby/issues/23
+          # https://github.com/bazel-contrib/rules_ruby/issues/23
           - mode: bzlmod
             ruby: 3.0.6
           - mode: bzlmod

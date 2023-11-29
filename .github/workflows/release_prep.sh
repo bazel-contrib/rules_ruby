@@ -45,7 +45,7 @@ http_archive(
     name = "rules_ruby",
     sha256 = "${SHA}",
     strip_prefix = "${PREFIX}",
-    url = "https://github.com/p0deje/rules_ruby/releases/download/${TAG}/${ARCHIVE}",
+    url = "https://github.com/bazel-contrib/rules_ruby/releases/download/${TAG}/${ARCHIVE}",
 )
 \`\`\`
 EOF

@@ -5,6 +5,6 @@ AllCops:
 
 # There is a difference in line endings between
 # GitHub Actions and Bazel CI.
-# https://github.com/p0deje/rules_ruby/issues/27
+# https://github.com/bazel-contrib/rules_ruby/issues/27
 Layout/EndOfLine:
   Enabled: false
