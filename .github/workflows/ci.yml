@@ -70,7 +70,7 @@ jobs:
         working-directory: examples/gem
     steps:
       - uses: actions/checkout@v4
-      - uses: p0deje/setup-bazel@0.3.0
+      - uses: p0deje/setup-bazel@0.3.2
         with:
           bazelrc: |
             build --announce_rc
