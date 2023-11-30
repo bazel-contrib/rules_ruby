@@ -92,7 +92,7 @@ jobs:
 
   release:
     name: Release
-    if: startsWith(github.ref, 'refs/tag/v')
+    if: startsWith(github.ref, 'refs/tags/v')
     needs:
       - ruleset
       - examples-gem
