@@ -76,7 +76,7 @@ jobs:
       - uses: p0deje/setup-bazel@0.3.2
         with:
           bazelrc: |
-            build --announce_rc
+            common --announce_rc --color=yes
             ${{ matrix.mode == 'bzlmod' && 'common --enable_bzlmod' || '' }}
       - run: echo 'RUBY_VERSION = "${{ matrix.ruby }}"' > ruby_version.bzl
       - if: matrix.ruby == 'system'
