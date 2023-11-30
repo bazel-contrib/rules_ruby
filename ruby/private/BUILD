@@ -1,12 +1,6 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
-exports_files([
-    "binary/binary.cmd.tpl",
-    "binary/binary.sh.tpl",
-    "gem_build/gem_builder.rb.tpl",
-])
-
-exports_files(glob(["**/*.bzl"]))
+exports_files(["gem_build/gem_builder.rb.tpl"])
 
 bzl_library(
     name = "binary",
@@ -15,6 +9,7 @@ bzl_library(
     deps = [
         ":library",
         ":providers",
+        "//ruby/private/binary:rlocation",
     ],
 )
 

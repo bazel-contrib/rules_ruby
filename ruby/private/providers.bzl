@@ -47,6 +47,24 @@ def get_transitive_deps(deps):
         transitive = [dep[RubyFilesInfo].transitive_deps for dep in deps],
     )
 
+# https://bazel.build/extending/rules#runfiles
+def get_transitive_runfiles(runfiles, srcs, data, deps):
+    """Obtain the runfiles for a target, its transitive data files and dependencies.
+
+    Args:
+      runfiles: the runfiles
+      srcs: a list of source files
+      data: a list of data files
+      deps: a list of targets that are direct dependencies
+    Returns:
+      the runfiles
+    """
+    transitive_runfiles = []
+    for targets in (srcs, data, deps):
+        for target in targets:
+            transitive_runfiles.append(target[DefaultInfo].default_runfiles)
+    return runfiles.merge_all(transitive_runfiles)
+
 def get_bundle_env(envs, deps):
     """Obtain the BUNDLE_* environment variables for a target and its transitive dependencies.
 

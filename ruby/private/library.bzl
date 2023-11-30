@@ -6,6 +6,7 @@ load(
     "get_bundle_env",
     "get_transitive_data",
     "get_transitive_deps",
+    "get_transitive_runfiles",
     "get_transitive_srcs",
 )
 
@@ -19,7 +20,7 @@ ATTRS = {
     ),
     "data": attr.label_list(
         allow_files = True,
-        doc = "List of non-Ruby source files used to build the library.",
+        doc = "List of runtime dependencies needed by a program that depends on this library.",
     ),
     "bundle_env": attr.string_dict(
         default = {},
@@ -28,11 +29,23 @@ ATTRS = {
 }
 
 def _rb_library_impl(ctx):
+    # TODO: avoid expanding the depset to a list, it may be expensive in a large graph
+    transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
+    transitive_deps = get_transitive_deps(ctx.attr.deps).to_list()
+    transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
+
+    runfiles = ctx.runfiles(transitive_srcs + transitive_data)
+    runfiles = get_transitive_runfiles(runfiles, ctx.attr.srcs, ctx.attr.deps, ctx.attr.data)
+
     return [
+        DefaultInfo(
+            files = depset(transitive_srcs + transitive_data),
+            runfiles = runfiles,
+        ),
         RubyFilesInfo(
-            transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps),
-            transitive_deps = get_transitive_deps(ctx.attr.deps),
-            transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps),
+            transitive_data = depset(transitive_data),
+            transitive_deps = depset(transitive_deps),
+            transitive_srcs = depset(transitive_srcs),
             bundle_env = get_bundle_env(ctx.attr.bundle_env, ctx.attr.deps),
         ),
     ]

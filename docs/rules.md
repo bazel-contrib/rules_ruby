@@ -151,7 +151,7 @@ rake, version 10.5.0
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_binary-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="rb_binary-data"></a>data |  List of non-Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
+| <a id="rb_binary-data"></a>data |  List of runtime dependencies needed by a program that depends on this library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_binary-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_binary-env"></a>env |  Environment variables to use during execution.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | <code>{}</code> |
 | <a id="rb_binary-env_inherit"></a>env_inherit |  List of environment variable names to be inherited by the test runner.   | List of strings | optional | <code>[]</code> |
@@ -258,7 +258,7 @@ INFO: Build completed successfully, 2 total actions
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_gem_build-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="rb_gem_build-bundle_env"></a>bundle_env |  List of bundle environment variables to set when building the library.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | <code>{}</code> |
-| <a id="rb_gem_build-data"></a>data |  List of non-Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
+| <a id="rb_gem_build-data"></a>data |  List of runtime dependencies needed by a program that depends on this library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_gem_build-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_gem_build-gemspec"></a>gemspec |  Gemspec file to use for gem building.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_gem_build-srcs"></a>srcs |  List of Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
@@ -336,7 +336,7 @@ Successfully registered gem: example (0.1.0)
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_gem_push-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="rb_gem_push-bundle_env"></a>bundle_env |  List of bundle environment variables to set when building the library.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | <code>{}</code> |
-| <a id="rb_gem_push-data"></a>data |  List of non-Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
+| <a id="rb_gem_push-data"></a>data |  List of runtime dependencies needed by a program that depends on this library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_gem_push-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_gem_push-env"></a>env |  Environment variables to use during execution.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | <code>{}</code> |
 | <a id="rb_gem_push-env_inherit"></a>env_inherit |  List of environment variable names to be inherited by the test runner.   | List of strings | optional | <code>[]</code> |
@@ -437,7 +437,7 @@ using other rules.
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_library-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="rb_library-bundle_env"></a>bundle_env |  List of bundle environment variables to set when building the library.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | <code>{}</code> |
-| <a id="rb_library-data"></a>data |  List of non-Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
+| <a id="rb_library-data"></a>data |  List of runtime dependencies needed by a program that depends on this library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_library-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_library-srcs"></a>srcs |  List of Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 
@@ -597,7 +597,7 @@ root = File.expand_path(__dir__)
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_test-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="rb_test-data"></a>data |  List of non-Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
+| <a id="rb_test-data"></a>data |  List of runtime dependencies needed by a program that depends on this library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_test-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_test-env"></a>env |  Environment variables to use during execution.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | <code>{}</code> |
 | <a id="rb_test-env_inherit"></a>env_inherit |  List of environment variable names to be inherited by the test runner.   | List of strings | optional | <code>[]</code> |
