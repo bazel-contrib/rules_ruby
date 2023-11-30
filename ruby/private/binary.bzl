@@ -7,8 +7,10 @@ load(
     "get_bundle_env",
     "get_transitive_data",
     "get_transitive_deps",
+    "get_transitive_runfiles",
     "get_transitive_srcs",
 )
+load("//ruby/private/binary:rlocation.bzl", "BASH_RLOCATION_FUNCTION", "BATCH_RLOCATION_FUNCTION")
 
 ATTRS = {
     "main": attr.label(
@@ -30,19 +32,27 @@ Use a built-in `args` attribute to pass extra arguments to the script.
     ),
     "_binary_cmd_tpl": attr.label(
         allow_single_file = True,
-        default = "@rules_ruby//ruby/private:binary/binary.cmd.tpl",
+        default = "@rules_ruby//ruby/private/binary:binary.cmd.tpl",
     ),
     "_binary_sh_tpl": attr.label(
         allow_single_file = True,
-        default = "@rules_ruby//ruby/private:binary/binary.sh.tpl",
+        default = "@rules_ruby//ruby/private/binary:binary.sh.tpl",
+    ),
+    "_runfiles_library": attr.label(
+        allow_single_file = True,
+        default = "@bazel_tools//tools/bash/runfiles",
     ),
     "_windows_constraint": attr.label(
         default = "@platforms//os:windows",
     ),
 }
 
+_EXPORT_ENV_VAR_COMMAND = "{command} {name}={value}"
+_EXPORT_BATCH_COMMAND = "set"
+_EXPORT_BASH_COMMAND = "export"
+
 # buildifier: disable=function-docstring
-def generate_rb_binary_script(ctx, binary, bundler = False, args = []):
+def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {}, java_bin = ""):
     windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
     is_windows = ctx.target_platform_has_constraint(windows_constraint)
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
@@ -55,10 +65,14 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = []):
 
     if is_windows:
         binary_path = binary_path.replace("/", "\\")
-        toolchain_bindir = toolchain_bindir.replace("/", "\\")
+        export_command = _EXPORT_BATCH_COMMAND
+        rlocation_function = BATCH_RLOCATION_FUNCTION
         script = ctx.actions.declare_file("{}.rb.cmd".format(ctx.label.name))
+        toolchain_bindir = toolchain_bindir.replace("/", "\\")
         template = ctx.file._binary_cmd_tpl
     else:
+        export_command = _EXPORT_BASH_COMMAND
+        rlocation_function = BASH_RLOCATION_FUNCTION
         script = ctx.actions.declare_file("{}.rb.sh".format(ctx.label.name))
         template = ctx.file._binary_sh_tpl
 
@@ -70,6 +84,11 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = []):
     args = " ".join(args)
     args = ctx.expand_location(args)
 
+    environment = []
+    for (name, value) in env.items():
+        command = _EXPORT_ENV_VAR_COMMAND.format(command = export_command, name = name, value = value)
+        environment.append(command)
+
     ctx.actions.expand_template(
         template = template,
         output = script,
@@ -78,8 +97,11 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = []):
             "{args}": args,
             "{binary}": binary_path,
             "{toolchain_bindir}": toolchain_bindir,
+            "{env}": "\n".join(environment),
             "{bundler_command}": bundler_command,
             "{ruby_binary_name}": toolchain.ruby.basename,
+            "{java_bin}": java_bin,
+            "{rlocation_function}": rlocation_function,
         },
     )
 
@@ -89,36 +111,46 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = []):
 def rb_binary_impl(ctx):
     bundler = False
     env = {}
+    java_bin = ""
+
+    # TODO: avoid expanding the depset to a list, it may be expensive in a large graph
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
     transitive_deps = get_transitive_deps(ctx.attr.deps).to_list()
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
-    tools = []
-    java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
-    ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
-    if not ctx.attr.main:
-        tools.append(ruby_toolchain.ruby)
+    ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
+    tools = [ruby_toolchain.ruby, ruby_toolchain.bundle, ruby_toolchain.gem]
 
     if ruby_toolchain.version.startswith("jruby"):
-        env["JAVA_HOME"] = java_toolchain.java_runtime.java_home_runfiles_path
+        java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
+        tools.extend(ctx.files._runfiles_library)
         tools.extend(java_toolchain.java_runtime.files.to_list())
+        java_bin = java_toolchain.java_runtime.java_executable_runfiles_path[3:]
 
     for dep in transitive_deps:
         # TODO: Do not depend on workspace name to determine bundle
         if dep.label.workspace_name.endswith("bundle"):
             bundler = True
 
-    runfiles = ctx.runfiles(transitive_data + transitive_srcs + tools)
-
     bundle_env = get_bundle_env(ctx.attr.env, ctx.attr.deps)
     env.update(bundle_env)
     env.update(ctx.attr.env)
 
-    script = generate_rb_binary_script(ctx, ctx.executable.main, bundler)
+    script = generate_rb_binary_script(
+        ctx,
+        ctx.executable.main,
+        bundler = bundler,
+        env = env,
+        java_bin = java_bin,
+    )
+
+    runfiles = ctx.runfiles(transitive_srcs + transitive_data + tools)
+    runfiles = get_transitive_runfiles(runfiles, ctx.attr.srcs, ctx.attr.deps, ctx.attr.data)
 
     return [
         DefaultInfo(
             executable = script,
+            files = depset(transitive_srcs + transitive_data + tools),
             runfiles = runfiles,
         ),
         RubyFilesInfo(

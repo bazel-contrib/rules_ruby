@@ -1,3 +1,4 @@
+load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@rules_ruby//ruby:defs.bzl", "rb_binary", "rb_library")
 
 package(default_visibility = ["//:__subpackages__"])
@@ -31,4 +32,16 @@ rb_binary(
     name = "print-version",
     args = ["lib/gem/version.rb"],
     deps = [":version"],
+)
+
+run_binary(
+    name = "perform-addition",
+    srcs = [":add"],
+    outs = ["addition-result"],
+    args = [
+        "1",
+        "2",
+        "$(location :addition-result)",
+    ],
+    tool = ":add-numbers",
 )

@@ -17,7 +17,13 @@ module GEM
 end
 
 if __FILE__ == $PROGRAM_NAME
-  raise "Pass two numbers to sum: #{ARGV}" unless ARGV.size == 2
+  raise "Pass two numbers to sum: #{ARGV}" if ARGV.size < 2
 
-  puts GEM::Add.new(*ARGV.map(&:to_i)).result
+  one, two, output = *ARGV
+  result = GEM::Add.new(Integer(one), Integer(two)).result
+  if output
+    File.write(output, result)
+  else
+    puts result
+  end
 end

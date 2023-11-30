@@ -83,9 +83,10 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.0.6'
-      - run: bazel test ...
+      - run: bazel build ...
       - run: bazel run lib/gem:add-numbers 2
       - run: bazel run lib/gem:print-version
+      - run: bazel test ...
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
 
