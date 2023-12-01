@@ -14,10 +14,9 @@ http_archive(
 )
 
 load("@rules_ruby//ruby:deps.bzl", "rb_bundle", "rb_register_toolchains")
-load("ruby_version.bzl", "RUBY_VERSION")
 
 rb_register_toolchains(
-    version = RUBY_VERSION,
+    version_file = "//:.ruby-version",
 )
 
 rb_bundle(

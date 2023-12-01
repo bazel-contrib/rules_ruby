@@ -53,21 +53,6 @@ jobs:
           # TruffleRuby doesn't work on Windows.
           - os: windows
             ruby: truffleruby-23.1.1
-          # https://github.com/bazel-contrib/rules_ruby/issues/23
-          - mode: bzlmod
-            ruby: system
-          - mode: bzlmod
-            ruby: 3.0.6
-          - mode: bzlmod
-            ruby: 3.1.4
-          - mode: bzlmod
-            ruby: 3.2.2
-          - mode: bzlmod
-            ruby: 3.3.0-preview3
-          - mode: bzlmod
-            ruby: 3.0.6
-          - mode: bzlmod
-            ruby: truffleruby-23.1.1
     defaults:
       run:
         working-directory: examples/gem
@@ -75,10 +60,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: p0deje/setup-bazel@0.3.2
         with:
-          bazelrc: |
-            common --announce_rc --color=yes
-            ${{ matrix.mode == 'bzlmod' && 'common --enable_bzlmod' || '' }}
-      - run: echo 'RUBY_VERSION = "${{ matrix.ruby }}"' > ruby_version.bzl
+          bazelrc: common --announce_rc --color=yes ${{ matrix.mode == 'bzlmod' && '--enable_bzlmod' || '' }}
+      - run: echo ${{ matrix.ruby }} > .ruby-version
       - if: matrix.ruby == 'system'
         uses: ruby/setup-ruby@v1
         with:

@@ -5,7 +5,7 @@ load("//ruby/private/toolchain:repository_proxy.bzl", _rb_toolchain_repository_p
 
 DEFAULT_RUBY_REPOSITORY = "rules_ruby"
 
-def rb_register_toolchains(name = DEFAULT_RUBY_REPOSITORY, version = None, register = True, **kwargs):
+def rb_register_toolchains(name = DEFAULT_RUBY_REPOSITORY, version = None, version_file = None, register = True, **kwargs):
     """
     Register a Ruby toolchain and lazily download the Ruby Interpreter.
 
@@ -20,13 +20,14 @@ def rb_register_toolchains(name = DEFAULT_RUBY_REPOSITORY, version = None, regis
     load("@rules_ruby//ruby:deps.bzl", "rb_register_toolchains")
 
     rb_register_toolchains(
-        version = "2.7.5"
+        version = "3.0.6"
     )
     ```
 
     Args:
         name: base name of resulting repositories, by default "rules_ruby"
-        version: a semver version of Matz Ruby Interpreter, or a string like [interpreter type]-[version], or "system"
+        version: a semver version of MRI, or a string like [interpreter type]-[version], or "system"
+        version_file: .ruby-version or .tool-versions file to read version from
         register: whether to register the resulting toolchains, should be False under bzlmod
         **kwargs: additional parameters to the downloader for this interpreter type
     """
@@ -36,6 +37,7 @@ def rb_register_toolchains(name = DEFAULT_RUBY_REPOSITORY, version = None, regis
         _rb_download(
             name = repo_name,
             version = version,
+            version_file = version_file,
             **kwargs
         )
         _rb_toolchain_repository_proxy(

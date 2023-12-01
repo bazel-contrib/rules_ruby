@@ -14,6 +14,7 @@ ruby_bundle = tag_class(attrs = {
 ruby_toolchain = tag_class(attrs = {
     "name": attr.string(doc = "Base name for generated repositories, allowing multiple to be registered."),
     "version": attr.string(doc = "Explicit version of ruby."),
+    "version_file": attr.label(doc = "File to read Ruby version from."),
 })
 
 def _ruby_module_extension(module_ctx):
@@ -40,15 +41,17 @@ def _ruby_module_extension(module_ctx):
                 fail("Multiple conflicting toolchains declared for name {} ({} and {}".format(
                     toolchain.name,
                     toolchain.version,
+                    toolchain.version_file,
                     registrations[toolchain.name],
                 ))
             else:
-                registrations[toolchain.name] = toolchain.version
+                registrations[toolchain.name] = (toolchain.version, toolchain.version_file)
 
-    for name, version in registrations.items():
+    for name, (version, version_file) in registrations.items():
         rb_register_toolchains(
             name = name,
             version = version,
+            version_file = version_file,
             register = False,
         )
 
