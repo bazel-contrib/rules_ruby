@@ -21,7 +21,9 @@ The ruleset is known to work with:
 load("@rules_ruby//ruby:deps.bzl", "rb_register_toolchains")
 
 rb_register_toolchains(
-    version = "3.0.6"
+    version = "3.0.6",
+    # alternatively, load version from .ruby-version file
+    # version_file = "//:.ruby-version",
 )
 ```
 
@@ -50,7 +52,9 @@ rb_bundle(
 ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
 ruby.toolchain(
     name = "rules_ruby",
-    version = "3.0.6"
+    version = "3.0.6",
+    # alternatively, load version from .ruby-version file
+    # version_file = "//:.ruby-version",
 )
 use_repo(ruby, "rules_ruby_dist")
 ```
@@ -92,7 +96,7 @@ The following toolchains are known to work and tested on CI.
 
 | Ruby              | Linux | macOS | Windows |
 |-------------------|-------|-------|---------|
-| MRI 3.3 (preview) | 🟩    | 🟩    | 🟩      |
+| MRI 3.3 (preview) | 🟩    | 🟩    | 🟥      |
 | MRI 3.2           | 🟩    | 🟩    | 🟩      |
 | MRI 3.1           | 🟩    | 🟩    | 🟩      |
 | MRI 3.0           | 🟩    | 🟩    | 🟩      |

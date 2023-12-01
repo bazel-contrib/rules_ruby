@@ -82,7 +82,7 @@ rb_bundle(<a href="#rb_bundle-toolchain">toolchain</a>, <a href="#rb_bundle-kwar
 ## rb_register_toolchains
 
 <pre>
-rb_register_toolchains(<a href="#rb_register_toolchains-name">name</a>, <a href="#rb_register_toolchains-version">version</a>, <a href="#rb_register_toolchains-register">register</a>, <a href="#rb_register_toolchains-kwargs">kwargs</a>)
+rb_register_toolchains(<a href="#rb_register_toolchains-name">name</a>, <a href="#rb_register_toolchains-version">version</a>, <a href="#rb_register_toolchains-version_file">version_file</a>, <a href="#rb_register_toolchains-register">register</a>, <a href="#rb_register_toolchains-kwargs">kwargs</a>)
 </pre>
 
     Register a Ruby toolchain and lazily download the Ruby Interpreter.
@@ -98,7 +98,7 @@ rb_register_toolchains(<a href="#rb_register_toolchains-name">name</a>, <a href=
 load("@rules_ruby//ruby:deps.bzl", "rb_register_toolchains")
 
 rb_register_toolchains(
-    version = "2.7.5"
+    version = "3.0.6"
 )
 ```
 
@@ -109,7 +109,8 @@ rb_register_toolchains(
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
 | <a id="rb_register_toolchains-name"></a>name |  base name of resulting repositories, by default "rules_ruby"   |  <code>"rules_ruby"</code> |
-| <a id="rb_register_toolchains-version"></a>version |  a semver version of Matz Ruby Interpreter, or a string like [interpreter type]-[version], or "system"   |  <code>None</code> |
+| <a id="rb_register_toolchains-version"></a>version |  a semver version of MRI, or a string like [interpreter type]-[version], or "system"   |  <code>None</code> |
+| <a id="rb_register_toolchains-version_file"></a>version_file |  .ruby-version or .tool-versions file to read version from   |  <code>None</code> |
 | <a id="rb_register_toolchains-register"></a>register |  whether to register the resulting toolchains, should be False under bzlmod   |  <code>True</code> |
 | <a id="rb_register_toolchains-kwargs"></a>kwargs |  additional parameters to the downloader for this interpreter type   |  none |
 
