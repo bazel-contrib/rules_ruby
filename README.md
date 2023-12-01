@@ -4,28 +4,100 @@
 
 This repository hosts [Ruby][1] language ruleset for [Bazel][2].
 
-The ruleset is known to work with Bazel 5 and 6.
+The ruleset is known to work with:
+
+- Bazel 6 using WORKSPACE and Bzlmod *(tested on CI)*;
+- Bazel 5 using WORKSPACE *(no longer tested on CI)*.
 
 ## Getting Started
 
-Pending the first release.
+### WORKSPACE
+
+1. Install the ruleset following WORKSPACE instructions on the [latest release][13].
+2. Download and install Ruby:
+
+```bazel
+# WORKSPACE
+load("@rules_ruby//ruby:deps.bzl", "rb_register_toolchains")
+
+rb_register_toolchains(
+    version = "3.0.6"
+)
+```
+
+3. *(Optional)* Download and install Bundler dependencies:
+
+```bazel
+# WORKSPACE
+load("@rules_ruby//ruby:deps.bzl", "rb_bundle")
+
+rb_bundle(
+    name = "bundle",
+    srcs = ["//:Gemfile.lock"],
+    gemfile = "//:Gemfile",
+)
+```
+
+4. Start defining your library, binary and test targets in `BUILD` files.
+
+### Bzlmod
+
+1. Install ruleset following Bzlmod instructions on the [latest release][13].
+2. Download and install Ruby:
+
+```bazel
+# MODULE.bazel
+ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
+ruby.toolchain(
+    name = "rules_ruby",
+    version = "3.0.6"
+)
+use_repo(ruby, "rules_ruby_dist")
+```
+
+3. _(Optional)_ Download and install Bundler dependencies:
+
+```bazel
+# MODULE.bazel
+ruby.bundle(
+    name = "bundle",
+    srcs = ["//:Gemfile.lock"],
+    gemfile = "//:Gemfile",
+    toolchain = "@rules_ruby_dist//:BUILD",
+)
+use_repo(ruby, "bundle", "rules_ruby_toolchains")
+```
+
+4. Register Ruby toolchains:
+
+```bazel
+# MODULE.bazel
+register_toolchains("@rules_ruby_toolchains//:all")
+```
+
+4. Start defining your library, binary and test targets in `BUILD` files.
 
 ## Documentation
 
 - See [repository rules][3] for the documentation of `WORKSPACE` rules.
 - See [rules][4] for the documentation of `BUILD` rules.
 
+## Examples
+
+See [`examples`][14] directory for a comprehensive set of examples how to use the ruleset.
+
 ## Toolchains
 
 The following toolchains are known to work and tested on CI.
 
-| Ruby             | Linux | macOS | Windows |
-|------------------|-------|-------|---------|
-| MRI 3.2          | 🟩    | 🟩    | 🟩      |
-| MRI 3.1          | 🟩    | 🟩    | 🟩      |
-| MRI 3.0          | 🟩    | 🟩    | 🟩      |
-| JRuby 9.4        | 🟩    | 🟩    | 🟩      |
-| TruffleRuby 23.0 | 🟩    | 🟩    | 🟥      |
+| Ruby              | Linux | macOS | Windows |
+|-------------------|-------|-------|---------|
+| MRI 3.3 (preview) | 🟩    | 🟩    | 🟩      |
+| MRI 3.2           | 🟩    | 🟩    | 🟩      |
+| MRI 3.1           | 🟩    | 🟩    | 🟩      |
+| MRI 3.0           | 🟩    | 🟩    | 🟩      |
+| JRuby 9.4         | 🟩    | 🟩    | 🟩      |
+| TruffleRuby 23.0  | 🟩    | 🟩    | 🟥      |
 
 The following toolchains were previously known to work but *no longer tested on CI*.
 
@@ -84,3 +156,5 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
 [10]: https://github.com/oracle/truffleruby/issues/2784
 [11]: https://github.com/jruby/jruby/issues/7182#issuecomment-1112953015
 [12]: https://github.com/rubocop/rubocop/pull/12062
+[13]: https://github.com/bazel-contrib/rules_ruby/releases/tag/v0.3.0
+[14]: examples/
