@@ -108,7 +108,7 @@ rb_register_toolchains(
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="rb_register_toolchains-name"></a>name |  base name of resulting repositories, by default "rules_ruby"   |  <code>"rules_ruby"</code> |
+| <a id="rb_register_toolchains-name"></a>name |  base name of resulting repositories, by default "rules_ruby"   |  <code>"ruby"</code> |
 | <a id="rb_register_toolchains-version"></a>version |  a semver version of MRI, or a string like [interpreter type]-[version], or "system"   |  <code>None</code> |
 | <a id="rb_register_toolchains-version_file"></a>version_file |  .ruby-version or .tool-versions file to read version from   |  <code>None</code> |
 | <a id="rb_register_toolchains-register"></a>register |  whether to register the resulting toolchains, should be False under bzlmod   |  <code>True</code> |
