@@ -73,7 +73,7 @@ rb_bundle(<a href="#rb_bundle-toolchain">toolchain</a>, <a href="#rb_bundle-kwar
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="rb_bundle-toolchain"></a>toolchain |  default Ruby toolchain BUILD   |  <code>"@rules_ruby_dist//:BUILD"</code> |
+| <a id="rb_bundle-toolchain"></a>toolchain |  default Ruby toolchain BUILD   |  <code>"@ruby//:BUILD"</code> |
 | <a id="rb_bundle-kwargs"></a>kwargs |  underlying attrs passed to rb_bundle_rule()   |  none |
 
 

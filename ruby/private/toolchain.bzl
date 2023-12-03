@@ -3,7 +3,7 @@
 load("//ruby/private:download.bzl", _rb_download = "rb_download")
 load("//ruby/private/toolchain:repository_proxy.bzl", _rb_toolchain_repository_proxy = "rb_toolchain_repository_proxy")
 
-DEFAULT_RUBY_REPOSITORY = "rules_ruby"
+DEFAULT_RUBY_REPOSITORY = "ruby"
 
 def rb_register_toolchains(name = DEFAULT_RUBY_REPOSITORY, version = None, version_file = None, register = True, **kwargs):
     """
@@ -31,18 +31,17 @@ def rb_register_toolchains(name = DEFAULT_RUBY_REPOSITORY, version = None, versi
         register: whether to register the resulting toolchains, should be False under bzlmod
         **kwargs: additional parameters to the downloader for this interpreter type
     """
-    repo_name = name + "_dist"
     proxy_repo_name = name + "_toolchains"
-    if repo_name not in native.existing_rules().values():
+    if name not in native.existing_rules().values():
         _rb_download(
-            name = repo_name,
+            name = name,
             version = version,
             version_file = version_file,
             **kwargs
         )
         _rb_toolchain_repository_proxy(
             name = proxy_repo_name,
-            toolchain = "@{}//:toolchain".format(repo_name),
+            toolchain = "@{}//:toolchain".format(name),
             toolchain_type = "@rules_ruby//ruby:toolchain_type",
         )
         if register:
