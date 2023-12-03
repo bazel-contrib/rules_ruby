@@ -69,14 +69,14 @@ ruby.bundle(
     gemfile = "//:Gemfile",
     toolchain = "@ruby//:BUILD",
 )
-use_repo(ruby, "bundle", "rules_ruby_toolchains")
+use_repo(ruby, "bundle", "ruby_toolchains")
 ```
 
 4. Register Ruby toolchains:
 
 ```bazel
 # MODULE.bazel
-register_toolchains("@rules_ruby_toolchains//:all")
+register_toolchains("@ruby_toolchains//:all")
 ```
 
 4. Start defining your library, binary and test targets in `BUILD` files.

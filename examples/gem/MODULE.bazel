@@ -26,6 +26,6 @@ ruby.bundle(
     gemfile = "//:Gemfile",
     toolchain = "@ruby//:BUILD",
 )
-use_repo(ruby, "bundle", "rules_ruby_toolchains")
+use_repo(ruby, "bundle", "ruby_toolchains")
 
-register_toolchains("@rules_ruby_toolchains//:all")
+register_toolchains("@ruby_toolchains//:all")
