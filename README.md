@@ -51,12 +51,12 @@ rb_bundle(
 # MODULE.bazel
 ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
 ruby.toolchain(
-    name = "rules_ruby",
+    name = "ruby",
     version = "3.0.6",
     # alternatively, load version from .ruby-version file
     # version_file = "//:.ruby-version",
 )
-use_repo(ruby, "rules_ruby_dist")
+use_repo(ruby, "ruby")
 ```
 
 3. _(Optional)_ Download and install Bundler dependencies:
@@ -67,16 +67,16 @@ ruby.bundle(
     name = "bundle",
     srcs = ["//:Gemfile.lock"],
     gemfile = "//:Gemfile",
-    toolchain = "@rules_ruby_dist//:BUILD",
+    toolchain = "@ruby//:BUILD",
 )
-use_repo(ruby, "bundle", "rules_ruby_toolchains")
+use_repo(ruby, "bundle", "ruby_toolchains")
 ```
 
 4. Register Ruby toolchains:
 
 ```bazel
 # MODULE.bazel
-register_toolchains("@rules_ruby_toolchains//:all")
+register_toolchains("@ruby_toolchains//:all")
 ```
 
 4. Start defining your library, binary and test targets in `BUILD` files.
