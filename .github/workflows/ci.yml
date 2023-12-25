@@ -35,7 +35,7 @@ jobs:
           - 3.0.6
           - 3.1.4
           - 3.2.2
-          - 3.3.0-preview3
+          - 3.3.0
           - jruby-9.4.5.0
           - truffleruby-23.1.1
           - system
@@ -47,9 +47,6 @@ jobs:
           - bzlmod
           - WORKSPACE
         exclude:
-          # RubyInstaller doesn't ship previews.
-          - os: windows
-            ruby: 3.3.0-preview3
           # TruffleRuby doesn't work on Windows.
           - os: windows
             ruby: truffleruby-23.1.1

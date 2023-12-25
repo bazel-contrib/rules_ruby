@@ -137,7 +137,7 @@ rb_download = repository_rule(
             doc = "File to read Ruby version from.",
         ),
         "ruby_build_version": attr.string(
-            default = "20231114",
+            default = "20231225",
             doc = """
 Version of [ruby-build](https://github.com/rbenv/ruby-build/releases)
 to install. You normally don't need to change this, unless `version` you pass is a new one
