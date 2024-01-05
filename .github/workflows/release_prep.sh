@@ -15,6 +15,14 @@ SHA=$(shasum -a 256 $ARCHIVE | awk '{print $1}')
 
 # The stdout of this program will be used as the top of the release notes for this release.
 cat << EOF
+## Using Bzlmod with Bazel 7
+
+1. Add to your \`MODULE.bazel\` file:
+
+\`\`\`starlark
+bazel_dep(name = "rules_ruby", version = "${TAG:1}")
+\`\`\`
+
 ## Using Bzlmod with Bazel 6
 
 1. Enable with \`common --enable_bzlmod\` in \`.bazelrc\`.
