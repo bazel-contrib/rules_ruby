@@ -190,6 +190,9 @@ build --enable_runfiles
 # Docs: https://bazel.build/reference/command-line-reference#flag--java_runtime_version
 build --java_runtime_version=remotejdk_11
 
+# Ignore timeout different between JRuby and MRI.
+test --test_verbose_timeout_warnings=false
+
 # JRuby needs $HOME for File#expand_path to work: https://github.com/jruby/jruby/issues/5661.
 # TruffleRuby needs $HOME too: https://github.com/oracle/truffleruby/issues/2784.
 build --action_env=HOME
