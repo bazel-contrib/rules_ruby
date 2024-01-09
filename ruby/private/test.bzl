@@ -58,7 +58,7 @@ rb_test(
     name = "add",
     srcs = ["add_spec.rb"],
     args = ["spec/add_spec.rb"],
-    main = "@bundle//:bin/rspec",
+    main = "@bundle//bin:rspec",
     deps = [
         ":spec_helper",
         "@bundle",
@@ -69,7 +69,7 @@ rb_test(
     name = "subtract",
     srcs = ["subtract_spec.rb"],
     args = ["spec/subtract_spec.rb"],
-    main = "@bundle//:bin/rspec",
+    main = "@bundle//bin:rspec",
     deps = [
         ":spec_helper",
         "@bundle",
@@ -103,7 +103,7 @@ package(default_visibility = ["//:__subpackages__"])
 rb_test(
     name = "rubocop",
     args = ["lib/"],
-    main = "@bundle//:bin/rubocop",
+    main = "@bundle//bin:rubocop",
     tags = ["no-sandbox"],
     deps = [
         "//lib:gem",

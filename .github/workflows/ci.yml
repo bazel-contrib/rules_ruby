@@ -11,9 +11,6 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  JAVA_OPTS: -Djdk.io.File.enableADS=true
-
 jobs:
   ruleset:
     name: Ruleset
@@ -48,6 +45,10 @@ jobs:
           - bzlmod
           - WORKSPACE
         exclude:
+          # JRuby with bzlmod fails with long path issues on Windows.
+          - os: windows
+            ruby: jruby-9.4.5.0
+            mode: bzlmod
           # TruffleRuby doesn't work on Windows.
           - os: windows
             ruby: truffleruby-23.1.1

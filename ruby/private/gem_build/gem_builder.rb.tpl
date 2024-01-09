@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'fileutils'
 require 'json'
 require 'rubygems/package'
@@ -34,7 +36,7 @@ Dir.mktmpdir do |tmpdir|
     gemspec_code = File.read(gemspec_path)
 
     Dir.chdir(gemspec_dir) do
-      spec = binding.eval(gemspec_code, gemspec_file, __LINE__)
+      spec = binding.eval(gemspec_code, gemspec_file, __LINE__) # rubocop:disable Security/Eval
       file = Gem::Package.build(spec)
       FileUtils.mv(file, packaged_gem_path)
     end

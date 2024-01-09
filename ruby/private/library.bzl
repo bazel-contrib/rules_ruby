@@ -2,6 +2,7 @@
 
 load(
     "//ruby/private:providers.bzl",
+    "BundlerInfo",
     "RubyFilesInfo",
     "get_bundle_env",
     "get_transitive_data",
@@ -37,7 +38,7 @@ def _rb_library_impl(ctx):
     runfiles = ctx.runfiles(transitive_srcs + transitive_data)
     runfiles = get_transitive_runfiles(runfiles, ctx.attr.srcs, ctx.attr.deps, ctx.attr.data)
 
-    return [
+    providers = [
         DefaultInfo(
             files = depset(transitive_srcs + transitive_data),
             runfiles = runfiles,
@@ -49,6 +50,13 @@ def _rb_library_impl(ctx):
             bundle_env = get_bundle_env(ctx.attr.bundle_env, ctx.attr.deps),
         ),
     ]
+
+    for dep in transitive_deps:
+        if BundlerInfo in dep:
+            providers.append(dep[BundlerInfo])
+            break
+
+    return providers
 
 rb_library = rule(
     implementation = _rb_library_impl,

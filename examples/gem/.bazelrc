@@ -198,11 +198,6 @@ test --test_verbose_timeout_warnings=false
 build --action_env=HOME
 test --test_env=HOME
 
-# JRuby might fail with "Errno::EACCES: Permission denied - NUL" on Windows:
-# https://github.com/jruby/jruby/issues/7182#issuecomment-1112953015.
-build --action_env=JAVA_OPTS="-Djdk.io.File.enableADS=true"
-test --test_env=JAVA_OPTS="-Djdk.io.File.enableADS=true"
-
 # Allows to run tests with rdbg:
 # 1. Add breakpoint with `binding.break`.
 # 2. Run tests: `bazel test --config debug spec:add`.

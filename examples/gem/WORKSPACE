@@ -13,16 +13,15 @@ http_archive(
     ],
 )
 
-load("@rules_ruby//ruby:deps.bzl", "rb_bundle", "rb_register_toolchains")
+load("@rules_ruby//ruby:deps.bzl", "rb_bundle_fetch", "rb_register_toolchains")
 
 rb_register_toolchains(
     version_file = "//:.ruby-version",
 )
 
-rb_bundle(
+rb_bundle_fetch(
     name = "bundle",
     srcs = [
-        "//:Gemfile.lock",
         "//:gem.gemspec",
         "//:lib/gem/version.rb",
     ],
@@ -30,4 +29,5 @@ rb_bundle(
         "BUNDLE_BUILD__FOO": "bar",
     },
     gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
 )

@@ -1,7 +1,18 @@
-"Providers for Interoperability between rules"
+"Providers for interoperability between rules"
+
 RubyFilesInfo = provider(
     "Provider for Ruby files",
     fields = ["transitive_data", "transitive_deps", "transitive_srcs", "bundle_env"],
+)
+
+BundlerInfo = provider(
+    "Provider for Bundler installation",
+    fields = ["bin", "gemfile", "path", "env"],
+)
+
+GemInfo = provider(
+    "Provider for a packed Ruby gem",
+    fields = ["name", "version"],
 )
 
 # https://bazel.build/rules/depsets
@@ -79,9 +90,10 @@ def get_bundle_env(envs, deps):
     transitive_deps = get_transitive_deps(deps).to_list()
     for dep in transitive_deps:
         bundle_env.update(dep[RubyFilesInfo].bundle_env)
+        if BundlerInfo in dep:
+            bundle_env.update(dep[BundlerInfo].env)
 
     for env in envs:
         if env.startswith("BUNDLE_"):
             bundle_env[env] = envs[env]
-
     return bundle_env

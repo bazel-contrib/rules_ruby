@@ -20,14 +20,20 @@ filegroup(
 
 filegroup(
     name = "gem",
-    srcs = ["dist/bin/{gem_binary_name}"],
+    srcs = select({
+        "@platforms//os:windows": ["dist/bin/{gem_binary_name}.cmd"],
+        "//conditions:default": ["dist/bin/{gem_binary_name}"],
+    }),
 )
 
 rb_toolchain(
     name = "toolchain",
-    ruby = ":ruby",
-    bundle = ":bundle",
-    gem = ":gem",
     bindir = "{bindir}",
+    bundle = ":bundle",
+    env = {env},
+    gem = ":gem",
+    ruby = ":ruby",
     version = "{version}",
 )
+
+# vim: ft=bzl
