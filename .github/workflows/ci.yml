@@ -46,6 +46,7 @@ jobs:
           - WORKSPACE
         exclude:
           # JRuby with bzlmod fails with long path issues on Windows.
+          # See #64
           - os: windows
             ruby: jruby-9.4.5.0
             mode: bzlmod

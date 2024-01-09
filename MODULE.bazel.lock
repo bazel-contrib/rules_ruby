@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "927e5313256a133827ed4814eb4dacff4884c3f2b77a6047917ab5e542e95d23",
+  "moduleFileHash": "505c065918d99a227d7f5250dd0e3d27bbc3d6409f8623f35e32583718bd7a7d",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -13,87 +13,28 @@
     "compatibilityMode": "ERROR"
   },
   "localOverrideHashes": {
-    "bazel_tools": "922ea6752dc9105de5af957f7a99a6933c0a6a712d23df6aad16a9c399f7e787",
-    "rules_ruby": "505c065918d99a227d7f5250dd0e3d27bbc3d6409f8623f35e32583718bd7a7d"
+    "bazel_tools": "922ea6752dc9105de5af957f7a99a6933c0a6a712d23df6aad16a9c399f7e787"
   },
   "moduleDepGraph": {
     "<root>": {
-      "name": "",
-      "version": "",
+      "name": "rules_ruby",
+      "version": "0.0.0",
       "key": "<root>",
-      "repoName": "",
+      "repoName": "rules_ruby",
       "executionPlatformsToRegister": [],
-      "toolchainsToRegister": [
-        "@ruby_toolchains//:all"
-      ],
-      "extensionUsages": [
-        {
-          "extensionBzlFile": "@rules_ruby//ruby:extensions.bzl",
-          "extensionName": "ruby",
-          "usingModule": "<root>",
-          "location": {
-            "file": "@@//:MODULE.bazel",
-            "line": 10,
-            "column": 21
-          },
-          "imports": {
-            "ruby": "ruby",
-            "bundle": "bundle",
-            "ruby_toolchains": "ruby_toolchains"
-          },
-          "devImports": [],
-          "tags": [
-            {
-              "tagName": "toolchain",
-              "attributeValues": {
-                "name": "ruby",
-                "version_file": "//:.ruby-version"
-              },
-              "devDependency": false,
-              "location": {
-                "file": "@@//:MODULE.bazel",
-                "line": 11,
-                "column": 15
-              }
-            },
-            {
-              "tagName": "bundle",
-              "attributeValues": {
-                "name": "bundle",
-                "srcs": [
-                  "//:Gemfile.lock",
-                  "//:gem.gemspec",
-                  "//:lib/gem/version.rb"
-                ],
-                "env": {
-                  "BUNDLE_BUILD__FOO": "bar"
-                },
-                "gemfile": "//:Gemfile",
-                "toolchain": "@ruby//:BUILD"
-              },
-              "devDependency": false,
-              "location": {
-                "file": "@@//:MODULE.bazel",
-                "line": 16,
-                "column": 12
-              }
-            }
-          ],
-          "hasDevUseExtension": false,
-          "hasNonDevUseExtension": true
-        }
-      ],
+      "toolchainsToRegister": [],
+      "extensionUsages": [],
       "deps": {
-        "bazel_skylib": "bazel_skylib@1.5.0",
-        "rules_ruby": "rules_ruby@_",
+        "bazel_skylib": "bazel_skylib@1.3.0",
+        "platforms": "platforms@0.0.7",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
       }
     },
-    "bazel_skylib@1.5.0": {
+    "bazel_skylib@1.3.0": {
       "name": "bazel_skylib",
-      "version": "1.5.0",
-      "key": "bazel_skylib@1.5.0",
+      "version": "1.3.0",
+      "key": "bazel_skylib@1.3.0",
       "repoName": "bazel_skylib",
       "executionPlatformsToRegister": [],
       "toolchainsToRegister": [
@@ -110,30 +51,43 @@
         "bzlFile": "@bazel_tools//tools/build_defs/repo:http.bzl",
         "ruleClassName": "http_archive",
         "attributes": {
-          "name": "bazel_skylib~1.5.0",
+          "name": "bazel_skylib~1.3.0",
           "urls": [
-            "https://github.com/bazelbuild/bazel-skylib/releases/download/1.5.0/bazel-skylib-1.5.0.tar.gz"
+            "https://github.com/bazelbuild/bazel-skylib/releases/download/1.3.0/bazel-skylib-1.3.0.tar.gz"
           ],
-          "integrity": "sha256-zVWgYudjuTSZIfD124w5MyiNyLpPdt2UFqrGis7jy5Q=",
+          "integrity": "sha256-dNVE2W9KW7Yw1GXKi7z+Ix41lOWq5X4e2/F6brPKJQY=",
           "strip_prefix": "",
           "remote_patches": {},
           "remote_patch_strip": 0
         }
       }
     },
-    "rules_ruby@_": {
-      "name": "rules_ruby",
-      "version": "0.0.0",
-      "key": "rules_ruby@_",
-      "repoName": "rules_ruby",
+    "platforms@0.0.7": {
+      "name": "platforms",
+      "version": "0.0.7",
+      "key": "platforms@0.0.7",
+      "repoName": "platforms",
       "executionPlatformsToRegister": [],
       "toolchainsToRegister": [],
       "extensionUsages": [],
       "deps": {
-        "bazel_skylib": "bazel_skylib@1.5.0",
-        "platforms": "platforms@0.0.7",
+        "rules_license": "rules_license@0.0.7",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
+      },
+      "repoSpec": {
+        "bzlFile": "@bazel_tools//tools/build_defs/repo:http.bzl",
+        "ruleClassName": "http_archive",
+        "attributes": {
+          "name": "platforms",
+          "urls": [
+            "https://github.com/bazelbuild/platforms/releases/download/0.0.7/platforms-0.0.7.tar.gz"
+          ],
+          "integrity": "sha256-OlYcmee9vpFzqmU/1Xn+hJ8djWc5V4CrR3Cx84FDHVE=",
+          "strip_prefix": "",
+          "remote_patches": {},
+          "remote_patch_strip": 0
+        }
       }
     },
     "bazel_tools@_": {
@@ -283,16 +237,15 @@
         "bazel_tools": "bazel_tools@_"
       }
     },
-    "platforms@0.0.7": {
-      "name": "platforms",
+    "rules_license@0.0.7": {
+      "name": "rules_license",
       "version": "0.0.7",
-      "key": "platforms@0.0.7",
-      "repoName": "platforms",
+      "key": "rules_license@0.0.7",
+      "repoName": "rules_license",
       "executionPlatformsToRegister": [],
       "toolchainsToRegister": [],
       "extensionUsages": [],
       "deps": {
-        "rules_license": "rules_license@0.0.7",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
       },
@@ -300,11 +253,11 @@
         "bzlFile": "@bazel_tools//tools/build_defs/repo:http.bzl",
         "ruleClassName": "http_archive",
         "attributes": {
-          "name": "platforms",
+          "name": "rules_license~0.0.7",
           "urls": [
-            "https://github.com/bazelbuild/platforms/releases/download/0.0.7/platforms-0.0.7.tar.gz"
+            "https://github.com/bazelbuild/rules_license/releases/download/0.0.7/rules_license-0.0.7.tar.gz"
           ],
-          "integrity": "sha256-OlYcmee9vpFzqmU/1Xn+hJ8djWc5V4CrR3Cx84FDHVE=",
+          "integrity": "sha256-RTHezLkTY5ww5cdRKgVNXYdWmNrrddjPkPKEN1/nw2A=",
           "strip_prefix": "",
           "remote_patches": {},
           "remote_patch_strip": 0
@@ -441,7 +394,7 @@
       "deps": {
         "platforms": "platforms@0.0.7",
         "rules_cc": "rules_cc@0.0.9",
-        "bazel_skylib": "bazel_skylib@1.5.0",
+        "bazel_skylib": "bazel_skylib@1.3.0",
         "rules_proto": "rules_proto@4.0.0",
         "rules_license": "rules_license@0.0.7",
         "bazel_tools": "bazel_tools@_",
@@ -462,33 +415,6 @@
         }
       }
     },
-    "rules_license@0.0.7": {
-      "name": "rules_license",
-      "version": "0.0.7",
-      "key": "rules_license@0.0.7",
-      "repoName": "rules_license",
-      "executionPlatformsToRegister": [],
-      "toolchainsToRegister": [],
-      "extensionUsages": [],
-      "deps": {
-        "bazel_tools": "bazel_tools@_",
-        "local_config_platform": "local_config_platform@_"
-      },
-      "repoSpec": {
-        "bzlFile": "@bazel_tools//tools/build_defs/repo:http.bzl",
-        "ruleClassName": "http_archive",
-        "attributes": {
-          "name": "rules_license~0.0.7",
-          "urls": [
-            "https://github.com/bazelbuild/rules_license/releases/download/0.0.7/rules_license-0.0.7.tar.gz"
-          ],
-          "integrity": "sha256-RTHezLkTY5ww5cdRKgVNXYdWmNrrddjPkPKEN1/nw2A=",
-          "strip_prefix": "",
-          "remote_patches": {},
-          "remote_patch_strip": 0
-        }
-      }
-    },
     "rules_proto@4.0.0": {
       "name": "rules_proto",
       "version": "4.0.0",
@@ -498,7 +424,7 @@
       "toolchainsToRegister": [],
       "extensionUsages": [],
       "deps": {
-        "bazel_skylib": "bazel_skylib@1.5.0",
+        "bazel_skylib": "bazel_skylib@1.3.0",
         "rules_cc": "rules_cc@0.0.9",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
@@ -584,7 +510,7 @@
       "toolchainsToRegister": [],
       "extensionUsages": [],
       "deps": {
-        "bazel_skylib": "bazel_skylib@1.5.0",
+        "bazel_skylib": "bazel_skylib@1.3.0",
         "zlib": "zlib@1.3",
         "rules_python": "rules_python@0.4.0",
         "rules_cc": "rules_cc@0.0.9",
@@ -675,7 +601,7 @@
         }
       ],
       "deps": {
-        "bazel_skylib": "bazel_skylib@1.5.0",
+        "bazel_skylib": "bazel_skylib@1.3.0",
         "platforms": "platforms@0.0.7",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
@@ -738,6 +664,24 @@
             "ruleClassName": "cc_autoconf_toolchains",
             "attributes": {
               "name": "bazel_tools~cc_configure_extension~local_config_cc_toolchains"
+            }
+          }
+        }
+      }
+    },
+    "@@bazel_tools//tools/osx:xcode_configure.bzl%xcode_configure_extension": {
+      "general": {
+        "bzlTransitiveDigest": "Qh2bWTU6QW6wkrd87qrU4YeY+SG37Nvw3A0PR4Y0L2Y=",
+        "accumulatedFileDigests": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "local_config_xcode": {
+            "bzlFile": "@@bazel_tools//tools/osx:xcode_configure.bzl",
+            "ruleClassName": "xcode_autoconf",
+            "attributes": {
+              "name": "bazel_tools~xcode_configure_extension~local_config_xcode",
+              "xcode_locator": "@bazel_tools//tools/osx:xcode_locator.m",
+              "remote_xcode": ""
             }
           }
         }
@@ -1294,50 +1238,6 @@
             "attributes": {
               "name": "rules_java~7.1.0~toolchains~remotejdk21_win_toolchain_config_repo",
               "build_file": "\nconfig_setting(\n    name = \"prefix_version_setting\",\n    values = {\"java_runtime_version\": \"remotejdk_21\"},\n    visibility = [\"//visibility:private\"],\n)\nconfig_setting(\n    name = \"version_setting\",\n    values = {\"java_runtime_version\": \"21\"},\n    visibility = [\"//visibility:private\"],\n)\nalias(\n    name = \"version_or_prefix_version_setting\",\n    actual = select({\n        \":version_setting\": \":version_setting\",\n        \"//conditions:default\": \":prefix_version_setting\",\n    }),\n    visibility = [\"//visibility:private\"],\n)\ntoolchain(\n    name = \"toolchain\",\n    target_compatible_with = [\"@platforms//os:windows\", \"@platforms//cpu:x86_64\"],\n    target_settings = [\":version_or_prefix_version_setting\"],\n    toolchain_type = \"@bazel_tools//tools/jdk:runtime_toolchain_type\",\n    toolchain = \"@remotejdk21_win//:jdk\",\n)\ntoolchain(\n    name = \"bootstrap_runtime_toolchain\",\n    # These constraints are not required for correctness, but prevent fetches of remote JDK for\n    # different architectures. As every Java compilation toolchain depends on a bootstrap runtime in\n    # the same configuration, this constraint will not result in toolchain resolution failures.\n    exec_compatible_with = [\"@platforms//os:windows\", \"@platforms//cpu:x86_64\"],\n    target_settings = [\":version_or_prefix_version_setting\"],\n    toolchain_type = \"@bazel_tools//tools/jdk:bootstrap_runtime_toolchain_type\",\n    toolchain = \"@remotejdk21_win//:jdk\",\n)\n"
-            }
-          }
-        }
-      }
-    },
-    "@@rules_ruby~override//ruby:extensions.bzl%ruby": {
-      "general": {
-        "bzlTransitiveDigest": "SQxPoUdQVlY1E52xJKuldVUzDBzhDAK9Le3Dihl5TZo=",
-        "accumulatedFileDigests": {},
-        "envVariables": {},
-        "generatedRepoSpecs": {
-          "ruby_toolchains": {
-            "bzlFile": "@@rules_ruby~override//ruby/private/toolchain:repository_proxy.bzl",
-            "ruleClassName": "rb_toolchain_repository_proxy",
-            "attributes": {
-              "name": "rules_ruby~override~ruby~ruby_toolchains",
-              "toolchain": "@ruby//:toolchain",
-              "toolchain_type": "@rules_ruby//ruby:toolchain_type"
-            }
-          },
-          "bundle": {
-            "bzlFile": "@@rules_ruby~override//ruby/private:bundle.bzl",
-            "ruleClassName": "rb_bundle",
-            "attributes": {
-              "toolchain": "@@rules_ruby~override~ruby~ruby//:BUILD",
-              "name": "rules_ruby~override~ruby~bundle",
-              "srcs": [
-                "@@//:Gemfile.lock",
-                "@@//:gem.gemspec",
-                "@@//:lib/gem/version.rb"
-              ],
-              "env": {
-                "BUNDLE_BUILD__FOO": "bar"
-              },
-              "gemfile": "@@//:Gemfile"
-            }
-          },
-          "ruby": {
-            "bzlFile": "@@rules_ruby~override//ruby/private:download.bzl",
-            "ruleClassName": "rb_download",
-            "attributes": {
-              "name": "rules_ruby~override~ruby~ruby",
-              "version": "",
-              "version_file": "@@//:.ruby-version"
             }
           }
         }
