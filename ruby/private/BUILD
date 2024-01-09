@@ -1,7 +1,5 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
-exports_files(["gem_build/gem_builder.rb.tpl"])
-
 bzl_library(
     name = "binary",
     srcs = ["binary.bzl"],
@@ -9,7 +7,7 @@ bzl_library(
     deps = [
         ":library",
         ":providers",
-        "//ruby/private/binary:rlocation",
+        ":utils",
     ],
 )
 
@@ -20,6 +18,7 @@ bzl_library(
     deps = [
         ":library",
         ":providers",
+        ":utils",
     ],
 )
 
@@ -61,6 +60,44 @@ bzl_library(
 )
 
 bzl_library(
+    name = "bundle_fetch",
+    srcs = ["bundle_fetch.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+    deps = [
+        ":utils",
+        "//ruby/private/bundle_fetch:gemfile_lock_parser",
+    ],
+)
+
+bzl_library(
+    name = "bundle_install",
+    srcs = ["bundle_install.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+    deps = [
+        ":gem_install",
+        ":providers",
+        ":utils",
+    ],
+)
+
+bzl_library(
+    name = "gem",
+    srcs = ["gem.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+    deps = [":providers"],
+)
+
+bzl_library(
+    name = "gem_install",
+    srcs = ["gem_install.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+    deps = [
+        ":providers",
+        ":utils",
+    ],
+)
+
+bzl_library(
     name = "bundle",
     srcs = ["bundle.bzl"],
     visibility = ["//ruby:__subpackages__"],
@@ -75,5 +112,11 @@ bzl_library(
 bzl_library(
     name = "providers",
     srcs = ["providers.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+)
+
+bzl_library(
+    name = "utils",
+    srcs = ["utils.bzl"],
     visibility = ["//ruby:__subpackages__"],
 )

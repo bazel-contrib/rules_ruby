@@ -2,6 +2,65 @@
 
 Public API for repository rules
 
+<a id="rb_bundle_fetch"></a>
+
+## rb_bundle_fetch
+
+<pre>
+rb_bundle_fetch(<a href="#rb_bundle_fetch-name">name</a>, <a href="#rb_bundle_fetch-env">env</a>, <a href="#rb_bundle_fetch-gemfile">gemfile</a>, <a href="#rb_bundle_fetch-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_fetch-repo_mapping">repo_mapping</a>, <a href="#rb_bundle_fetch-srcs">srcs</a>)
+</pre>
+
+
+Fetches Bundler dependencies to be automatically installed by other targets.
+
+Currently doesn't support installing gems from Git repositories,
+see https://github.com/bazel-contrib/rules_ruby/issues/62.
+
+`WORKSPACE`:
+```bazel
+load("@rules_ruby//ruby:deps.bzl", "rb_bundle_fetch")
+
+rb_bundle_fetch(
+    name = "bundle",
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+    srcs = [
+        "//:gem.gemspec",
+        "//:lib/gem/version.rb",
+    ]
+)
+```
+
+All the installed gems can be accessed using `@bundle` target and additionally
+gems binary files can also be used:
+
+`BUILD`:
+```bazel
+load("@rules_ruby//ruby:defs.bzl", "rb_test")
+
+package(default_visibility = ["//:__subpackages__"])
+
+rb_test(
+    name = "rubocop",
+    main = "@bundle//bin:rubocop",
+    deps = ["@bundle"],
+)
+```
+    
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="rb_bundle_fetch-name"></a>name |  A unique name for this repository.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="rb_bundle_fetch-env"></a>env |  Environment variables to use during installation.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | <code>{}</code> |
+| <a id="rb_bundle_fetch-gemfile"></a>gemfile |  Gemfile to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+| <a id="rb_bundle_fetch-gemfile_lock"></a>gemfile_lock |  Gemfile.lock to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+| <a id="rb_bundle_fetch-repo_mapping"></a>repo_mapping |  A dictionary from local repository name to global repository name. This allows controls over workspace dependency resolution for dependencies of this repository.&lt;p&gt;For example, an entry <code>"@foo": "@bar"</code> declares that, for any time this repository depends on <code>@foo</code> (such as a dependency on <code>@foo//some:target</code>, it should actually resolve that dependency within globally-declared <code>@bar</code> (<code>@bar//some:target</code>).   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | required |  |
+| <a id="rb_bundle_fetch-srcs"></a>srcs |  List of Ruby source files necessary during installation.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
+
+
 <a id="rb_bundle_rule"></a>
 
 ## rb_bundle_rule
@@ -10,6 +69,8 @@ Public API for repository rules
 rb_bundle_rule(<a href="#rb_bundle_rule-name">name</a>, <a href="#rb_bundle_rule-env">env</a>, <a href="#rb_bundle_rule-gemfile">gemfile</a>, <a href="#rb_bundle_rule-repo_mapping">repo_mapping</a>, <a href="#rb_bundle_rule-srcs">srcs</a>, <a href="#rb_bundle_rule-toolchain">toolchain</a>)
 </pre>
 
+
+(Deprecated) Use `rb_bundle_fetch()` instead.
 
 Installs Bundler dependencies and registers an external repository
 that can be used by other targets.
@@ -82,7 +143,7 @@ rb_bundle(<a href="#rb_bundle-toolchain">toolchain</a>, <a href="#rb_bundle-kwar
 ## rb_register_toolchains
 
 <pre>
-rb_register_toolchains(<a href="#rb_register_toolchains-name">name</a>, <a href="#rb_register_toolchains-version">version</a>, <a href="#rb_register_toolchains-version_file">version_file</a>, <a href="#rb_register_toolchains-register">register</a>, <a href="#rb_register_toolchains-kwargs">kwargs</a>)
+rb_register_toolchains(<a href="#rb_register_toolchains-name">name</a>, <a href="#rb_register_toolchains-version">version</a>, <a href="#rb_register_toolchains-version_file">version_file</a>, <a href="#rb_register_toolchains-msys2_packages">msys2_packages</a>, <a href="#rb_register_toolchains-register">register</a>, <a href="#rb_register_toolchains-kwargs">kwargs</a>)
 </pre>
 
     Register a Ruby toolchain and lazily download the Ruby Interpreter.
@@ -91,7 +152,7 @@ rb_register_toolchains(<a href="#rb_register_toolchains-name">name</a>, <a href=
 * _(For MRI on Windows)_ Installed using [RubyInstaller](https://rubyinstaller.org).
 * _(For JRuby on any OS)_ Downloaded and installed directly from [official website](https://www.jruby.org).
 * _(For TruffleRuby on Linux and macOS)_ Installed using [ruby-build](https://github.com/rbenv/ruby-build).
-* _(For "system") Ruby found on the PATH is used. Please note that builds are not hermetic in this case.
+* _(For "system")_ Ruby found on the PATH is used. Please note that builds are not hermetic in this case.
 
 `WORKSPACE`:
 ```bazel
@@ -111,6 +172,7 @@ rb_register_toolchains(
 | <a id="rb_register_toolchains-name"></a>name |  base name of resulting repositories, by default "rules_ruby"   |  <code>"ruby"</code> |
 | <a id="rb_register_toolchains-version"></a>version |  a semver version of MRI, or a string like [interpreter type]-[version], or "system"   |  <code>None</code> |
 | <a id="rb_register_toolchains-version_file"></a>version_file |  .ruby-version or .tool-versions file to read version from   |  <code>None</code> |
+| <a id="rb_register_toolchains-msys2_packages"></a>msys2_packages |  extra MSYS2 packages to install   |  <code>["libyaml"]</code> |
 | <a id="rb_register_toolchains-register"></a>register |  whether to register the resulting toolchains, should be False under bzlmod   |  <code>True</code> |
 | <a id="rb_register_toolchains-kwargs"></a>kwargs |  additional parameters to the downloader for this interpreter type   |  none |
 

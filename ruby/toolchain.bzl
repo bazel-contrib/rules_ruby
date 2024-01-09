@@ -7,6 +7,7 @@ def _rb_toolchain_impl(ctx):
         gem = ctx.executable.gem,
         bindir = ctx.attr.bindir,
         version = ctx.attr.version,
+        env = ctx.attr.env,
     )
 
 rb_toolchain = rule(
@@ -35,6 +36,9 @@ rb_toolchain = rule(
         ),
         "version": attr.string(
             doc = "Ruby version",
+        ),
+        "env": attr.string_dict(
+            doc = "Environment variables required by an interpreter",
         ),
     },
 )

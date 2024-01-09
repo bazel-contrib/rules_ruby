@@ -17,7 +17,7 @@ rb_test(
     timeout = "moderate",  # JRuby startup can be slow
     srcs = ["add_spec.rb"],
     args = ["spec/add_spec.rb"],
-    main = "@bundle//:bin/rspec",
+    main = "@bundle//bin:rspec",
     deps = [":spec_helper"],
 )
 
@@ -32,7 +32,7 @@ rb_test(
         "USER",  # POSIX
         "USERNAME",  # Windows
     ],
-    main = "@bundle//:bin/rspec",
+    main = "@bundle//bin:rspec",
     deps = [":spec_helper"],
 )
 
@@ -43,7 +43,7 @@ rb_test(
     srcs = ["file_spec.rb"],
     args = ["spec/file_spec.rb"],
     data = ["support/file.txt"],
-    main = "@bundle//:bin/rspec",
+    main = "@bundle//bin:rspec",
     deps = [":spec_helper"],
 )
 
@@ -53,6 +53,6 @@ rb_test(
     timeout = "moderate",  # JRuby startup can be slow
     srcs = ["subtract_spec.rb"],
     args = ["spec/subtract_spec.rb"],
-    main = "@bundle//:bin/rspec",
+    main = "@bundle//bin:rspec",
     deps = [":spec_helper"],
 )

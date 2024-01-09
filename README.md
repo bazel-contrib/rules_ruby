@@ -32,12 +32,12 @@ rb_register_toolchains(
 
 ```bazel
 # WORKSPACE
-load("@rules_ruby//ruby:deps.bzl", "rb_bundle")
+load("@rules_ruby//ruby:deps.bzl", "rb_bundle_fetch")
 
-rb_bundle(
+rb_bundle_fetch(
     name = "bundle",
-    srcs = ["//:Gemfile.lock"],
     gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
 )
 ```
 
@@ -64,11 +64,10 @@ use_repo(ruby, "ruby")
 
 ```bazel
 # MODULE.bazel
-ruby.bundle(
+ruby.bundle_fetch(
     name = "bundle",
-    srcs = ["//:Gemfile.lock"],
     gemfile = "//:Gemfile",
-    toolchain = "@ruby//:BUILD",
+    gemfile_lock = "//:Gemfile.lock",
 )
 use_repo(ruby, "bundle", "ruby_toolchains")
 ```
@@ -137,11 +136,10 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
 ## Known Issues
 
 * JRuby/TruffleRuby might need `HOME` variable exposed.
-  See [`eamples/gem/.bazelrc`][7] to learn how to do that.
+  See [`examples/gem/.bazelrc`][7] to learn how to do that.
   This is to be fixed in [`jruby/jruby#5661`][9] and [`oracle/truffleruby#2784`][10].
 * JRuby might fail with `Errno::EACCES: Permission denied - NUL` error on Windows.
   You need to configure JDK to allow proper access.
-  See [`examples/gem/.bazelrc`][7] to learn how to do that.
   This is described in [`jruby/jruby#7182`][11].
 * RuboCop < 1.55 crashes with `LoadError` on Windows.
   This is fixed in [`rubocop/rubocop#12062`][12].

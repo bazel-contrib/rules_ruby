@@ -14,7 +14,10 @@ bzl_library(
     srcs = ["defs.bzl"],
     deps = [
         "//ruby/private:binary",
+        "//ruby/private:bundle_install",
+        "//ruby/private:gem",
         "//ruby/private:gem_build",
+        "//ruby/private:gem_install",
         "//ruby/private:gem_push",
         "//ruby/private:library",
         "//ruby/private:test",
@@ -26,6 +29,7 @@ bzl_library(
     srcs = ["deps.bzl"],
     deps = [
         "//ruby/private:bundle",
+        "//ruby/private:bundle_fetch",
         "//ruby/private:toolchain",
     ],
 )

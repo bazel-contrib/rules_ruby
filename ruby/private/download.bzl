@@ -30,6 +30,16 @@ def _rb_download_impl(repository_ctx):
         ruby_binary_name = "ruby"
         gem_binary_name = "gem"
 
+    env = {}
+    if version.startswith("jruby"):
+        # JRuby might fail with "Errno::EACCES: Permission denied - NUL" on Windows:
+        # https://github.com/jruby/jruby/issues/7182#issuecomment-1112953015
+        env.update({"JAVA_OPTS": "-Djdk.io.File.enableADS=true"})
+    elif version.startswith("truffleruby"):
+        # TruffleRuby needs explicit locale
+        # https://www.graalvm.org/dev/reference-manual/ruby/UTF8Locale/
+        env.update({"LANG": "en_US.UTF-8"})
+
     repository_ctx.template(
         "BUILD",
         repository_ctx.attr._build_tpl,
@@ -39,6 +49,7 @@ def _rb_download_impl(repository_ctx):
             "{version}": version,
             "{ruby_binary_name}": ruby_binary_name,
             "{gem_binary_name}": gem_binary_name,
+            "{env}": repr(env),
         },
     )
 
@@ -67,6 +78,7 @@ def _install_jruby(repository_ctx, version):
 
     if repository_ctx.os.name.startswith("windows"):
         repository_ctx.symlink("dist/bin/bundle.bat", "dist/bin/bundle.cmd")
+        repository_ctx.symlink("dist/bin/jgem.bat", "dist/bin/jgem.cmd")
 
 # https://github.com/oneclick/rubyinstaller2/wiki/FAQ#q-how-do-i-perform-a-silentunattended-install-with-the-rubyinstaller
 def _install_via_rubyinstaller(repository_ctx, version):
@@ -89,9 +101,27 @@ def _install_via_rubyinstaller(repository_ctx, version):
     if result.return_code != 0:
         fail("%s\n%s" % (result.stdout, result.stderr))
 
-    result = repository_ctx.execute(["./dist/bin/ridk.cmd", "install", "1"])
+    result = repository_ctx.execute(["./dist/bin/ridk.cmd", "install", "1", "3"])
     if result.return_code != 0:
         fail("%s\n%s" % (result.stdout, result.stderr))
+
+    if len(repository_ctx.attr.msys2_packages) > 0:
+        mingw_package_prefix = None
+        result = repository_ctx.execute([
+            "./dist/bin/ruby.exe",
+            "-rruby_installer",
+            "-e",
+            "puts RubyInstaller::Runtime::Msys2Installation.new.mingw_package_prefix",
+        ])
+        if result.return_code != 0:
+            fail("%s\n%s" % (result.stdout, result.stderr))
+        else:
+            mingw_package_prefix = result.stdout.strip()
+
+        packages = ["%s-%s" % (mingw_package_prefix, package) for package in repository_ctx.attr.msys2_packages]
+        result = repository_ctx.execute(["./dist/bin/ridk.cmd", "exec", "pacman", "--sync", "--noconfirm"] + packages)
+        if result.return_code != 0:
+            fail("%s\n%s" % (result.stdout, result.stderr))
 
     binpath = repository_ctx.path("dist/bin")
     if not binpath.get_child("bundle.cmd").exists:
@@ -135,6 +165,14 @@ rb_download = repository_rule(
         "version_file": attr.label(
             allow_single_file = [".ruby-version"],
             doc = "File to read Ruby version from.",
+        ),
+        "msys2_packages": attr.string_list(
+            default = ["libyaml"],
+            doc = """
+Extra MSYS2 packages to install.
+
+By default, contains `libyaml` (dependency of a `psych` gem).
+""",
         ),
         "ruby_build_version": attr.string(
             default = "20231225",

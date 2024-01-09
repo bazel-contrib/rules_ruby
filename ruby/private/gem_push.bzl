@@ -1,4 +1,4 @@
-"Implementation details for gem_push"
+"Implementation details for rb_gem_push"
 
 load("//ruby/private:binary.bzl", "generate_rb_binary_script", BINARY_ATTRS = "ATTRS")
 load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
@@ -8,7 +8,7 @@ def _rb_gem_push_impl(ctx):
     java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
     srcs = [ctx.file.gem]
-    tools = [ruby_toolchain.gem]
+    tools = [ruby_toolchain.gem, ctx.file._runfiles_library]
 
     if ruby_toolchain.version.startswith("jruby"):
         env["JAVA_HOME"] = java_toolchain.java_runtime.java_home
@@ -52,6 +52,7 @@ Gem file to push to RubyGems. You would usually use an output of `rb_gem_build()
         _binary_cmd_tpl = BINARY_ATTRS["_binary_cmd_tpl"],
         _binary_sh_tpl = BINARY_ATTRS["_binary_sh_tpl"],
         _windows_constraint = BINARY_ATTRS["_windows_constraint"],
+        _runfiles_library = BINARY_ATTRS["_runfiles_library"],
     ),
     toolchains = [
         "@rules_ruby//ruby:toolchain_type",

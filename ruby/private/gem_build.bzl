@@ -3,31 +3,33 @@
 load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
 load(
     "//ruby/private:providers.bzl",
+    "BundlerInfo",
     "RubyFilesInfo",
     "get_bundle_env",
     "get_transitive_data",
     "get_transitive_deps",
     "get_transitive_srcs",
 )
+load("//ruby/private:utils.bzl", _is_windows = "is_windows")
 
 def _rb_gem_build_impl(ctx):
-    env = {}
-    windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
-    is_windows = ctx.target_platform_has_constraint(windows_constraint)
     tools = depset([])
 
     gem_builder = ctx.actions.declare_file("{}_gem_builder.rb".format(ctx.label.name))
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
-    transitive_deps = get_transitive_deps(ctx.attr.deps)
+    transitive_deps = get_transitive_deps(ctx.attr.deps).to_list()
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
     bundle_env = get_bundle_env({}, ctx.attr.deps)
     java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
+    env = {}
+    env.update(ruby_toolchain.env)
+
     if ruby_toolchain.version.startswith("jruby"):
         env["JAVA_HOME"] = java_toolchain.java_runtime.java_home
         tools = java_toolchain.java_runtime.files
-        if is_windows:
+        if _is_windows(ctx):
             env["PATH"] = ruby_toolchain.ruby.dirname
 
     # Inputs manifest is a dictionary where:
@@ -58,23 +60,38 @@ def _rb_gem_build_impl(ctx):
     args = ctx.actions.args()
     args.add(gem_builder)
     ctx.actions.run(
-        inputs = depset(inputs),
         executable = ruby_toolchain.ruby,
-        arguments = [args],
+        inputs = depset(inputs),
         outputs = [ctx.outputs.gem],
+        arguments = [args],
         env = env,
-        use_default_shell_env = not is_windows,
+        mnemonic = "GemBuild",
         tools = tools,
+        use_default_shell_env = not _is_windows(ctx),
     )
 
-    return [
+    providers = []
+    runfiles = ctx.runfiles(transitive_srcs + transitive_data)
+    for dep in transitive_deps:
+        if BundlerInfo in dep:
+            providers.append(dep[BundlerInfo])
+            runfiles.merge(ctx.runfiles([dep[BundlerInfo].gemfile, dep[BundlerInfo].path]))
+            break
+
+    providers.extend([
+        DefaultInfo(
+            files = depset([ctx.outputs.gem]),
+            runfiles = runfiles,
+        ),
         RubyFilesInfo(
             transitive_data = depset(transitive_data),
-            transitive_deps = transitive_deps,
+            transitive_deps = depset(transitive_deps),
             transitive_srcs = depset(transitive_srcs),
             bundle_env = bundle_env,
         ),
-    ]
+    ])
+
+    return providers
 
 rb_gem_build = rule(
     _rb_gem_build_impl,
@@ -87,7 +104,7 @@ rb_gem_build = rule(
         ),
         _gem_builder_tpl = attr.label(
             allow_single_file = True,
-            default = "@rules_ruby//ruby/private:gem_build/gem_builder.rb.tpl",
+            default = "@rules_ruby//ruby/private/gem_build:gem_builder.rb.tpl",
         ),
         _windows_constraint = attr.label(
             default = "@platforms//os:windows",

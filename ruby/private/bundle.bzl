@@ -6,7 +6,16 @@ _BINSTUB_CMD = """@ruby -x "%~f0" %*
 {}
 """
 
+_DEPRECATED_MESSAGE = """
+
+rb_bundle(...) is deprecated and will be removed in the future versions.
+rb_bundle_fetch(...) should be used instead.
+
+"""
+
 def _rb_bundle_impl(repository_ctx):
+    print(_DEPRECATED_MESSAGE)  # buildifier: disable=print
+
     binstubs_path = repository_ctx.path("bin")
     bundle_path = repository_ctx.path(".")
     gemfile_path = repository_ctx.path(repository_ctx.attr.gemfile)
@@ -96,6 +105,8 @@ Gemfile to install dependencies from.
         ),
     },
     doc = """
+(Deprecated) Use `rb_bundle_fetch()` instead.
+
 Installs Bundler dependencies and registers an external repository
 that can be used by other targets.
 

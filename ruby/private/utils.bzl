@@ -59,3 +59,83 @@ exit /b 0
 :rlocation_end
 :: End of rlocation
 """
+
+def is_windows(ctx):
+    windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
+    return ctx.target_platform_has_constraint(windows_constraint)
+
+def convert_env_to_script(ctx, env):
+    """Converts an env dictionary to a string of batch/shell commands.
+
+    Args:
+        ctx: rule context
+        env: dictionary of environment variables
+
+    Returns:
+        a string with export environment variables commands.
+    """
+    environment = []
+    if is_windows(ctx):
+        export_command = "set"
+    else:
+        export_command = "export"
+
+    for (name, value) in env.items():
+        command = "{command} {name}={value}".format(command = export_command, name = name, value = value)
+        environment.append(command)
+
+    return "\n".join(environment)
+
+def normalize_path(ctx, path):
+    """Converts path to an OS-specific equivalent.
+
+    Args:
+        ctx: rule context
+        path: filepath string
+
+    Returns:
+        an OS-specific path.
+    """
+    if is_windows(ctx):
+        return path.replace("/", "\\")
+    else:
+        return path.replace("\\", "/")
+
+def join_and_indent(names, indentation_level = 2):
+    """Convers a list of strings to a pretty indented BUILD variant.
+
+    Args:
+        names: list of strings
+        indentation_level: how many 4 spaces to indent with
+
+    Returns:
+        indented string
+    """
+    indentation = ""
+    for _ in range(0, indentation_level):
+        indentation += "    "
+
+    string = "["
+    for name in names:
+        string += '\n%s"%s",' % (indentation, name)
+    string += "\n%s]" % indentation[:-4]
+
+    return string
+
+def normalize_bzlmod_repository_name(name):
+    """Converts Bzlmod repostory to its private name.
+
+    This is needed to define a target that is called the same as the repository.
+    For example, given a canonical name "rules_ruby~override~ruby~bundle",
+    the function would return "bundle" as the name.
+
+    This is a hacky workaround and will be fixed upstream.
+    See https://github.com/bazelbuild/bazel/issues/20486.
+
+    Args:
+        name: canonical repository name
+
+    Returns:
+        repository name
+    """
+    return name.rpartition("~")[-1]
