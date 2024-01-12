@@ -28,12 +28,12 @@ filegroup(
 
 rb_toolchain(
     name = "toolchain",
-    bindir = "{bindir}",
     bundle = ":bundle",
     env = {env},
     gem = ":gem",
     ruby = ":ruby",
     version = "{version}",
+    files = glob(["dist/**/*"]),
 )
 
 # vim: ft=bzl

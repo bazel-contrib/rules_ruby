@@ -45,7 +45,6 @@ def _rb_download_impl(repository_ctx):
         repository_ctx.attr._build_tpl,
         executable = False,
         substitutions = {
-            "{bindir}": repr(repository_ctx.path("dist/bin")),
             "{version}": version,
             "{ruby_binary_name}": ruby_binary_name,
             "{gem_binary_name}": gem_binary_name,

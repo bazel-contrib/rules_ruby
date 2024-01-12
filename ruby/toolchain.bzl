@@ -5,9 +5,9 @@ def _rb_toolchain_impl(ctx):
         ruby = ctx.executable.ruby,
         bundle = ctx.executable.bundle,
         gem = ctx.executable.gem,
-        bindir = ctx.attr.bindir,
         version = ctx.attr.version,
         env = ctx.attr.env,
+        files = ctx.files.files,
     )
 
 rb_toolchain = rule(
@@ -31,14 +31,15 @@ rb_toolchain = rule(
             executable = True,
             cfg = "exec",
         ),
-        "bindir": attr.string(
-            doc = "Path to Ruby bin/ directory",
-        ),
         "version": attr.string(
             doc = "Ruby version",
         ),
         "env": attr.string_dict(
             doc = "Environment variables required by an interpreter",
+        ),
+        "files": attr.label_list(
+            allow_files = True,
+            doc = "All files necessary for toolchain",
         ),
     },
 )

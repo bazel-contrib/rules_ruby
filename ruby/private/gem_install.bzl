@@ -15,7 +15,10 @@ def _rb_gem_install_impl(ctx):
 
     env = {}
     env.update(toolchain.env)
-    tools = [toolchain.gem]
+
+    tools = []
+    tools.extend(toolchain.files)
+
     if toolchain.version.startswith("jruby"):
         java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
         tools.extend(java_toolchain.java_runtime.files.to_list())
@@ -24,11 +27,11 @@ def _rb_gem_install_impl(ctx):
     if _is_windows(ctx):
         gem_install = ctx.actions.declare_file("gem_install_{}.cmd".format(ctx.label.name))
         template = ctx.file._gem_install_cmd_tpl
-        env.update({"PATH": _normalize_path(ctx, toolchain.bindir) + ";%PATH%"})
+        env.update({"PATH": _normalize_path(ctx, toolchain.ruby.dirname) + ";%PATH%"})
     else:
         gem_install = ctx.actions.declare_file("gem_install_{}.sh".format(ctx.label.name))
         template = ctx.file._gem_install_sh_tpl
-        env.update({"PATH": "%s:$PATH" % toolchain.bindir})
+        env.update({"PATH": "%s:$PATH" % toolchain.ruby.dirname})
 
     ctx.actions.expand_template(
         template = template,
