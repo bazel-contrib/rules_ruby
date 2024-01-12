@@ -11,7 +11,8 @@ load(
 def _rb_bundle_install_impl(ctx):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
-    tools = [toolchain.ruby, toolchain.bundle]
+    tools = []
+    tools.extend(toolchain.files)
     bundler_exe = toolchain.bundle.path
 
     for gem in ctx.attr.gems:
@@ -35,11 +36,11 @@ def _rb_bundle_install_impl(ctx):
     if _is_windows(ctx):
         script = ctx.actions.declare_file("bundle_install_{}.cmd".format(ctx.label.name))
         template = ctx.file._bundle_install_cmd_tpl
-        env.update({"PATH": _normalize_path(ctx, toolchain.bindir) + ";%PATH%"})
+        env.update({"PATH": _normalize_path(ctx, toolchain.ruby.dirname) + ";%PATH%"})
     else:
         script = ctx.actions.declare_file("bundle_install_{}.sh".format(ctx.label.name))
         template = ctx.file._bundle_install_sh_tpl
-        env.update({"PATH": "%s:$PATH" % toolchain.bindir})
+        env.update({"PATH": "%s:$PATH" % toolchain.ruby.dirname})
 
     # Calculate relative location between BUNDLE_GEMFILE and BUNDLE_PATH.
     relative_dir = "../../"

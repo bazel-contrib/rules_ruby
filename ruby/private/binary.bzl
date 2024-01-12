@@ -18,6 +18,7 @@ load(
     _convert_env_to_script = "convert_env_to_script",
     _is_windows = "is_windows",
     _normalize_path = "normalize_path",
+    _to_rlocation_path = "to_rlocation_path",
 )
 
 ATTRS = {
@@ -66,16 +67,15 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
 
     environment = {}
     environment.update(env)
+
     if _is_windows(ctx):
         rlocation_function = BATCH_RLOCATION_FUNCTION
         script = ctx.actions.declare_file("{}.rb.cmd".format(ctx.label.name))
         template = ctx.file._binary_cmd_tpl
-        environment.update({"PATH": _normalize_path(ctx, toolchain.bindir) + ";%PATH%"})
     else:
         rlocation_function = BASH_RLOCATION_FUNCTION
         script = ctx.actions.declare_file("{}.rb.sh".format(ctx.label.name))
         template = ctx.file._binary_sh_tpl
-        environment.update({"PATH": "%s:$PATH" % toolchain.bindir})
 
     if bundler:
         bundler_command = "bundle exec"
@@ -94,6 +94,7 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
             "{binary}": _normalize_path(ctx, binary_path),
             "{env}": _convert_env_to_script(ctx, environment),
             "{bundler_command}": bundler_command,
+            "{ruby}": _to_rlocation_path(toolchain.ruby),
             "{ruby_binary_name}": toolchain.ruby.basename,
             "{java_bin}": java_bin,
             "{rlocation_function}": rlocation_function,
@@ -114,7 +115,8 @@ def rb_binary_impl(ctx):
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
 
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
-    tools = [ruby_toolchain.ruby, ruby_toolchain.bundle, ruby_toolchain.gem, ctx.file._runfiles_library]
+    tools = [ctx.file._runfiles_library]
+    tools.extend(ruby_toolchain.files)
 
     if ruby_toolchain.version.startswith("jruby"):
         java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
@@ -133,8 +135,8 @@ def rb_binary_impl(ctx):
 
             # See https://bundler.io/v2.5/man/bundle-config.1.html for confiugration keys.
             env.update({
-                "BUNDLE_GEMFILE": info.gemfile.short_path.removeprefix("../"),
-                "BUNDLE_PATH": info.path.short_path.removeprefix("../"),
+                "BUNDLE_GEMFILE": _to_rlocation_path(info.gemfile),
+                "BUNDLE_PATH": _to_rlocation_path(info.path),
             })
 
     bundle_env = get_bundle_env(ctx.attr.env, ctx.attr.deps)
@@ -160,7 +162,7 @@ def rb_binary_impl(ctx):
             runfiles = runfiles,
         ),
         RubyFilesInfo(
-            transitive_data = depset(transitive_data),
+            transitive_data = depset(transitive_data + tools),
             transitive_deps = depset(transitive_deps),
             transitive_srcs = depset(transitive_srcs),
             bundle_env = bundle_env,

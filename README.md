@@ -122,6 +122,7 @@ On Windows, [RubyInstaller][6] is used to install MRI.
 
 On all operating systems, JRuby is downloaded manually.
 It uses Bazel runtime Java toolchain as JDK.
+JRuby is currently the only toolchain that supports [Remote Build Execution][15].
 
 ### TruffleRuby
 
@@ -161,3 +162,4 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
 [12]: https://github.com/rubocop/rubocop/pull/12062
 [13]: https://github.com/bazel-contrib/rules_ruby/releases/tag/v0.3.0
 [14]: examples/
+[15]: https://bazel.build/remote/rbe

@@ -139,3 +139,7 @@ def normalize_bzlmod_repository_name(name):
         repository name
     """
     return name.rpartition("~")[-1]
+
+def to_rlocation_path(source):
+    """Returns source path that can be used with runfiles library."""
+    return source.short_path.removeprefix("../")
