@@ -1,5 +1,6 @@
-"Implementation details for fetch the bundler"
+"Implementation details for rb_bundle_fetch"
 
+load("@bazel_skylib//lib:versions.bzl", "versions")
 load(
     "//ruby/private:utils.bzl",
     _join_and_indent = "join_and_indent",
@@ -35,15 +36,6 @@ Please update Bundler version and try again.
 See https://github.com/rubygems/rubygems/issues/4620 for more details.
 
 """
-
-def _is_outdated_bundler(version):
-    """Checks that Bundler version is 2.2.19+.
-
-    Older versions don't work with cached gems properly.
-    See https://github.com/rubygems/rubygems/issues/4620 for more details.
-    """
-    major, minor, patch = version.split(".")
-    return (int(major) < 2 or int(minor) < 2 or int(patch) < 19)
 
 def _download_gem(repository_ctx, gem, cache_path):
     """Downloads gem into a predefined vendor/cache location."""
@@ -100,7 +92,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
         repository_ctx.file(src.name, repository_ctx.read(src))
 
     gemfile_lock = parse_gemfile_lock(repository_ctx.read(gemfile_lock_path))
-    if _is_outdated_bundler(gemfile_lock.bundler.version):
+    if not versions.is_at_least("2.2.19", gemfile_lock.bundler.version):
         fail(_OUTDATED_BUNDLER_ERROR)
 
     if len(gemfile_lock.git_packages) > 0:

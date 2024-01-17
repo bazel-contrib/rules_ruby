@@ -66,6 +66,7 @@ bzl_library(
     deps = [
         ":utils",
         "//ruby/private/bundle_fetch:gemfile_lock_parser",
+        "@bazel_skylib//lib:versions",
     ],
 )
 
