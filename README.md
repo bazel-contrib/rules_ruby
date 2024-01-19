@@ -147,6 +147,10 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
 * REPL doesn't work when used with `bazel test`.
   To work it around, use a debugger with remote client support such as [`ruby/debug`][8] .
   See [`examples/gem/.bazelrc`][7] to learn how to do that.
+* Some gems contain files with spaces which cause Bazel error `link or target filename contains space`.
+  To work it around, use [`--experimental_inprocess_symlink_creation`][16] Bazel flag.
+  See [`bazelbuild/bazel#4327`[17] for more details.
+
 
 [1]: https://www.ruby-lang.org
 [2]: https://bazel.build
@@ -163,3 +167,5 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
 [13]: https://github.com/bazel-contrib/rules_ruby/releases/tag/v0.3.0
 [14]: examples/
 [15]: https://bazel.build/remote/rbe
+[16]: https://bazel.build/reference/command-line-reference#flag--experimental_inprocess_symlink_creation
+[17]: https://github.com/bazelbuild/bazel/issues/4327
