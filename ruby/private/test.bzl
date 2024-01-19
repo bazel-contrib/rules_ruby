@@ -79,11 +79,7 @@ rb_test(
 
 ```output
 $ bazel test spec/...
-INFO: Analyzed 3 targets (22 packages loaded, 621 targets configured).
-INFO: Found 1 target and 2 test targets...
-INFO: Elapsed time: 2.354s, Critical Path: 0.49s
-INFO: 9 processes: 5 internal, 4 darwin-sandbox.
-INFO: Build completed successfully, 9 total actions
+...
 //spec:add                                                               PASSED in 0.4s
 //spec:subtract                                                          PASSED in 0.4s
 
@@ -114,13 +110,7 @@ rb_test(
 
 ```output
 $ bazel test :rubocop
-INFO: Analyzed target //:rubocop (0 packages loaded, 123 targets configured).
-INFO: Found 1 test target...
-Target //:rubocop up-to-date:
-  bazel-bin/rubocop.rb.sh
-INFO: Elapsed time: 0.875s, Critical Path: 0.79s
-INFO: 2 processes: 2 local.
-INFO: Build completed successfully, 2 total actions
+...
 //:rubocop                                                               PASSED in 0.8s
 
 Executed 1 out of 1 test: 1 test passes.
@@ -131,17 +121,7 @@ the Ruby script. For example, you can re-use `:rubocop` target to perform autoco
 
 ```output
 $ bazel run :rubocop -- --autocorrect-all
-INFO: Analyzed target //:rubocop (0 packages loaded, 0 targets configured).
-INFO: Found 1 target...
-Target //:rubocop up-to-date:
-  bazel-bin/rubocop.rb.sh
-INFO: Elapsed time: 0.066s, Critical Path: 0.00s
-INFO: 1 process: 1 internal.
-INFO: Build completed successfully, 1 total action
-INFO: Running command line: external/bazel_tools/tools/test/test-setup.sh ./rubocop.rb.sh --autocorrect-all
-exec ${PAGER:-/usr/bin/less} "$0" || exit 1
-Executing tests from //:rubocop
------------------------------------------------------------------------------
+...
 Inspecting 11 files
 .C.........
 

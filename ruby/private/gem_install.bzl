@@ -131,10 +131,10 @@ rb_gem_install(
 
 ```output
 $ bazel build :gem-install
-INFO: Analyzed target //:gem-install (4 packages loaded, 82 targets configured).
-INFO: From Installing bazel-out/darwin_arm64-fastbuild/bin/gem-build.gem (//:gem-install):
+...
 Successfully installed example-0.1.0
 1 gem installed
+...
 ```
     """,
 )

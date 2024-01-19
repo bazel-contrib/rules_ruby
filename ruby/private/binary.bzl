@@ -244,14 +244,7 @@ rb_binary(
 
 ```output
 $ bazel run lib/gem:print-version
-INFO: Analyzed target //lib/gem:print-version (1 packages loaded, 3 targets configured).
-INFO: Found 1 target...
-Target //lib/gem:print-version up-to-date:
-  bazel-bin/lib/gem/print-version.rb.sh
-INFO: Elapsed time: 0.121s, Critical Path: 0.01s
-INFO: 4 processes: 4 internal.
-INFO: Build completed successfully, 4 total actions
-INFO: Build completed successfully, 4 total actions
+...
 Version is: 0.1.0
 ```
 
@@ -283,14 +276,7 @@ rb_binary(
 
 ```output
 $ bazel run lib/gem:add-numbers 1 2
-INFO: Analyzed target //lib/gem:add-numbers (1 packages loaded, 3 targets configured).
-INFO: Found 1 target...
-Target //lib/gem:add-numbers up-to-date:
-  bazel-bin/lib/gem/add-numbers.rb.sh
-INFO: Elapsed time: 0.092s, Critical Path: 0.00s
-INFO: 1 process: 1 internal.
-INFO: Build completed successfully, 1 total action
-INFO: Build completed successfully, 1 total action
+...
 3
 ```
 
@@ -315,15 +301,8 @@ rb_binary(
 
 ```output
 $ bazel run :rake -- --version
-INFO: Analyzed target //:rake (0 packages loaded, 0 targets configured).
-INFO: Found 1 target...
-Target //:rake up-to-date:
-  bazel-bin/rake.rb.sh
-INFO: Elapsed time: 0.073s, Critical Path: 0.00s
-INFO: 1 process: 1 internal.
-INFO: Build completed successfully, 1 total action
-INFO: Running command line: bazel-bin/rake.rb.sh --version
-rake, version 10.5.0
+...
+rake, version 13.1.0
 ```
     """,
 )

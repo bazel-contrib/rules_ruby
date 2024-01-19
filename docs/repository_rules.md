@@ -46,6 +46,14 @@ rb_register_toolchains(
 )
 ```
 
+Once registered, you can use the toolchain directly as it provides all the binaries:
+
+```output
+$ bazel run @ruby -- -e "puts RUBY_VERSION"
+$ bazel run @ruby//:bundle -- update
+$ bazel run @ruby//:gem -- install rails
+```
+
 
 **PARAMETERS**
 
@@ -89,7 +97,7 @@ rb_bundle_fetch(
 ```
 
 All the installed gems can be accessed using `@bundle` target and additionally
-gems binary files can also be used:
+gems binary files can also be used via BUILD rules or directly with `bazel run`:
 
 `BUILD`:
 ```bazel

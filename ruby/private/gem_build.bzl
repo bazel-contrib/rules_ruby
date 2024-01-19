@@ -187,18 +187,12 @@ rb_gem_build(
 
 ```output
 $ bazel build :gem-build
-INFO: Analyzed target //:gem-build (0 packages loaded, 0 targets configured).
-INFO: Found 1 target...
-INFO: From Action gem-build.gem:
+...
   Successfully built RubyGem
   Name: example
   Version: 0.1.0
   File: example-0.1.0.gem
-Target //:gem-build up-to-date:
-  bazel-bin/gem-build.gem
-INFO: Elapsed time: 0.196s, Critical Path: 0.10s
-INFO: 2 processes: 1 internal, 1 darwin-sandbox.
-INFO: Build completed successfully, 2 total actions
+...
 ```
     """,
 )

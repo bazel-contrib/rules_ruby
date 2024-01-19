@@ -102,14 +102,7 @@ rb_gem_push(
 
 ```output
 $ bazel run :gem-release
-INFO: Analyzed target //:gem-release (3 packages loaded, 14 targets configured).
-INFO: Found 1 target...
-Target //:gem-release up-to-date:
-  bazel-bin/gem-release.rb.sh
-INFO: Elapsed time: 0.113s, Critical Path: 0.01s
-INFO: 4 processes: 4 internal.
-INFO: Build completed successfully, 4 total actions
-INFO: Build completed successfully, 4 total actions
+...
 Pushing gem to https://rubygems.org...
 Successfully registered gem: example (0.1.0)
 ```
