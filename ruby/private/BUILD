@@ -75,6 +75,7 @@ bzl_library(
     srcs = ["bundle_install.bzl"],
     visibility = ["//ruby:__subpackages__"],
     deps = [
+        ":bundle_fetch",
         ":gem_install",
         ":providers",
         ":utils",

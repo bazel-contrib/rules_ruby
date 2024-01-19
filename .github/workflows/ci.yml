@@ -69,6 +69,11 @@ jobs:
       - run: bazel build ...
       - run: bazel run lib/gem:add-numbers 2
       - run: bazel run lib/gem:print-version
+      - run: bazel run "@ruby" "--" -e "puts RUBY_VERSION"
+      - run: bazel run "@ruby//:bundle" "--" lock
+      - run: bazel run "@ruby//:gem" "--" info
+      - run: bazel run "@bundle//bin:rake" "--" --version
+      - run: bazel run "@bundle//bin:rspec" "--" --help
       - run: bazel test ...
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3

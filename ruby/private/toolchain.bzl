@@ -30,6 +30,14 @@ def rb_register_toolchains(
     )
     ```
 
+    Once registered, you can use the toolchain directly as it provides all the binaries:
+
+    ```output
+    $ bazel run @ruby -- -e "puts RUBY_VERSION"
+    $ bazel run @ruby//:bundle -- update
+    $ bazel run @ruby//:gem -- install rails
+    ```
+
     Args:
         name: base name of resulting repositories, by default "rules_ruby"
         version: a semver version of MRI, or a string like [interpreter type]-[version], or "system"

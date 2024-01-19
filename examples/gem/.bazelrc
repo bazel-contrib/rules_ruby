@@ -37,9 +37,8 @@ test --test_verbose_timeout_warnings=false
 build --action_env=HOME
 test --test_env=HOME
 
-# Allows to run tests with rdbg:
-# 1. Add breakpoint with `binding.break`.
+# Allows to run tests with rdbg bundled with Ruby 3.1:
+# 1. Add breakpoint with `debugger`.
 # 2. Run tests: `bazel test --config debug spec:add`.
-# 3. Connect to debugger:
-#    BUNDLE_PATH="bazel-gem/external/bundle" bazel-gem/external/bundle/bin/rdbg -A
-test:debug --run_under="@bundle//bin:rdbg --nonstop --open --command"
+# 3. Connect to debugger: `bazel-gem/external/ruby/dist/bin/rdbg -A`.
+test:debug --run_under="@ruby//:rdbg --nonstop --open --command"
