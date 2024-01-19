@@ -60,7 +60,7 @@ Use a built-in `args` attribute to pass extra arguments to the script.
 def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {}, java_bin = ""):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
-    if binary:
+    if binary and binary != toolchain.ruby:
         binary_path = binary.short_path
     else:
         binary_path = ""
