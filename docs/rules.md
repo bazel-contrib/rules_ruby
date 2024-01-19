@@ -61,14 +61,7 @@ rb_binary(
 
 ```output
 $ bazel run lib/gem:print-version
-INFO: Analyzed target //lib/gem:print-version (1 packages loaded, 3 targets configured).
-INFO: Found 1 target...
-Target //lib/gem:print-version up-to-date:
-  bazel-bin/lib/gem/print-version.rb.sh
-INFO: Elapsed time: 0.121s, Critical Path: 0.01s
-INFO: 4 processes: 4 internal.
-INFO: Build completed successfully, 4 total actions
-INFO: Build completed successfully, 4 total actions
+...
 Version is: 0.1.0
 ```
 
@@ -100,14 +93,7 @@ rb_binary(
 
 ```output
 $ bazel run lib/gem:add-numbers 1 2
-INFO: Analyzed target //lib/gem:add-numbers (1 packages loaded, 3 targets configured).
-INFO: Found 1 target...
-Target //lib/gem:add-numbers up-to-date:
-  bazel-bin/lib/gem/add-numbers.rb.sh
-INFO: Elapsed time: 0.092s, Critical Path: 0.00s
-INFO: 1 process: 1 internal.
-INFO: Build completed successfully, 1 total action
-INFO: Build completed successfully, 1 total action
+...
 3
 ```
 
@@ -132,15 +118,8 @@ rb_binary(
 
 ```output
 $ bazel run :rake -- --version
-INFO: Analyzed target //:rake (0 packages loaded, 0 targets configured).
-INFO: Found 1 target...
-Target //:rake up-to-date:
-  bazel-bin/rake.rb.sh
-INFO: Elapsed time: 0.073s, Critical Path: 0.00s
-INFO: 1 process: 1 internal.
-INFO: Build completed successfully, 1 total action
-INFO: Running command line: bazel-bin/rake.rb.sh --version
-rake, version 10.5.0
+...
+rake, version 13.1.0
 ```
 
 **ATTRIBUTES**
@@ -281,18 +260,12 @@ rb_gem_build(
 
 ```output
 $ bazel build :gem-build
-INFO: Analyzed target //:gem-build (0 packages loaded, 0 targets configured).
-INFO: Found 1 target...
-INFO: From Action gem-build.gem:
+...
   Successfully built RubyGem
   Name: example
   Version: 0.1.0
   File: example-0.1.0.gem
-Target //:gem-build up-to-date:
-  bazel-bin/gem-build.gem
-INFO: Elapsed time: 0.196s, Critical Path: 0.10s
-INFO: 2 processes: 1 internal, 1 darwin-sandbox.
-INFO: Build completed successfully, 2 total actions
+...
 ```
 
 **ATTRIBUTES**
@@ -359,10 +332,10 @@ rb_gem_install(
 
 ```output
 $ bazel build :gem-install
-INFO: Analyzed target //:gem-install (4 packages loaded, 82 targets configured).
-INFO: From Installing bazel-out/darwin_arm64-fastbuild/bin/gem-build.gem (//:gem-install):
+...
 Successfully installed example-0.1.0
 1 gem installed
+...
 ```
 
 **ATTRIBUTES**
@@ -425,14 +398,7 @@ rb_gem_push(
 
 ```output
 $ bazel run :gem-release
-INFO: Analyzed target //:gem-release (3 packages loaded, 14 targets configured).
-INFO: Found 1 target...
-Target //:gem-release up-to-date:
-  bazel-bin/gem-release.rb.sh
-INFO: Elapsed time: 0.113s, Critical Path: 0.01s
-INFO: 4 processes: 4 internal.
-INFO: Build completed successfully, 4 total actions
-INFO: Build completed successfully, 4 total actions
+...
 Pushing gem to https://rubygems.org...
 Successfully registered gem: example (0.1.0)
 ```
@@ -617,11 +583,7 @@ rb_test(
 
 ```output
 $ bazel test spec/...
-INFO: Analyzed 3 targets (22 packages loaded, 621 targets configured).
-INFO: Found 1 target and 2 test targets...
-INFO: Elapsed time: 2.354s, Critical Path: 0.49s
-INFO: 9 processes: 5 internal, 4 darwin-sandbox.
-INFO: Build completed successfully, 9 total actions
+...
 //spec:add                                                               PASSED in 0.4s
 //spec:subtract                                                          PASSED in 0.4s
 
@@ -652,13 +614,7 @@ rb_test(
 
 ```output
 $ bazel test :rubocop
-INFO: Analyzed target //:rubocop (0 packages loaded, 123 targets configured).
-INFO: Found 1 test target...
-Target //:rubocop up-to-date:
-  bazel-bin/rubocop.rb.sh
-INFO: Elapsed time: 0.875s, Critical Path: 0.79s
-INFO: 2 processes: 2 local.
-INFO: Build completed successfully, 2 total actions
+...
 //:rubocop                                                               PASSED in 0.8s
 
 Executed 1 out of 1 test: 1 test passes.
@@ -669,17 +625,7 @@ the Ruby script. For example, you can re-use `:rubocop` target to perform autoco
 
 ```output
 $ bazel run :rubocop -- --autocorrect-all
-INFO: Analyzed target //:rubocop (0 packages loaded, 0 targets configured).
-INFO: Found 1 target...
-Target //:rubocop up-to-date:
-  bazel-bin/rubocop.rb.sh
-INFO: Elapsed time: 0.066s, Critical Path: 0.00s
-INFO: 1 process: 1 internal.
-INFO: Build completed successfully, 1 total action
-INFO: Running command line: external/bazel_tools/tools/test/test-setup.sh ./rubocop.rb.sh --autocorrect-all
-exec ${PAGER:-/usr/bin/less} "$0" || exit 1
-Executing tests from //:rubocop
------------------------------------------------------------------------------
+...
 Inspecting 11 files
 .C.........
 
