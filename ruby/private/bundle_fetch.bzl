@@ -8,6 +8,9 @@ load(
 )
 load("//ruby/private/bundle_fetch:gemfile_lock_parser.bzl", "parse_gemfile_lock")
 
+# Location of Bundler binstubs to generate shims and use during rb_bundle_install(...).
+BINSTUBS_LOCATION = "bin/private"
+
 _GEM_BUILD_FRAGMENT = """
 rb_gem(
     name = "{name}",
@@ -19,6 +22,14 @@ _GEM_INSTALL_BUILD_FRAGMENT = """
 rb_gem_install(
     name = "{name}",
     gem = "{cache_path}/{gem}",
+)
+"""
+
+_GEM_BINARY_BUILD_FRAGMENT = """
+rb_binary(
+    name = "{name}",
+    main = "{path}/{name}",
+    deps = ["//:{repository_name}"],
 )
 """
 
@@ -102,17 +113,23 @@ def _rb_bundle_fetch_impl(repository_ctx):
     gem_full_names = []
     gem_fragments = []
     gem_install_fragments = []
+    repository_name = _normalize_bzlmod_repository_name(repository_ctx.name)
 
     # Fetch gems and expose them as `rb_gem()` targets.
     for gem in gemfile_lock.remote_packages:
         _download_gem(repository_ctx, gem, cache_path)
         executables.extend(_get_gem_executables(repository_ctx, gem, cache_path))
         gem_full_names.append(":%s" % gem.full_name)
-        gem_fragments.append(_GEM_BUILD_FRAGMENT.format(name = gem.full_name, gem = gem.filename, cache_path = cache_path))
+        gem_fragments.append(
+            _GEM_BUILD_FRAGMENT.format(
+                name = gem.full_name,
+                gem = gem.filename,
+                cache_path = cache_path,
+            ),
+        )
 
     # Fetch Bundler and define an `rb_gem_install()` target for it.
     _download_gem(repository_ctx, gemfile_lock.bundler, cache_path)
-    executables.extend(_get_gem_executables(repository_ctx, gemfile_lock.bundler, cache_path))
     gem_full_names.append(":%s" % gemfile_lock.bundler.full_name)
     gem_install_fragments.append(
         _GEM_INSTALL_BUILD_FRAGMENT.format(
@@ -122,12 +139,35 @@ def _rb_bundle_fetch_impl(repository_ctx):
         ),
     )
 
+    # Create `bin` package with shims for gem executables.
+    # This allows targets to depend on `@bundle//bin:rake`
+    # and also run those directly such as `bazel run @bundle//bin:rake`.
+    gem_binaries_fragments = []
+    for executable in depset(executables).to_list():
+        repository_ctx.file("%s/%s" % (BINSTUBS_LOCATION, executable))
+        gem_binaries_fragments.append(
+            _GEM_BINARY_BUILD_FRAGMENT.format(
+                name = executable,
+                repository_name = repository_name,
+                path = BINSTUBS_LOCATION.partition("/")[-1],
+            ),
+        )
+    repository_ctx.template(
+        "bin/BUILD",
+        repository_ctx.attr._bin_build_tpl,
+        executable = False,
+        substitutions = {
+            "{name}": repository_name,
+            "{gem_binary_fragments}": "".join(gem_binaries_fragments),
+        },
+    )
+
     repository_ctx.template(
         "BUILD",
         repository_ctx.attr._build_tpl,
         executable = False,
         substitutions = {
-            "{name}": _normalize_bzlmod_repository_name(repository_ctx.name),
+            "{name}": repository_name,
             "{srcs}": _join_and_indent(srcs),
             "{gemfile_path}": repository_ctx.attr.gemfile.name,
             "{gemfile_lock_path}": repository_ctx.attr.gemfile_lock.name,
@@ -137,19 +177,6 @@ def _rb_bundle_fetch_impl(repository_ctx):
             "{env}": repr(repository_ctx.attr.env),
         },
     )
-
-    # Create `bin` package with shims for gem executables.
-    # This allows targets to depend on `@bundle//bin:rake`.
-    repository_ctx.template(
-        "bin/BUILD",
-        repository_ctx.attr._bin_build_tpl,
-        executable = False,
-        substitutions = {
-            "{name}": _normalize_bzlmod_repository_name(repository_ctx.name),
-        },
-    )
-    for executable in executables:
-        repository_ctx.file("bin/%s" % executable)
 
 rb_bundle_fetch = repository_rule(
     implementation = _rb_bundle_fetch_impl,
@@ -202,7 +229,7 @@ rb_bundle_fetch(
 ```
 
 All the installed gems can be accessed using `@bundle` target and additionally
-gems binary files can also be used:
+gems binary files can also be used via BUILD rules or directly with `bazel run`:
 
 `BUILD`:
 ```bazel

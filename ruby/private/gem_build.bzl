@@ -84,6 +84,7 @@ def _rb_gem_build_impl(ctx):
             runfiles = runfiles,
         ),
         RubyFilesInfo(
+            binary = None,
             transitive_data = depset(transitive_data),
             transitive_deps = depset(transitive_deps),
             transitive_srcs = depset(transitive_srcs),

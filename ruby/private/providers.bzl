@@ -2,17 +2,31 @@
 
 RubyFilesInfo = provider(
     "Provider for Ruby files",
-    fields = ["transitive_data", "transitive_deps", "transitive_srcs", "bundle_env"],
+    fields = {
+        "binary": "Main Ruby script.",
+        "transitive_data": "Transitive data files to add to runfiles.",
+        "transitive_deps": "Transitive dependencies to get files from.",
+        "transitive_srcs": "Transitive Ruby files.",
+        "bundle_env": "Bundle environment variables (deprecated)",
+    },
 )
 
 BundlerInfo = provider(
     "Provider for Bundler installation",
-    fields = ["bin", "gemfile", "path", "env"],
+    fields = {
+        "bin": "Binstubs path (BUNDLE_BIN).",
+        "gemfile": "Gemfile path (BUNDLE_GEMFILE).",
+        "path": "Bundle path (BUNDLE_PATH).",
+        "env": "Bundle environment variables.",
+    },
 )
 
 GemInfo = provider(
     "Provider for a packed Ruby gem",
-    fields = ["name", "version"],
+    fields = {
+        "name": "Gem name.",
+        "version": "Gem version.",
+    },
 )
 
 # https://bazel.build/rules/depsets

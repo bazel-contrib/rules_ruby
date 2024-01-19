@@ -1,5 +1,6 @@
 "Implementation details for rb_bundle_install"
 
+load("//ruby/private:bundle_fetch.bzl", "BINSTUBS_LOCATION")
 load("//ruby/private:providers.bzl", "BundlerInfo", "GemInfo", "RubyFilesInfo")
 load(
     "//ruby/private:utils.bzl",
@@ -22,7 +23,7 @@ def _rb_bundle_install_impl(ctx):
             bundler_exe = gem.files.to_list()[-1].path + "/gems/" + full_name + "/exe/bundle"
             tools.extend(gem.files.to_list())
 
-    binstubs = ctx.actions.declare_directory("bin")
+    binstubs = ctx.actions.declare_directory(BINSTUBS_LOCATION)
     bundle_path = ctx.actions.declare_directory("vendor/bundle")
 
     env = {}
@@ -56,7 +57,7 @@ def _rb_bundle_install_impl(ctx):
         "BUNDLE_GEMFILE": _normalize_path(ctx, ctx.file.gemfile.path),
         "BUNDLE_IGNORE_CONFIG": "1",
         "BUNDLE_PATH": _normalize_path(ctx, "/".join([relative_dir, bundle_path.path])),
-        "BUNDLE_SHEBANG": _normalize_path(ctx, toolchain.ruby.path),
+        "BUNDLE_SHEBANG": _normalize_path(ctx, toolchain.ruby.short_path),
     })
 
     ctx.actions.expand_template(
@@ -92,6 +93,7 @@ def _rb_bundle_install_impl(ctx):
             runfiles = ctx.runfiles(files),
         ),
         RubyFilesInfo(
+            binary = None,
             transitive_srcs = depset([ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs),
             transitive_deps = depset(),
             transitive_data = depset(),
