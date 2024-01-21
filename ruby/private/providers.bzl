@@ -35,10 +35,10 @@ def get_transitive_srcs(srcs, deps):
     """Obtain the source files for a target and its transitive dependencies.
 
     Args:
-      srcs: a list of source files
-      deps: a list of targets that are direct dependencies
+        srcs: a list of source files
+        deps: a list of targets that are direct dependencies
     Returns:
-      a collection of the transitive sources
+        a collection of the transitive sources
     """
     return depset(
         srcs,
@@ -49,10 +49,10 @@ def get_transitive_data(data, deps):
     """Obtain the data files for a target and its transitive dependencies.
 
     Args:
-      data: a list of data files
-      deps: a list of targets that are direct dependencies
+        data: a list of data files
+        deps: a list of targets that are direct dependencies
     Returns:
-      a collection of the transitive data files
+        a collection of the transitive data files
     """
     return depset(
         data,
@@ -63,9 +63,9 @@ def get_transitive_deps(deps):
     """Obtain the dependencies for a target and its transitive dependencies.
 
     Args:
-      deps: a list of targets that are direct dependencies
+        deps: a list of targets that are direct dependencies
     Returns:
-      a collection of the transitive dependencies
+        a collection of the transitive dependencies
     """
     return depset(
         deps,
@@ -77,12 +77,12 @@ def get_transitive_runfiles(runfiles, srcs, data, deps):
     """Obtain the runfiles for a target, its transitive data files and dependencies.
 
     Args:
-      runfiles: the runfiles
-      srcs: a list of source files
-      data: a list of data files
-      deps: a list of targets that are direct dependencies
+        runfiles: the runfiles
+        srcs: a list of source files
+        data: a list of data files
+        deps: a list of targets that are direct dependencies
     Returns:
-      the runfiles
+        the runfiles
     """
     transitive_runfiles = []
     for targets in (srcs, data, deps):
@@ -94,10 +94,10 @@ def get_bundle_env(envs, deps):
     """Obtain the BUNDLE_* environment variables for a target and its transitive dependencies.
 
     Args:
-      envs: a list of environment variables
-      deps: a list of targets that are direct dependencies
+        envs: a list of environment variables
+        deps: a list of targets that are direct dependencies
     Returns:
-      a collection of the transitive environment variables
+        a collection of the transitive environment variables
     """
     bundle_env = {}
 

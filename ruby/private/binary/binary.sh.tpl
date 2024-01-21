@@ -35,6 +35,12 @@ if [ -n "{bundler_command}" ]; then
   export BUNDLE_PATH=$(rlocation $BUNDLE_PATH)
 fi
 
-{bundler_command} {ruby_binary_name} {binary} {args} "$@"
+if [ -n "{locate_binary_in_runfiles}" ]; then
+  binary=$(rlocation {binary})
+else
+  binary={binary}
+fi
+
+exec {bundler_command} {ruby_binary_name} $binary {args} "$@"
 
 # vim: ft=bash
