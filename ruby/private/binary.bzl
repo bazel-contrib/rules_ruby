@@ -60,21 +60,31 @@ Use a built-in `args` attribute to pass extra arguments to the script.
 def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {}, java_bin = ""):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
+    binary_path = ""
+    locate_binary_in_runfiles = ""
     if binary and binary != toolchain.ruby:
         binary_path = binary.short_path
-    else:
-        binary_path = ""
+
+        # Runfiles library for Windows does not support generated directories,
+        # so for now we skip locating the binary in runfiles. This only prevents
+        # running binary scripts directly and should not affect normal `bazel run`.
+        # See BATCH_RLOCATION_FUNCTION comments for more details.
+        if binary_path.startswith("../") and not _is_windows(ctx):
+            binary_path = _to_rlocation_path(binary)
+            locate_binary_in_runfiles = "true"
+        else:
+            binary_path = _normalize_path(ctx, binary_path)
 
     environment = {}
     environment.update(env)
 
     if _is_windows(ctx):
         rlocation_function = BATCH_RLOCATION_FUNCTION
-        script = ctx.actions.declare_file("{}.rb.cmd".format(ctx.label.name))
+        script = ctx.actions.declare_file("{}.cmd".format(ctx.label.name))
         template = ctx.file._binary_cmd_tpl
     else:
         rlocation_function = BASH_RLOCATION_FUNCTION
-        script = ctx.actions.declare_file("{}.rb.sh".format(ctx.label.name))
+        script = ctx.actions.declare_file(ctx.label.name)
         template = ctx.file._binary_sh_tpl
 
     if bundler:
@@ -91,13 +101,14 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
         is_executable = True,
         substitutions = {
             "{args}": args,
-            "{binary}": _normalize_path(ctx, binary_path),
+            "{binary}": binary_path,
             "{env}": _convert_env_to_script(ctx, environment),
             "{bundler_command}": bundler_command,
             "{ruby}": _to_rlocation_path(toolchain.ruby),
             "{ruby_binary_name}": toolchain.ruby.basename,
             "{java_bin}": java_bin,
             "{rlocation_function}": rlocation_function,
+            "{locate_binary_in_runfiles}": locate_binary_in_runfiles,
         },
     )
 
