@@ -155,7 +155,10 @@ def rb_binary_impl(ctx):
     env.update(ruby_toolchain.env)
     env.update(ctx.attr.env)
 
-    runfiles = ctx.runfiles(transitive_srcs + transitive_data + tools)
+    runfile_srcs = transitive_srcs + transitive_data + tools
+    # Some gems may have spaces in their paths, which are not supported by runfiles.
+    runfile_srcs =  [f for f in runfile_srcs if " " not in f.path]
+    runfiles = ctx.runfiles(runfile_srcs)
     runfiles = get_transitive_runfiles(runfiles, ctx.attr.srcs, ctx.attr.deps, ctx.attr.data)
 
     # Propagate executable from source rb_binary() targets.
