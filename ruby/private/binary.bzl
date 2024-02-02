@@ -156,7 +156,7 @@ def rb_binary_impl(ctx):
     env.update(ctx.attr.env)
 
     runfile_srcs = transitive_srcs + transitive_data + tools
-    
+
     # Some gems may have spaces in their paths, which are not supported by runfiles.
     runfile_srcs = [f for f in runfile_srcs if " " not in f.path]
     runfiles = ctx.runfiles(runfile_srcs)
