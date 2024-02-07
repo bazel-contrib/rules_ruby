@@ -58,7 +58,7 @@ jobs:
         working-directory: examples/gem
     steps:
       - uses: actions/checkout@v4
-      - uses: p0deje/setup-bazel@0.4.0
+      - uses: p0deje/setup-bazel@0.5.0
         with:
           bazelrc: common --announce_rc --color=yes ${{ matrix.mode == 'WORKSPACE' && '--noenable_bzlmod' || '' }}
       - run: echo ${{ matrix.ruby }} > .ruby-version
