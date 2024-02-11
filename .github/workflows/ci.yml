@@ -78,6 +78,28 @@ jobs:
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
 
+  examples-jekyll:
+    name: Examples / Jekyll
+    runs-on: ${{ matrix.os }}-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu
+          - macos
+    defaults:
+      run:
+        working-directory: examples/jekyll
+    steps:
+      - uses: actions/checkout@v4
+      - uses: p0deje/setup-bazel@0.4.0
+        with:
+          bazelrc: common --announce_rc --color=yes
+      - run: bazel build ...
+      - if: failure() && runner.debug == '1'
+        uses: mxschmitt/action-tmate@v3
+
   release:
     name: Release
     if: startsWith(github.ref, 'refs/tags/v')
