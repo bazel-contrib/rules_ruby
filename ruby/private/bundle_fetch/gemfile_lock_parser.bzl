@@ -180,7 +180,7 @@ def parse_gemfile_lock(content):
                 version = version,
                 filename = "bundler-%s.gem" % version,
                 full_name = "bundler-%s" % version,
-                remote = "https://rubygems.org/",
+                remote = remote,
             )
             inside_bundled_with = False
 
