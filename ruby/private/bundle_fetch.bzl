@@ -102,7 +102,10 @@ def _rb_bundle_fetch_impl(repository_ctx):
         srcs.append(src.name)
         repository_ctx.file(src.name, repository_ctx.read(src))
 
-    gemfile_lock = parse_gemfile_lock(repository_ctx.read(gemfile_lock_path))
+    gemfile_lock = parse_gemfile_lock(
+        repository_ctx.read(gemfile_lock_path),
+        repository_ctx.attr.bundler_remote,
+    )
     if not versions.is_at_least("2.2.19", gemfile_lock.bundler.version):
         fail(_OUTDATED_BUNDLER_ERROR)
 
@@ -197,6 +200,10 @@ rb_bundle_fetch = repository_rule(
         ),
         "env": attr.string_dict(
             doc = "Environment variables to use during installation.",
+        ),
+        "bundler_remote": attr.string(
+            default = "https://rubygems.org/",
+            doc = "Remote to fetch the bundler gem from.",
         ),
         "_build_tpl": attr.label(
             allow_single_file = True,

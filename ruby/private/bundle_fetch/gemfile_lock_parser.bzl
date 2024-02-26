@@ -111,7 +111,7 @@ def _parse_git_package(lines):
 
     return {"revision": revision, "remote": remote}
 
-def parse_gemfile_lock(content):
+def parse_gemfile_lock(content, bundler_remote):
     """Parses a Gemfile.lock.
 
     Find lines in the content of a Gemfile.lock that look like package
@@ -119,6 +119,7 @@ def parse_gemfile_lock(content):
 
     Args:
         content: Gemfile.lock contents
+        bundler_remote: Remote URL for the bundler package.
 
     Returns:
         struct with parsed Gemfile.lock
@@ -180,7 +181,7 @@ def parse_gemfile_lock(content):
                 version = version,
                 filename = "bundler-%s.gem" % version,
                 full_name = "bundler-%s" % version,
-                remote = "https://rubygems.org/",
+                remote = bundler_remote,
             )
             inside_bundled_with = False
 
