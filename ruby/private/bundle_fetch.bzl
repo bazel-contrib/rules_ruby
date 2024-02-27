@@ -113,7 +113,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
     gemfile_lock = parse_gemfile_lock(
         repository_ctx.read(gemfile_lock_path),
         repository_ctx.attr.bundler_remote,
-        repository_ctx.attr.bundler_checksums,
+        bundler_checksums,
     )
     if not versions.is_at_least("2.2.19", gemfile_lock.bundler.version):
         fail(_OUTDATED_BUNDLER_ERROR)
