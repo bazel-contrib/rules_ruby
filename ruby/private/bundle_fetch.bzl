@@ -49,7 +49,7 @@ See https://github.com/rubygems/rubygems/issues/4620 for more details.
 
 """
 
-def _download_gem(repository_ctx, gem, cache_path, sha256):
+def _download_gem(repository_ctx, gem, cache_path, sha256 = None):
     """Downloads gem into a predefined vendor/cache location.
 
     Returns sha256 hash of the downloaded gem.
