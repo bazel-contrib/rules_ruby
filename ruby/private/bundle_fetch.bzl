@@ -49,10 +49,20 @@ See https://github.com/rubygems/rubygems/issues/4620 for more details.
 
 """
 
-def _download_gem(repository_ctx, gem, cache_path):
-    """Downloads gem into a predefined vendor/cache location."""
+def _download_gem(repository_ctx, gem, cache_path, sha256):
+    """Downloads gem into a predefined vendor/cache location.
+
+    Returns sha256 hash of the downloaded gem.
+    """
     url = "{remote}gems/{filename}".format(remote = gem.remote, filename = gem.filename)
-    repository_ctx.download(url = url, output = "%s/%s" % (cache_path, gem.filename))
+
+    # Bazel doesn't accept `None` for sha256 so we have to omit the kwarg if
+    # we don't have sha256.
+    kwargs = {}
+    if sha256:
+        kwargs["sha256"] = sha256
+    download = repository_ctx.download(url = url, output = "%s/%s" % (cache_path, gem.filename), **kwargs)
+    return download.sha256
 
 def _get_gem_executables(repository_ctx, gem, cache_path):
     """Unpacks downloaded gem and returns its executables.
@@ -141,7 +151,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
         )
 
     # Fetch Bundler and define an `rb_gem_install()` target for it.
-    _download_gem(repository_ctx, gemfile_lock.bundler, cache_path)
+    _download_gem(repository_ctx, gemfile_lock.bundler, cache_path, gemfile_lock.bundler.sha256)
     gem_full_names.append(":%s" % gemfile_lock.bundler.full_name)
     gem_install_fragments.append(
         _GEM_INSTALL_BUILD_FRAGMENT.format(
