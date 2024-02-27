@@ -1,7 +1,7 @@
 "Implementation details for rb_bundle_fetch"
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
-load("//ruby/private:bundler_checksums.bzl", "BUNDLER_CHECKUMS")
+load("//ruby/private:bundler_checksums.bzl", "BUNDLER_CHECKSUMS")
 load(
     "//ruby/private:utils.bzl",
     _join_and_indent = "join_and_indent",
@@ -104,9 +104,9 @@ def _rb_bundle_fetch_impl(repository_ctx):
         repository_ctx.file(src.name, repository_ctx.read(src))
 
     # We insert our default value here, not on the attribute's default, so it
-    # isn't documented. # The BUNDLER_CHECKUMS value is huge and not useful to
+    # isn't documented. # The BUNDLER_CHECKSUMS value is huge and not useful to
     # document.
-    bundler_checksums = BUNDLER_CHECKUMS
+    bundler_checksums = BUNDLER_CHECKSUMS
     if len(repository_ctx.attr.bundler_checksums) > 0:
         bundler_checksums = repository_ctx.attr.bundler_checksums
 

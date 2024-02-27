@@ -3,7 +3,7 @@
 # Update with:
 # curl -sSf https://rubygems.org/api/v1/versions/bundler.json | jq 'map({key: .number, value: .sha}) | from_entries' | grep -vE '\.pre|\.rc|\.beta'
 
-BUNDLER_CHECKUMS = {
+BUNDLER_CHECKSUMS = {
     "2.5.6": "1a1f21d1456e16dd2fee93461d9640348047aa2dcaf5d776874a60ddd4df5c64",
     "2.5.5": "13c7fe269030e2a6402a654c06deff01aef674ced649db3be98b5503a080a462",
     "2.5.4": "f7b9f08c47e8c665613a668aa1b633df63f818b99183cee4b797704a816edefe",
