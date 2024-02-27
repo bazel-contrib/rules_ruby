@@ -1,6 +1,7 @@
 "Implementation details for rb_bundle_fetch"
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
+load("//ruby/private:bundler_checksums.bzl", "BUNDLER_CHECKSUMS")
 load(
     "//ruby/private:utils.bzl",
     _join_and_indent = "join_and_indent",
@@ -102,9 +103,17 @@ def _rb_bundle_fetch_impl(repository_ctx):
         srcs.append(src.name)
         repository_ctx.file(src.name, repository_ctx.read(src))
 
+    # We insert our default value here, not on the attribute's default, so it
+    # isn't documented. # The BUNDLER_CHECKSUMS value is huge and not useful to
+    # document.
+    bundler_checksums = BUNDLER_CHECKSUMS
+    if len(repository_ctx.attr.bundler_checksums) > 0:
+        bundler_checksums = repository_ctx.attr.bundler_checksums
+
     gemfile_lock = parse_gemfile_lock(
         repository_ctx.read(gemfile_lock_path),
         repository_ctx.attr.bundler_remote,
+        bundler_checksums,
     )
     if not versions.is_at_least("2.2.19", gemfile_lock.bundler.version):
         fail(_OUTDATED_BUNDLER_ERROR)
@@ -204,6 +213,9 @@ rb_bundle_fetch = repository_rule(
         "bundler_remote": attr.string(
             default = "https://rubygems.org/",
             doc = "Remote to fetch the bundler gem from.",
+        ),
+        "bundler_checksums": attr.string_dict(
+            doc = "Custom map from Bundler version to its SHA-256 checksum.",
         ),
         "_build_tpl": attr.label(
             allow_single_file = True,
