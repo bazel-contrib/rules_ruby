@@ -60,10 +60,17 @@ bzl_library(
 )
 
 bzl_library(
+    name = "bundler_checksums",
+    srcs = ["bundler_checksums.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+)
+
+bzl_library(
     name = "bundle_fetch",
     srcs = ["bundle_fetch.bzl"],
     visibility = ["//ruby:__subpackages__"],
     deps = [
+        ":bundler_checksums",
         ":utils",
         "//ruby/private/bundle_fetch:gemfile_lock_parser",
         "@bazel_skylib//lib:versions",

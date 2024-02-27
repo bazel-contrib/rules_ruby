@@ -73,7 +73,8 @@ $ bazel run @ruby//:gem -- install rails
 ## rb_bundle_fetch
 
 <pre>
-rb_bundle_fetch(<a href="#rb_bundle_fetch-name">name</a>, <a href="#rb_bundle_fetch-srcs">srcs</a>, <a href="#rb_bundle_fetch-bundler_remote">bundler_remote</a>, <a href="#rb_bundle_fetch-env">env</a>, <a href="#rb_bundle_fetch-gemfile">gemfile</a>, <a href="#rb_bundle_fetch-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_fetch-repo_mapping">repo_mapping</a>)
+rb_bundle_fetch(<a href="#rb_bundle_fetch-name">name</a>, <a href="#rb_bundle_fetch-srcs">srcs</a>, <a href="#rb_bundle_fetch-bundler_checksums">bundler_checksums</a>, <a href="#rb_bundle_fetch-bundler_remote">bundler_remote</a>, <a href="#rb_bundle_fetch-env">env</a>, <a href="#rb_bundle_fetch-gemfile">gemfile</a>, <a href="#rb_bundle_fetch-gemfile_lock">gemfile_lock</a>,
+                <a href="#rb_bundle_fetch-repo_mapping">repo_mapping</a>)
 </pre>
 
 Fetches Bundler dependencies to be automatically installed by other targets.
@@ -119,6 +120,7 @@ rb_test(
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_bundle_fetch-name"></a>name |  A unique name for this repository.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="rb_bundle_fetch-srcs"></a>srcs |  List of Ruby source files necessary during installation.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="rb_bundle_fetch-bundler_checksums"></a>bundler_checksums |  Custom map from Bundler version to its SHA-256 checksum.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="rb_bundle_fetch-bundler_remote"></a>bundler_remote |  Remote to fetch the bundler gem from.   | String | optional |  `"https://rubygems.org/"`  |
 | <a id="rb_bundle_fetch-env"></a>env |  Environment variables to use during installation.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="rb_bundle_fetch-gemfile"></a>gemfile |  Gemfile to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
