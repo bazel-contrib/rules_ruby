@@ -106,7 +106,7 @@ jobs:
     needs:
       - ruleset
       - examples-gem
-    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v5
+    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v6
     with:
       prerelease: false
       release_files: rules_ruby-*.tar.gz
