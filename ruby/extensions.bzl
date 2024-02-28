@@ -17,6 +17,9 @@ ruby_bundle_fetch = tag_class(attrs = {
     "env": attr.string_dict(),
     "gemfile": attr.label(),
     "gemfile_lock": attr.label(),
+    "gem_checksums": attr.string_dict(),
+    "bundler_remote": attr.string(default = "https://rubygems.org/"),
+    "bundler_checksums": attr.string_dict(),
 })
 
 ruby_toolchain = tag_class(attrs = {
@@ -45,6 +48,9 @@ def _ruby_module_extension(module_ctx):
                 env = bundle_fetch.env,
                 gemfile = bundle_fetch.gemfile,
                 gemfile_lock = bundle_fetch.gemfile_lock,
+                gem_checksums = bundle_fetch.gem_checksums,
+                bundler_remote = bundle_fetch.bundler_remote,
+                bundler_checksums = bundle_fetch.bundler_checksums,
             )
 
         for toolchain in mod.tags.toolchain:
