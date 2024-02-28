@@ -135,11 +135,17 @@ def _rb_bundle_fetch_impl(repository_ctx):
     gem_full_names = []
     gem_fragments = []
     gem_install_fragments = []
+    gem_checksums = {}
     repository_name = _normalize_bzlmod_repository_name(repository_ctx.name)
 
     # Fetch gems and expose them as `rb_gem()` targets.
     for gem in gemfile_lock.remote_packages:
-        _download_gem(repository_ctx, gem, cache_path)
+        gem_checksums[gem.full_name] = _download_gem(
+            repository_ctx,
+            gem,
+            cache_path,
+            repository_ctx.attr.gem_checksums.get(gem.full_name, None),
+        )
         executables.extend(_get_gem_executables(repository_ctx, gem, cache_path))
         gem_full_names.append(":%s" % gem.full_name)
         gem_fragments.append(
@@ -200,6 +206,19 @@ def _rb_bundle_fetch_impl(repository_ctx):
         },
     )
 
+    if len(repository_ctx.attr.gem_checksums) != len(gem_checksums):
+        return {
+            "name": repository_ctx.name,
+            "gemfile": repository_ctx.attr.gemfile,
+            "gemfile_lock": repository_ctx.attr.gemfile_lock,
+            "srcs": repository_ctx.attr.srcs,
+            "env": repository_ctx.attr.env,
+            "bundler_remote": repository_ctx.attr.bundler_remote,
+            "bundler_checksums": repository_ctx.attr.bundler_checksums,
+            "gem_checksums": gem_checksums,
+        }
+    return None
+
 rb_bundle_fetch = repository_rule(
     implementation = _rb_bundle_fetch_impl,
     attrs = {
@@ -226,6 +245,10 @@ rb_bundle_fetch = repository_rule(
         ),
         "bundler_checksums": attr.string_dict(
             doc = "Custom map from Bundler version to its SHA-256 checksum.",
+        ),
+        "gem_checksums": attr.string_dict(
+            default = {},
+            doc = "SHA-256 checksums for remote gems. Keys are gem names (e.g. foobar-1.2.3), values are SHA-256 checksums.",
         ),
         "_build_tpl": attr.label(
             allow_single_file = True,
