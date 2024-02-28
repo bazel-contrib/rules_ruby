@@ -14,4 +14,10 @@ RSpec.describe ENV do
   specify do
     expect(ENV.fetch('BUNDLE_BUILD__FOO')).to eq('bar')
   end
+
+  specify do
+    expect(File).to exist(ENV.fetch('LOCATION_SRC'))
+    expect(File).to exist(ENV.fetch('LOCATION_DATA'))
+    expect(File).to exist(ENV.fetch('LOCATION_DEP'))
+  end
 end

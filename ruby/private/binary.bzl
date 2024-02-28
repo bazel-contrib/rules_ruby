@@ -34,7 +34,11 @@ Use a built-in `args` attribute to pass extra arguments to the script.
         """,
     ),
     "env": attr.string_dict(
-        doc = "Environment variables to use during execution.",
+        doc = """
+Environment variables to use during execution.
+
+Supports `$(location)` expansion for targets from `srcs`, `data` and `deps`.
+""",
     ),
     "env_inherit": attr.string_list(
         doc = "List of environment variable names to be inherited by the test runner.",
@@ -77,6 +81,8 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
 
     environment = {}
     environment.update(env)
+    for k, v in environment.items():
+        environment[k] = ctx.expand_location(v, ctx.attr.srcs + ctx.attr.data + ctx.attr.deps)
 
     if _is_windows(ctx):
         rlocation_function = BATCH_RLOCATION_FUNCTION
@@ -93,7 +99,7 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
         bundler_command = ""
 
     args = " ".join(args)
-    args = ctx.expand_location(args)
+    args = ctx.expand_location(args, ctx.attr.srcs + ctx.attr.data + ctx.attr.deps)
 
     ctx.actions.expand_template(
         template = template,
