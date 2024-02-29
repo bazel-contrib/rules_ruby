@@ -280,6 +280,22 @@ rb_bundle_fetch(
 )
 ```
 
+Checksums for gems in Gemfile.lock are printed by the ruleset during the build.
+It's recommended to add them to `gem_checksums` attribute.
+
+`WORKSPACE`:
+```bazel
+rb_bundle_fetch(
+    name = "bundle",
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+    gem_checksums = {
+        "ast-2.4.2": "1e280232e6a33754cde542bc5ef85520b74db2aac73ec14acef453784447cc12",
+        "concurrent-ruby-1.2.2": "3879119b8b75e3b62616acc256c64a134d0b0a7a9a3fcba5a233025bcde22c4f",
+    },
+)
+```
+
 All the installed gems can be accessed using `@bundle` target and additionally
 gems binary files can also be used via BUILD rules or directly with `bazel run`:
 
