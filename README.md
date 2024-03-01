@@ -149,7 +149,7 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
   See [`examples/gem/.bazelrc`][7] to learn how to do that.
 * Some gems contain files with spaces which cause Bazel error `link or target filename contains space`.
   To work it around, use [`--experimental_inprocess_symlink_creation`][16] Bazel flag.
-  See [`bazelbuild/bazel#4327`[17] for more details.
+  See [`bazelbuild/bazel#4327`][17] for more details.
 
 
 [1]: https://www.ruby-lang.org
