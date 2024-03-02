@@ -39,7 +39,7 @@ def rb_register_toolchains(
     ```
 
     Args:
-        name: base name of resulting repositories, by default "rules_ruby"
+        name: base name of resulting repositories, by default "ruby"
         version: a semver version of MRI, or a string like [interpreter type]-[version], or "system"
         version_file: .ruby-version or .tool-versions file to read version from
         msys2_packages: extra MSYS2 packages to install

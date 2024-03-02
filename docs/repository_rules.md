@@ -60,7 +60,7 @@ $ bazel run @ruby//:gem -- install rails
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="rb_register_toolchains-name"></a>name |  base name of resulting repositories, by default "rules_ruby"   |  `"ruby"` |
+| <a id="rb_register_toolchains-name"></a>name |  base name of resulting repositories, by default "ruby"   |  `"ruby"` |
 | <a id="rb_register_toolchains-version"></a>version |  a semver version of MRI, or a string like [interpreter type]-[version], or "system"   |  `None` |
 | <a id="rb_register_toolchains-version_file"></a>version_file |  .ruby-version or .tool-versions file to read version from   |  `None` |
 | <a id="rb_register_toolchains-msys2_packages"></a>msys2_packages |  extra MSYS2 packages to install   |  `["libyaml"]` |
