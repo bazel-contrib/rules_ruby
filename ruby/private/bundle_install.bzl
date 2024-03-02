@@ -37,11 +37,13 @@ def _rb_bundle_install_impl(ctx):
     if _is_windows(ctx):
         script = ctx.actions.declare_file("bundle_install_{}.cmd".format(ctx.label.name))
         template = ctx.file._bundle_install_cmd_tpl
-        env.update({"PATH": _normalize_path(ctx, toolchain.ruby.dirname) + ";%PATH%"})
+        path = ctx.attr.env.get("PATH", "%PATH%")
+        env.update({"PATH": _normalize_path(ctx, toolchain.ruby.dirname) + ";" + path})
     else:
         script = ctx.actions.declare_file("bundle_install_{}.sh".format(ctx.label.name))
         template = ctx.file._bundle_install_sh_tpl
-        env.update({"PATH": "%s:$PATH" % toolchain.ruby.dirname})
+        path = ctx.attr.env.get("PATH", "$PATH")
+        env.update({"PATH": toolchain.ruby.dirname + ":" + path})
 
     # Calculate relative location between BUNDLE_GEMFILE and BUNDLE_PATH.
     relative_dir = "../../"
