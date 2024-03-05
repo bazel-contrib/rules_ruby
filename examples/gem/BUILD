@@ -29,8 +29,8 @@ rb_test(
         "//lib:gem",
         "//spec:add",
         "//spec:env",
-        "//spec:file",
         "//spec:subtract",
+        "//spec:support",
         "@bundle",
     ],
 )
