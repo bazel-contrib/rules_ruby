@@ -1,3 +1,4 @@
+# https://github.com/bazel-contrib/publish-to-bcr/tree/main/templates#presubmityml
 bcr_test_module:
   module_path: "examples/gem"
   matrix:
@@ -8,5 +9,6 @@ bcr_test_module:
     run_tests:
       name: "Run test module"
       platform: ${{ platform }}
+      bazel: ${{ bazel }}
       test_targets:
         - "//..."
