@@ -13,8 +13,6 @@ load(
 load("//ruby/private:utils.bzl", _is_windows = "is_windows")
 
 def _rb_gem_build_impl(ctx):
-    tools = depset([])
-
     gem_builder = ctx.actions.declare_file("{}_gem_builder.rb".format(ctx.label.name))
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
     transitive_deps = get_transitive_deps(ctx.attr.deps).to_list()
@@ -22,13 +20,15 @@ def _rb_gem_build_impl(ctx):
     bundle_env = get_bundle_env({}, ctx.attr.deps)
     java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
+    tools = []
+    tools.extend(ruby_toolchain.files)
 
     env = {}
     env.update(ruby_toolchain.env)
 
     if ruby_toolchain.version.startswith("jruby"):
         env["JAVA_HOME"] = java_toolchain.java_runtime.java_home
-        tools = java_toolchain.java_runtime.files
+        tools.extend(java_toolchain.java_runtime.files.to_list())
         if _is_windows(ctx):
             env["PATH"] = ruby_toolchain.ruby.dirname
 
@@ -66,8 +66,7 @@ def _rb_gem_build_impl(ctx):
         arguments = [args],
         env = env,
         mnemonic = "GemBuild",
-        tools = tools,
-        use_default_shell_env = not _is_windows(ctx),
+        tools = depset(tools),
     )
 
     providers = []
