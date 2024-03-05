@@ -90,7 +90,7 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
         template = ctx.file._binary_cmd_tpl
     else:
         rlocation_function = BASH_RLOCATION_FUNCTION
-        script = ctx.actions.declare_file(ctx.label.name)
+        script = ctx.actions.declare_file("{}.sh".format(ctx.label.name))
         template = ctx.file._binary_sh_tpl
 
     if bundler:

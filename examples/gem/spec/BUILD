@@ -2,11 +2,6 @@ load("@rules_ruby//ruby:defs.bzl", "rb_library", "rb_test")
 
 package(default_visibility = ["//:__pkg__"])
 
-filegroup(
-    name = "support_file",
-    srcs = ["support/file.txt"],
-)
-
 rb_library(
     name = "spec_helper",
     srcs = ["spec_helper.rb"],
@@ -37,12 +32,12 @@ rb_test(
     timeout = "moderate",  # JRuby startup can be slow
     srcs = [":env_spec"],
     args = ["spec/env_spec.rb"],
-    data = [":support_file"],
+    data = ["//spec/support:file"],
     env = {
         "EXAMPLE": "ENV",
         "LOCATION_SRC": "$(location :env_spec)",
         "LOCATION_DEP": "$(location //lib/gem:add)",
-        "LOCATION_DATA": "$(location :support_file)",
+        "LOCATION_DATA": "$(location //spec/support:file)",
     },
     env_inherit = [
         "USER",  # POSIX
@@ -56,12 +51,12 @@ rb_test(
 )
 
 rb_test(
-    name = "file",
+    name = "support",
     size = "small",
     timeout = "moderate",  # JRuby startup can be slow
-    srcs = ["file_spec.rb"],
-    args = ["spec/file_spec.rb"],
-    data = [":support_file"],
+    srcs = ["support_spec.rb"],
+    args = ["spec/support_spec.rb"],
+    data = ["//spec/support:file"],
     main = "@bundle//bin:rspec",
     deps = [":spec_helper"],
 )
