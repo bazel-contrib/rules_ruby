@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: p0deje/setup-bazel@0.7.1
+      - uses: p0deje/setup-bazel@0.8.0
         with:
           bazelrc: common --announce_rc --color=yes
           repository-cache: true
@@ -62,10 +62,10 @@ jobs:
         working-directory: examples/gem
     steps:
       - uses: actions/checkout@v4
-      - uses: p0deje/setup-bazel@0.7.1
+      - uses: p0deje/setup-bazel@0.8.0
         with:
           bazelrc: common --announce_rc --color=yes ${{ matrix.mode == 'WORKSPACE' && '--noenable_bzlmod' || '' }}
-          repository-cache: true
+          repository-cache: examples/gem/${{ matrix.mode == 'WORKSPACE' && 'WORKSPACE' || 'MODULE.bazel' }}
       - run: echo ${{ matrix.ruby }} > .ruby-version
       - if: matrix.ruby == 'system'
         uses: ruby/setup-ruby@v1
@@ -98,10 +98,10 @@ jobs:
         working-directory: examples/jekyll
     steps:
       - uses: actions/checkout@v4
-      - uses: p0deje/setup-bazel@0.7.1
+      - uses: p0deje/setup-bazel@0.8.0
         with:
           bazelrc: common --announce_rc --color=yes
-          repository-cache: true
+          repository-cache: examples/jekyll/MODULE.bazel
       - run: bazel build ...
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
@@ -112,7 +112,9 @@ jobs:
     needs:
       - ruleset
       - examples-gem
+      - examples-jekyll
     uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v6
     with:
+      mount_bazel_caches: false
       prerelease: false
       release_files: rules_ruby-*.tar.gz
