@@ -7,7 +7,7 @@ This repository hosts [Ruby][1] language ruleset for [Bazel][2].
 The ruleset is known to work with:
 
 - Bazel 7 using WORKSPACE and Bzlmod *(tested on CI)*;
-- Bazel 6 using WORKSPACE and Bzlmod *(not tested on CI)*;
+- Bazel 6 using WORKSPACE and Bzlmod *(no longer tested on CI)*;
 - Bazel 5 using WORKSPACE *(no longer tested on CI)*.
 
 ## Getting Started
@@ -101,7 +101,7 @@ The following toolchains are known to work and tested on CI.
 | MRI 3.1          | 🟩    | 🟩    | 🟩      |
 | MRI 3.0          | 🟩    | 🟩    | 🟩      |
 | JRuby 9.4        | 🟩    | 🟩    | 🟩      |
-| TruffleRuby 23.0 | 🟩    | 🟩    | 🟥      |
+| TruffleRuby 24.0 | 🟩    | 🟩    | 🟥      |
 
 The following toolchains were previously known to work but *no longer tested on CI*.
 
@@ -110,6 +110,7 @@ The following toolchains were previously known to work but *no longer tested on 
 | MRI 2.7          | 🟩    | 🟩    | 🟩      |
 | JRuby 9.3        | 🟩    | 🟩    | 🟩      |
 | TruffleRuby 22.0 | 🟩    | 🟩    | 🟥      |
+| TruffleRuby 23.0 | 🟩    | 🟩    | 🟥      |
 
 ### MRI
 
