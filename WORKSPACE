@@ -50,9 +50,9 @@ stardoc_pinned_maven_install()
 
 http_archive(
     name = "aspect_bazel_lib",
-    sha256 = "3e0a430ada9b8f0f845767a267cf584bc94b8ec642d6093f31dca3938b18f6a1",
-    strip_prefix = "bazel-lib-2.6.0",
-    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.6.0/bazel-lib-v2.6.0.tar.gz",
+    sha256 = "357dad9d212327c35d9244190ef010aad315e73ffa1bed1a29e20c372f9ca346",
+    strip_prefix = "bazel-lib-2.7.0",
+    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.7.0/bazel-lib-v2.7.0.tar.gz",
 )
 
 http_archive(
