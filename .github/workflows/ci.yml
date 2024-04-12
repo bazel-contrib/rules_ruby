@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: bazel-contrib/setup-bazel@0.8.1
+      - uses: bazel-contrib/setup-bazel@0.8.2
         with:
           bazelrc: common --announce_rc --color=yes
           repository-cache: true
@@ -62,7 +62,7 @@ jobs:
         working-directory: examples/gem
     steps:
       - uses: actions/checkout@v4
-      - uses: bazel-contrib/setup-bazel@0.8.1
+      - uses: bazel-contrib/setup-bazel@0.8.2
         with:
           bazelrc: common --announce_rc --color=yes ${{ matrix.mode == 'WORKSPACE' && '--noenable_bzlmod' || '' }}
           repository-cache: examples/gem/${{ matrix.mode == 'WORKSPACE' && 'WORKSPACE' || 'MODULE.bazel' }}
@@ -98,7 +98,7 @@ jobs:
         working-directory: examples/jekyll
     steps:
       - uses: actions/checkout@v4
-      - uses: bazel-contrib/setup-bazel@0.8.1
+      - uses: bazel-contrib/setup-bazel@0.8.2
         with:
           bazelrc: common --announce_rc --color=yes
           repository-cache: examples/jekyll/MODULE.bazel
