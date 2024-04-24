@@ -75,9 +75,9 @@ http_archive(
 
 http_archive(
     name = "bazel_skylib_gazelle_plugin",
-    sha256 = "747addf3f508186234f6232674dd7786743efb8c68619aece5fb0cac97b8f415",
+    sha256 = "8700f9204f3b0a32851cdf56c63b8d8d4fcf93b96707c590d1de8d84cf07ee7d",
     urls = [
-        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.5.0/bazel-skylib-gazelle-plugin-1.5.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.6.0/bazel-skylib-gazelle-plugin-1.6.0.tar.gz",
     ],
 )
 
