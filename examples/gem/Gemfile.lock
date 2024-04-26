@@ -28,9 +28,9 @@ GEM
     parser (3.2.2.3)
       ast (~> 2.4.1)
       racc
-    psych (5.1.1.1)
+    psych (5.1.2)
       stringio
-    psych (5.1.1.1-java)
+    psych (5.1.2-java)
       jar-dependencies (>= 0.1.7)
     racc (1.7.1)
     racc (1.7.1-java)
@@ -78,6 +78,7 @@ PLATFORMS
   universal-java-11
   universal-java-17
   universal-java-18
+  universal-java-21
   x64-mingw32
 
 DEPENDENCIES
@@ -88,4 +89,4 @@ DEPENDENCIES
   rubocop (~> 1.10, >= 1.55)
 
 BUNDLED WITH
-   2.2.19
+   2.3.3

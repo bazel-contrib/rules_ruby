@@ -28,35 +28,35 @@ jobs:
 
   examples-gem:
     name: Examples / Gem
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         ruby:
-          - 3.0.6
-          - 3.1.4
-          - 3.2.3
-          - 3.3.0
-          - jruby-9.4.6.0
-          - truffleruby-24.0.0
+          - 3.1.5
+          - 3.2.4
+          - 3.3.1
+          - jruby-9.4.7.0
+          - truffleruby-24.0.1
           - system
         os:
-          - ubuntu
-          - macos
-          - windows
+          - ubuntu-latest
+          # Use Intel-based macOS for now because Ruby 3.1 doesn't compile on Apple Silicon.
+          - macos-13
+          - windows-latest
         mode:
           - bzlmod
           - WORKSPACE
         exclude:
           # JRuby with bzlmod fails with long path issues on Windows.
           # See #64
-          - os: windows
-            ruby: jruby-9.4.6.0
+          - os: windows-latest
+            ruby: jruby-9.4.7.0
             mode: bzlmod
           # TruffleRuby doesn't work on Windows.
-          - os: windows
-            ruby: truffleruby-24.0.0
+          - os: windows-latest
+            ruby: truffleruby-24.0.1
     defaults:
       run:
         working-directory: examples/gem
@@ -85,14 +85,15 @@ jobs:
 
   examples-jekyll:
     name: Examples / Jekyll
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}-
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         os:
-          - ubuntu
-          - macos
+          - ubuntu-latest
+          # Use Intel-based macOS for now because Ruby 3.1 doesn't compile on Apple Silicon.
+          - macos-13
     defaults:
       run:
         working-directory: examples/jekyll
