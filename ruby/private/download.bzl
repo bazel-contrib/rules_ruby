@@ -206,7 +206,7 @@ By default, contains `libyaml` (dependency of a `psych` gem).
 """,
         ),
         "ruby_build_version": attr.string(
-            default = "20240319",
+            default = "20240423",
             doc = """
 Version of [ruby-build](https://github.com/rbenv/ruby-build/releases)
 to install. You normally don't need to change this, unless `version` you pass is a new one
