@@ -39,6 +39,7 @@ bzl_library(
     srcs = ["extensions.bzl"],
     deps = [
         ":deps",
+        "//ruby/private:download",
         "//ruby/private:toolchain",
     ],
 )
