@@ -1,5 +1,7 @@
 "Repository rule for fetching Ruby interpreters"
 
+RUBY_BUILD_VERSION = "20240423"
+
 _JRUBY_BINARY_URL = "https://repo1.maven.org/maven2/org/jruby/jruby-dist/{version}/jruby-dist-{version}-bin.tar.gz"
 _RUBY_BUILD_URL = "https://github.com/rbenv/ruby-build/archive/refs/tags/v{version}.tar.gz"
 _RUBY_INSTALLER_URL = "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-{version}-1/rubyinstaller-devkit-{version}-1-x64.exe"
@@ -252,7 +254,7 @@ By default, contains `libyaml` (dependency of a `psych` gem).
 """,
         ),
         "ruby_build_version": attr.string(
-            default = "20240423",
+            default = RUBY_BUILD_VERSION,
             doc = """
 Version of [ruby-build](https://github.com/rbenv/ruby-build/releases)
 to install. You normally don't need to change this, unless `version` you pass is a new one

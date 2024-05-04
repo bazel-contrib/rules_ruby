@@ -1,5 +1,6 @@
 "Module extensions used by bzlmod"
 
+load("//ruby/private:download.bzl", "RUBY_BUILD_VERSION")
 load("//ruby/private:toolchain.bzl", "DEFAULT_RUBY_REPOSITORY")
 load(":deps.bzl", "rb_bundle", "rb_bundle_fetch", "rb_register_toolchains")
 
@@ -26,6 +27,7 @@ ruby_toolchain = tag_class(attrs = {
     "name": attr.string(doc = "Base name for generated repositories, allowing multiple to be registered."),
     "version": attr.string(doc = "Explicit version of ruby."),
     "version_file": attr.label(doc = "File to read Ruby version from."),
+    "ruby_build_version": attr.string(doc = "Version of ruby-build to use.", default = RUBY_BUILD_VERSION),
     "msys2_packages": attr.string_list(doc = "Extra MSYS2 packages to install.", default = ["libyaml"]),
 })
 
