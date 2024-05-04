@@ -32,7 +32,10 @@ def _rb_bundle_install_impl(ctx):
     if toolchain.version.startswith("jruby"):
         java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
         tools.extend(java_toolchain.java_runtime.files.to_list())
-        env.update({"JAVA_HOME": java_toolchain.java_runtime.java_home})
+        env.update({
+            "JARS_SKIP": "true",  # Avoid installing extra dependencies.
+            "JAVA_HOME": java_toolchain.java_runtime.java_home,
+        })
 
     if _is_windows(ctx):
         script = ctx.actions.declare_file("bundle_install_{}.cmd".format(ctx.label.name))
