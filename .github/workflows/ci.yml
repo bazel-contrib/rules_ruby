@@ -70,7 +70,7 @@ jobs:
       - if: matrix.ruby == 'system'
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.0.6'
+          ruby-version: '3.1.5'
       - run: bazel build ...
       - run: bazel run lib/gem:add-numbers 2
       - run: bazel run lib/gem:print-version
