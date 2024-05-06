@@ -85,15 +85,14 @@ jobs:
 
   examples-jekyll:
     name: Examples / Jekyll
-    runs-on: ${{ matrix.os }}-
+    runs-on: ${{ matrix.os }}-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-latest
-          # Use Intel-based macOS for now because Ruby 3.1 doesn't compile on Apple Silicon.
-          - macos-13
+          - ubuntu
+          - macos
     defaults:
       run:
         working-directory: examples/jekyll
