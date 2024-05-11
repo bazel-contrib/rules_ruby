@@ -6,10 +6,5 @@
   "ignoreDeps": [
     "bazel_skylib",
     "platforms"
-  ],
-  "bazelisk": {
-    "fileMatch": [
-      "(^|/)examples/gem/\\.bazelversion$"
-    ]
-  }
+  ]
 }
