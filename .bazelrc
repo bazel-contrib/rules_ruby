@@ -1,2 +1,5 @@
 # This file contains Bazel settings to apply on Release only.
 # It is referenced with a --bazelrc option in the call to bazel in release.yaml
+#
+# Not ready for the MODULE.lock file yet, as of Bazel 7.0.0 there are still some stability issues.
+common --lockfile_mode=off
