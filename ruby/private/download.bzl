@@ -230,10 +230,14 @@ def _install_via_ruby_build(repository_ctx, version):
         fail("%s\n%s" % (result.stdout, result.stderr))
 
 def _symlink_system_ruby(repository_ctx):
-    ruby = repository_ctx.which("ruby")
-    repository_ctx.symlink(ruby.dirname, "dist/bin")
+    result = repository_ctx.execute(["ruby", "-e", "puts RbConfig.ruby"])
+    if result.return_code != 0:
+        fail("Failed to determine the system Ruby path:\n%s\n%s" % (result.stdout, result.stderr))
+    ruby_path = result.stdout.strip()
+    ruby_dir = repository_ctx.path(ruby_path).dirname
+    repository_ctx.symlink(ruby_dir, "dist/bin")
     if repository_ctx.os.name.startswith("windows"):
-        repository_ctx.symlink(ruby.dirname.dirname.get_child("lib"), "dist/lib")
+        repository_ctx.symlink(ruby_dir.dirname.get_child("lib"), "dist/lib")
 
 rb_download = repository_rule(
     implementation = _rb_download_impl,
