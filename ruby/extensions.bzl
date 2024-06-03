@@ -68,17 +68,24 @@ def _ruby_module_extension(module_ctx):
                     toolchain.name,
                     toolchain.version,
                     toolchain.version_file,
+                    toolchain.ruby_build_version,
                     registrations[toolchain.name],
                 ))
             else:
-                registrations[toolchain.name] = (toolchain.version, toolchain.version_file, toolchain.msys2_packages)
+                registrations[toolchain.name] = (
+                    toolchain.version,
+                    toolchain.version_file,
+                    toolchain.msys2_packages,
+                    toolchain.ruby_build_version,
+                )
 
-    for name, (version, version_file, msys2_packages) in registrations.items():
+    for name, (version, version_file, msys2_packages, ruby_build_version) in registrations.items():
         rb_register_toolchains(
             name = name,
             version = version,
             version_file = version_file,
             msys2_packages = msys2_packages,
+            ruby_build_version = ruby_build_version,
             register = False,
         )
 
