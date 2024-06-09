@@ -219,7 +219,7 @@ def _install_via_ruby_build(repository_ctx, version):
 
     repository_ctx.report_progress("Installing Ruby %s" % version)
     result = repository_ctx.execute(
-        ["ruby-build/bin/ruby-build", "--verbose", version, "dist"],
+        ["ruby-build/bin/ruby-build", "--verbose", version, "dist", "--", "--disable-install-doc"],
         timeout = 1200,
         quiet = not repository_ctx.os.environ.get("RUBY_RULES_DEBUG", default = False),
     )
