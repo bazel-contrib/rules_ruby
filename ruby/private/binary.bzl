@@ -43,6 +43,10 @@ Supports `$(location)` expansion for targets from `srcs`, `data` and `deps`.
     "env_inherit": attr.string_list(
         doc = "List of environment variable names to be inherited by the test runner.",
     ),
+    "ruby": attr.label(
+        doc = "Override Ruby toolchain to use when running the script.",
+        providers = [platform_common.ToolchainInfo],
+    ),
     "_binary_cmd_tpl": attr.label(
         allow_single_file = True,
         default = "@rules_ruby//ruby/private/binary:binary.cmd.tpl",
@@ -63,6 +67,8 @@ Supports `$(location)` expansion for targets from `srcs`, `data` and `deps`.
 # buildifier: disable=function-docstring
 def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {}, java_bin = ""):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
+    if ctx.attr.ruby != None:
+        toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
 
     binary_path = ""
     locate_binary_in_runfiles = ""

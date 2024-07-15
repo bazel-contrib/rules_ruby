@@ -12,6 +12,8 @@ def _rb_gem_install_impl(ctx):
     gem = ctx.file.gem
     install_dir = ctx.actions.declare_directory(gem.basename[:-4])
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
+    if ctx.attr.ruby != None:
+        toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
 
     env = {}
     env.update(toolchain.env)
@@ -70,6 +72,10 @@ rb_gem_install = rule(
             allow_single_file = [".gem"],
             mandatory = True,
             doc = "Gem file to install.",
+        ),
+        "ruby": attr.label(
+            doc = "Override Ruby toolchain to use when installing the gem.",
+            providers = [platform_common.ToolchainInfo],
         ),
         "_gem_install_cmd_tpl": attr.label(
             allow_single_file = True,

@@ -11,6 +11,7 @@ rb_bundle_install(
     gemfile = "{gemfile_path}",
     gemfile_lock = "{gemfile_lock_path}",
     gems = {gems},
+    ruby = {ruby},
 )
 
 {gem_fragments}

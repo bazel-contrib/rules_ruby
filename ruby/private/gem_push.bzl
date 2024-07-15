@@ -49,6 +49,7 @@ Gem file to push to RubyGems. You would usually use an output of `rb_gem_build()
         ),
         env = BINARY_ATTRS["env"],
         env_inherit = BINARY_ATTRS["env_inherit"],
+        ruby = BINARY_ATTRS["ruby"],
         _binary_cmd_tpl = BINARY_ATTRS["_binary_cmd_tpl"],
         _binary_sh_tpl = BINARY_ATTRS["_binary_sh_tpl"],
         _windows_constraint = BINARY_ATTRS["_windows_constraint"],
