@@ -11,6 +11,8 @@ load(
 
 def _rb_bundle_install_impl(ctx):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
+    if ctx.attr.ruby != None:
+        toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
 
     tools = []
     tools.extend(toolchain.files)
@@ -136,6 +138,10 @@ rb_bundle_install = rule(
         ),
         "env": attr.string_dict(
             doc = "Environment variables to use during installation.",
+        ),
+        "ruby": attr.label(
+            doc = "Override Ruby toolchain to use when installing the gem.",
+            providers = [platform_common.ToolchainInfo],
         ),
         "_runfiles_library": attr.label(
             allow_single_file = True,

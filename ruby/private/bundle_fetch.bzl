@@ -23,6 +23,7 @@ _GEM_INSTALL_BUILD_FRAGMENT = """
 rb_gem_install(
     name = "{name}",
     gem = "{cache_path}/{gem}",
+    ruby = {ruby},
 )
 """
 
@@ -31,6 +32,7 @@ rb_binary(
     name = "{name}",
     main = "{path}/{name}",
     deps = ["//:{repository_name}"],
+    ruby = {ruby},
 )
 """
 
@@ -136,6 +138,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
     gem_fragments = []
     gem_install_fragments = []
     gem_checksums = {}
+    ruby_toolchain_attr = "None" if repository_ctx.attr.ruby == None else '"{}"'.format(repository_ctx.attr.ruby)
     repository_name = _normalize_bzlmod_repository_name(repository_ctx.name)
 
     # Fetch gems and expose them as `rb_gem()` targets.
@@ -164,6 +167,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
             name = gemfile_lock.bundler.full_name,
             gem = gemfile_lock.bundler.filename,
             cache_path = cache_path,
+            ruby = ruby_toolchain_attr,
         ),
     )
 
@@ -178,6 +182,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
                 name = executable,
                 repository_name = repository_name,
                 path = BINSTUBS_LOCATION.partition("/")[-1],
+                ruby = ruby_toolchain_attr,
             ),
         )
     repository_ctx.template(
@@ -203,6 +208,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
             "{gem_fragments}": "".join(gem_fragments),
             "{gem_install_fragments}": "".join(gem_install_fragments),
             "{env}": repr(repository_ctx.attr.env),
+            "{ruby}": ruby_toolchain_attr,
         },
     )
 
@@ -249,6 +255,10 @@ rb_bundle_fetch = repository_rule(
         "gem_checksums": attr.string_dict(
             default = {},
             doc = "SHA-256 checksums for remote gems. Keys are gem names (e.g. foobar-1.2.3), values are SHA-256 checksums.",
+        ),
+        "ruby": attr.label(
+            doc = "Override Ruby toolchain to use for installation.",
+            providers = [platform_common.ToolchainInfo],
         ),
         "_build_tpl": attr.label(
             allow_single_file = True,

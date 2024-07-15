@@ -74,7 +74,7 @@ $ bazel run @ruby//:gem -- install rails
 
 <pre>
 rb_bundle_fetch(<a href="#rb_bundle_fetch-name">name</a>, <a href="#rb_bundle_fetch-srcs">srcs</a>, <a href="#rb_bundle_fetch-bundler_checksums">bundler_checksums</a>, <a href="#rb_bundle_fetch-bundler_remote">bundler_remote</a>, <a href="#rb_bundle_fetch-env">env</a>, <a href="#rb_bundle_fetch-gem_checksums">gem_checksums</a>, <a href="#rb_bundle_fetch-gemfile">gemfile</a>,
-                <a href="#rb_bundle_fetch-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_fetch-repo_mapping">repo_mapping</a>)
+                <a href="#rb_bundle_fetch-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_fetch-repo_mapping">repo_mapping</a>, <a href="#rb_bundle_fetch-ruby">ruby</a>)
 </pre>
 
 Fetches Bundler dependencies to be automatically installed by other targets.
@@ -143,6 +143,7 @@ rb_test(
 | <a id="rb_bundle_fetch-gemfile"></a>gemfile |  Gemfile to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_bundle_fetch-gemfile_lock"></a>gemfile_lock |  Gemfile.lock to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_bundle_fetch-repo_mapping"></a>repo_mapping |  In `WORKSPACE` context only: a dictionary from local repository name to global repository name. This allows controls over workspace dependency resolution for dependencies of this repository.<br><br>For example, an entry `"@foo": "@bar"` declares that, for any time this repository depends on `@foo` (such as a dependency on `@foo//some:target`, it should actually resolve that dependency within globally-declared `@bar` (`@bar//some:target`).<br><br>This attribute is _not_ supported in `MODULE.bazel` context (when invoking a repository rule inside a module extension's implementation function).   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  |
+| <a id="rb_bundle_fetch-ruby"></a>ruby |  Override Ruby toolchain to use for installation.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 
 
 <a id="rb_bundle_rule"></a>
