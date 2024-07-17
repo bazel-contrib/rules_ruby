@@ -26,6 +26,17 @@ if [ -n "{java_bin}" ]; then
   export JAVA_HOME=$(dirname $(dirname $(rlocation "{java_bin}")))
 fi
 
+# Bundler expects the $HOME directory to be writable and produces misleading
+# warnings if it isn't. This isn't the case in every situation (e.g. remote
+# execution) and Bazel recommends using $TEST_TMPDIR when it's available:
+# https://bazel.build/reference/test-encyclopedia#initial-conditions
+#
+# We set $HOME prior to setting environment variables from the target itself so
+# that users can override this behavior if they desire.
+if [ -n "${TEST_TMPDIR:-}" ]; then
+  export HOME=$TEST_TMPDIR
+fi
+
 # Set environment variables.
 {env}
 
