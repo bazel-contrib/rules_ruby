@@ -1,5 +1,6 @@
 "Implementation details for rb_gem_build"
 
+load("//ruby/private:binary.bzl", BINARY_ATTRS = "ATTRS")
 load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
 load(
     "//ruby/private:providers.bzl",
@@ -20,6 +21,8 @@ def _rb_gem_build_impl(ctx):
     bundle_env = get_bundle_env({}, ctx.attr.deps)
     java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
+    if ctx.attr.ruby != None:
+        ruby_toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
     tools = []
     tools.extend(ruby_toolchain.files)
 
@@ -97,6 +100,7 @@ rb_gem_build = rule(
     _rb_gem_build_impl,
     attrs = dict(
         LIBRARY_ATTRS,
+        ruby = BINARY_ATTRS["ruby"],
         gemspec = attr.label(
             allow_single_file = [".gemspec"],
             mandatory = True,
