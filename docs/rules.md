@@ -191,7 +191,7 @@ used by `rb_bundle_fetch()`.
 ## rb_gem_build
 
 <pre>
-rb_gem_build(<a href="#rb_gem_build-name">name</a>, <a href="#rb_gem_build-deps">deps</a>, <a href="#rb_gem_build-srcs">srcs</a>, <a href="#rb_gem_build-data">data</a>, <a href="#rb_gem_build-bundle_env">bundle_env</a>, <a href="#rb_gem_build-gemspec">gemspec</a>)
+rb_gem_build(<a href="#rb_gem_build-name">name</a>, <a href="#rb_gem_build-deps">deps</a>, <a href="#rb_gem_build-srcs">srcs</a>, <a href="#rb_gem_build-data">data</a>, <a href="#rb_gem_build-bundle_env">bundle_env</a>, <a href="#rb_gem_build-gemspec">gemspec</a>, <a href="#rb_gem_build-ruby">ruby</a>)
 </pre>
 
 Builds a Ruby gem.
@@ -281,6 +281,7 @@ $ bazel build :gem-build
 | <a id="rb_gem_build-data"></a>data |  List of runtime dependencies needed by a program that depends on this library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="rb_gem_build-bundle_env"></a>bundle_env |  List of bundle environment variables to set when building the library.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="rb_gem_build-gemspec"></a>gemspec |  Gemspec file to use for gem building.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+| <a id="rb_gem_build-ruby"></a>ruby |  Override Ruby toolchain to use when running the script.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 
 
 <a id="rb_gem_install"></a>

@@ -138,6 +138,8 @@ def rb_binary_impl(ctx):
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
 
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
+    if ctx.attr.ruby != None:
+        ruby_toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
     tools = [ctx.file._runfiles_library]
     tools.extend(ruby_toolchain.files)
 
