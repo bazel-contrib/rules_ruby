@@ -9,6 +9,7 @@ load(
 def _normalize_bzlmod_repository_name_test_impl(ctx):
     env = unittest.begin(ctx)
     asserts.equals(env, _normalize_bzlmod_repository_name("bundle"), "bundle")
+    asserts.equals(env, _normalize_bzlmod_repository_name("rules_ruby+override+ruby+bundle"), "bundle")
     asserts.equals(env, _normalize_bzlmod_repository_name("rules_ruby~override~ruby~bundle"), "bundle")
     return unittest.end(env)
 
