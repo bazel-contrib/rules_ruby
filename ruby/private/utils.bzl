@@ -144,7 +144,8 @@ def normalize_bzlmod_repository_name(name):
     """Converts Bzlmod repostory to its private name.
 
     This is needed to define a target that is called the same as the repository.
-    For example, given a canonical name "rules_ruby~override~ruby~bundle",
+    For example, given a canonical name "rules_ruby+override+ruby+bundle" or
+    "rules_ruby~override~ruby~bundle",
     the function would return "bundle" as the name.
 
     This is a hacky workaround and will be fixed upstream.
@@ -156,6 +157,9 @@ def normalize_bzlmod_repository_name(name):
     Returns:
         repository name
     """
+    if "+" in name:
+        return name.rpartition("+")[-1]
+
     return name.rpartition("~")[-1]
 
 def to_rlocation_path(source):
