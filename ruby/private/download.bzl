@@ -1,6 +1,6 @@
 "Repository rule for fetching Ruby interpreters"
 
-RUBY_BUILD_VERSION = "20240530.1"
+RUBY_BUILD_VERSION = "20241030"
 
 _JRUBY_BINARY_URL = "https://repo1.maven.org/maven2/org/jruby/jruby-dist/{version}/jruby-dist-{version}-bin.tar.gz"
 _RUBY_BUILD_URL = "https://github.com/rbenv/ruby-build/archive/refs/tags/v{version}.tar.gz"
@@ -33,6 +33,7 @@ _JRUBY_VERSIONS = {
     "9.4.5.0": "a40f78c4641ccc86752e16b2da247fd6bc9fbcf9a4864cf1be36f7ff7b35684c",
     "9.4.6.0": "2da14de4152b71fdbfa35ba4687a46ef12cd465740337b549cc1fe6c7c139813",
     "9.4.7.0": "f1c39f8257505300a528ff83fe4721fbe61a855abb25e3d27d52d43ac97a4d80",
+    "9.4.8.0": "347b6692bd9c91c480a45af25ce88d77be8b6e4ac4a77bc94870f2c5b54bc929",
 }
 _JRUBY_INTEGRITY_MISSING = """
 
