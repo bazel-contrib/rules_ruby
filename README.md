@@ -22,7 +22,7 @@ The ruleset is known to work with:
 load("@rules_ruby//ruby:deps.bzl", "rb_register_toolchains")
 
 rb_register_toolchains(
-    version = "3.0.6",
+    version = "3.1.6",
     # alternatively, load version from .ruby-version file
     # version_file = "//:.ruby-version",
 )
