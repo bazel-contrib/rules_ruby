@@ -2,7 +2,8 @@
 # If you have both `--noremote_upload_local_results` and `--disk_cache`, then this fixes a bug where
 # Bazel doesn't write to the local disk cache as it treats as a remote cache.
 # Docs: https://bazel.build/reference/command-line-reference#flag--incompatible_remote_results_ignore_disk
-build --incompatible_remote_results_ignore_disk
+# Bazel 8.0 RC4 doesn't have this option
+# build --incompatible_remote_results_ignore_disk
 
 # Directories used by sandboxed non-worker execution may be reused to avoid unnecessary setup costs.
 # Save time on Sandbox creation and deletion when many of the same kind of action run during the
