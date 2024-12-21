@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: bazel-contrib/setup-bazel@0.9.1
+      - uses: bazel-contrib/setup-bazel@0.10.0
         with:
           bazelrc: common --announce_rc --color=yes
           repository-cache: true
@@ -53,11 +53,6 @@ jobs:
           # Previews are unavailable on Windows.
           - os: windows-latest
             ruby: 3.4.0-preview2
-          # JRuby with bzlmod fails with long path issues on Windows.
-          # See #64
-          - os: windows-latest
-            ruby: jruby-9.4.9.0
-            mode: bzlmod
           # TruffleRuby doesn't work on Windows.
           - os: windows-latest
             ruby: truffleruby-24.1.1
@@ -66,9 +61,11 @@ jobs:
         working-directory: examples/gem
     steps:
       - uses: actions/checkout@v4
-      - uses: bazel-contrib/setup-bazel@0.9.1
+      - uses: bazel-contrib/setup-bazel@0.10.0
         with:
-          bazelrc: common --announce_rc --color=yes ${{ matrix.mode == 'WORKSPACE' && '--noenable_bzlmod' || '' }}
+          bazelrc: common --announce_rc --color=yes ${{ matrix.mode == 'WORKSPACE' && '--enable_workspace' || '' }}
+          # Workaround for long path issues: https://github.com/jruby/jruby/issues/3995.
+          output-base: ${{ matrix.os == 'windows-latest' && 'D:/b' || '' }}
           repository-cache: examples/gem/${{ matrix.mode == 'WORKSPACE' && 'WORKSPACE' || 'MODULE.bazel' }}
       - run: echo ${{ matrix.ruby }} > .ruby-version
       - if: matrix.ruby == 'system'
@@ -102,7 +99,7 @@ jobs:
         working-directory: examples/jekyll
     steps:
       - uses: actions/checkout@v4
-      - uses: bazel-contrib/setup-bazel@0.9.1
+      - uses: bazel-contrib/setup-bazel@0.10.0
         with:
           bazelrc: common --announce_rc --color=yes
           repository-cache: examples/jekyll/MODULE.bazel

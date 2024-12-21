@@ -15,7 +15,7 @@ SHA=$(shasum -a 256 $ARCHIVE | awk '{print $1}')
 
 # The stdout of this program will be used as the top of the release notes for this release.
 cat << EOF
-## Using Bzlmod with Bazel 7
+## Using Bzlmod with Bazel 7-8
 
 1. Add to your \`MODULE.bazel\` file:
 

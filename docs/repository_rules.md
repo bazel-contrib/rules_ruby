@@ -7,7 +7,9 @@ Public API for repository rules
 ## rb_bundle
 
 <pre>
-rb_bundle(<a href="#rb_bundle-toolchain">toolchain</a>, <a href="#rb_bundle-kwargs">kwargs</a>)
+load("@rules_ruby//ruby:deps.bzl", "rb_bundle")
+
+rb_bundle(<a href="#rb_bundle-toolchain">toolchain</a>, <a href="#rb_bundle-kwargs">**kwargs</a>)
 </pre>
 
 Wraps `rb_bundle_rule()` providing default toolchain name.
@@ -26,7 +28,9 @@ Wraps `rb_bundle_rule()` providing default toolchain name.
 ## rb_register_toolchains
 
 <pre>
-rb_register_toolchains(<a href="#rb_register_toolchains-name">name</a>, <a href="#rb_register_toolchains-version">version</a>, <a href="#rb_register_toolchains-version_file">version_file</a>, <a href="#rb_register_toolchains-msys2_packages">msys2_packages</a>, <a href="#rb_register_toolchains-register">register</a>, <a href="#rb_register_toolchains-kwargs">kwargs</a>)
+load("@rules_ruby//ruby:deps.bzl", "rb_register_toolchains")
+
+rb_register_toolchains(<a href="#rb_register_toolchains-name">name</a>, <a href="#rb_register_toolchains-version">version</a>, <a href="#rb_register_toolchains-version_file">version_file</a>, <a href="#rb_register_toolchains-msys2_packages">msys2_packages</a>, <a href="#rb_register_toolchains-register">register</a>, <a href="#rb_register_toolchains-kwargs">**kwargs</a>)
 </pre>
 
 Register a Ruby toolchain and lazily download the Ruby Interpreter.
@@ -73,6 +77,8 @@ $ bazel run @ruby//:gem -- install rails
 ## rb_bundle_fetch
 
 <pre>
+load("@rules_ruby//ruby:deps.bzl", "rb_bundle_fetch")
+
 rb_bundle_fetch(<a href="#rb_bundle_fetch-name">name</a>, <a href="#rb_bundle_fetch-srcs">srcs</a>, <a href="#rb_bundle_fetch-bundler_checksums">bundler_checksums</a>, <a href="#rb_bundle_fetch-bundler_remote">bundler_remote</a>, <a href="#rb_bundle_fetch-env">env</a>, <a href="#rb_bundle_fetch-gem_checksums">gem_checksums</a>, <a href="#rb_bundle_fetch-gemfile">gemfile</a>,
                 <a href="#rb_bundle_fetch-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_fetch-repo_mapping">repo_mapping</a>, <a href="#rb_bundle_fetch-ruby">ruby</a>)
 </pre>
@@ -151,6 +157,8 @@ rb_test(
 ## rb_bundle_rule
 
 <pre>
+load("@rules_ruby//ruby:deps.bzl", "rb_bundle_rule")
+
 rb_bundle_rule(<a href="#rb_bundle_rule-name">name</a>, <a href="#rb_bundle_rule-srcs">srcs</a>, <a href="#rb_bundle_rule-env">env</a>, <a href="#rb_bundle_rule-gemfile">gemfile</a>, <a href="#rb_bundle_rule-repo_mapping">repo_mapping</a>, <a href="#rb_bundle_rule-toolchain">toolchain</a>)
 </pre>
 

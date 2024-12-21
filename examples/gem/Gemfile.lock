@@ -75,6 +75,7 @@ GEM
 
 PLATFORMS
   arm64-darwin-23
+  arm64-darwin-24
   java
   ruby
   universal-java-1.8
