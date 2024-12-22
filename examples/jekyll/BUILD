@@ -5,10 +5,13 @@ package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "sources",
-    srcs = glob([
-        "_posts/**/*",
-        "_layouts/**/*",
-    ]) + [
+    srcs = glob(
+        [
+            "_posts/**/*",
+            "_layouts/**/*",
+        ],
+        allow_empty = True,
+    ) + [
         "404.html",
         "about.md",
         "index.md",

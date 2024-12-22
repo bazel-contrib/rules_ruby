@@ -1,5 +1,5 @@
-load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_binary")
 load("@buildifier_prebuilt//:rules.bzl", "buildifier")
+load("@gazelle//:def.bzl", "gazelle", "gazelle_binary")
 
 gazelle_binary(
     name = "gazelle_bin",

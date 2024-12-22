@@ -7,6 +7,8 @@ Public API for rules
 ## rb_binary
 
 <pre>
+load("@rules_ruby//ruby:defs.bzl", "rb_binary")
+
 rb_binary(<a href="#rb_binary-name">name</a>, <a href="#rb_binary-deps">deps</a>, <a href="#rb_binary-srcs">srcs</a>, <a href="#rb_binary-data">data</a>, <a href="#rb_binary-env">env</a>, <a href="#rb_binary-env_inherit">env_inherit</a>, <a href="#rb_binary-main">main</a>, <a href="#rb_binary-ruby">ruby</a>)
 </pre>
 
@@ -142,6 +144,8 @@ rake, version 13.1.0
 ## rb_bundle_install
 
 <pre>
+load("@rules_ruby//ruby:defs.bzl", "rb_bundle_install")
+
 rb_bundle_install(<a href="#rb_bundle_install-name">name</a>, <a href="#rb_bundle_install-srcs">srcs</a>, <a href="#rb_bundle_install-env">env</a>, <a href="#rb_bundle_install-gemfile">gemfile</a>, <a href="#rb_bundle_install-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_install-gems">gems</a>, <a href="#rb_bundle_install-ruby">ruby</a>)
 </pre>
 
@@ -169,6 +173,8 @@ used by `rb_bundle_fetch()`.
 ## rb_gem
 
 <pre>
+load("@rules_ruby//ruby:defs.bzl", "rb_gem")
+
 rb_gem(<a href="#rb_gem-name">name</a>, <a href="#rb_gem-gem">gem</a>)
 </pre>
 
@@ -191,6 +197,8 @@ used by `rb_bundle_fetch()`.
 ## rb_gem_build
 
 <pre>
+load("@rules_ruby//ruby:defs.bzl", "rb_gem_build")
+
 rb_gem_build(<a href="#rb_gem_build-name">name</a>, <a href="#rb_gem_build-deps">deps</a>, <a href="#rb_gem_build-srcs">srcs</a>, <a href="#rb_gem_build-data">data</a>, <a href="#rb_gem_build-bundle_env">bundle_env</a>, <a href="#rb_gem_build-gemspec">gemspec</a>, <a href="#rb_gem_build-ruby">ruby</a>)
 </pre>
 
@@ -289,6 +297,8 @@ $ bazel build :gem-build
 ## rb_gem_install
 
 <pre>
+load("@rules_ruby//ruby:defs.bzl", "rb_gem_install")
+
 rb_gem_install(<a href="#rb_gem_install-name">name</a>, <a href="#rb_gem_install-gem">gem</a>, <a href="#rb_gem_install-ruby">ruby</a>)
 </pre>
 
@@ -356,6 +366,8 @@ Successfully installed example-0.1.0
 ## rb_gem_push
 
 <pre>
+load("@rules_ruby//ruby:defs.bzl", "rb_gem_push")
+
 rb_gem_push(<a href="#rb_gem_push-name">name</a>, <a href="#rb_gem_push-deps">deps</a>, <a href="#rb_gem_push-srcs">srcs</a>, <a href="#rb_gem_push-data">data</a>, <a href="#rb_gem_push-bundle_env">bundle_env</a>, <a href="#rb_gem_push-env">env</a>, <a href="#rb_gem_push-env_inherit">env_inherit</a>, <a href="#rb_gem_push-gem">gem</a>, <a href="#rb_gem_push-ruby">ruby</a>)
 </pre>
 
@@ -428,6 +440,8 @@ Successfully registered gem: example (0.1.0)
 ## rb_library
 
 <pre>
+load("@rules_ruby//ruby:defs.bzl", "rb_library")
+
 rb_library(<a href="#rb_library-name">name</a>, <a href="#rb_library-deps">deps</a>, <a href="#rb_library-srcs">srcs</a>, <a href="#rb_library-data">data</a>, <a href="#rb_library-bundle_env">bundle_env</a>)
 </pre>
 
@@ -524,6 +538,8 @@ using other rules.
 ## rb_test
 
 <pre>
+load("@rules_ruby//ruby:defs.bzl", "rb_test")
+
 rb_test(<a href="#rb_test-name">name</a>, <a href="#rb_test-deps">deps</a>, <a href="#rb_test-srcs">srcs</a>, <a href="#rb_test-data">data</a>, <a href="#rb_test-env">env</a>, <a href="#rb_test-env_inherit">env_inherit</a>, <a href="#rb_test-main">main</a>, <a href="#rb_test-ruby">ruby</a>)
 </pre>
 

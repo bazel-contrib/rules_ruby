@@ -6,7 +6,8 @@ This repository hosts [Ruby][1] language ruleset for [Bazel][2].
 
 The ruleset is known to work with:
 
-- Bazel 7 using WORKSPACE and Bzlmod *(tested on CI)*;
+- Bazel 8 using WORKSPACE and Bzlmod *(tested on CI)*;
+- Bazel 7 using WORKSPACE and Bzlmod *(no longer tested on CI)*;
 - Bazel 6 using WORKSPACE and Bzlmod *(no longer tested on CI)*;
 - Bazel 5 using WORKSPACE *(no longer tested on CI)*.
 
