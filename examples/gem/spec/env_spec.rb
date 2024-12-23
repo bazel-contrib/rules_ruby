@@ -20,4 +20,8 @@ RSpec.describe ENV do
     expect(File).to exist(ENV.fetch('LOCATION_DATA'))
     expect(File).to exist(ENV.fetch('LOCATION_DEP'))
   end
+
+  specify do
+    expect(ENV.fetch('RUBY_ENGINE')).to eq(RUBY_ENGINE)
+  end
 end

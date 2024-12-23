@@ -58,6 +58,22 @@ $ bazel run @ruby//:bundle -- update
 $ bazel run @ruby//:gem -- install rails
 ```
 
+You can also use Ruby engine targets to `select()` depending on installed Ruby interpreter:
+
+`BUILD`:
+```bazel
+rb_library(
+    name = "my_lib",
+    srcs = ["my_lib.rb"],
+    deps = select({
+        "@ruby//engine:jruby": [":my_jruby_lib"],
+        "@ruby//engine:truffleruby": ["//:my_truffleruby_lib"],
+        "@ruby//engine:ruby": ["//:my__lib"],
+        "//conditions:default": [],
+    }),
+)
+```
+
 
 **PARAMETERS**
 
