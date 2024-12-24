@@ -99,11 +99,16 @@ def _rb_download_impl(repository_ctx):
         gem_binary_name = "gem"
 
     env = {}
+    engine = "ruby"
     if version.startswith("jruby"):
+        engine = "jruby"
+
         # JRuby might fail with "Errno::EACCES: Permission denied - NUL" on Windows:
         # https://github.com/jruby/jruby/issues/7182#issuecomment-1112953015
         env.update({"JAVA_OPTS": "-Djdk.io.File.enableADS=true"})
     elif version.startswith("truffleruby"):
+        engine = "truffleruby"
+
         # TruffleRuby needs explicit locale
         # https://www.graalvm.org/dev/reference-manual/ruby/UTF8Locale/
         env.update({"LANG": "en_US.UTF-8"})
@@ -117,6 +122,15 @@ def _rb_download_impl(repository_ctx):
             "{ruby_binary_name}": ruby_binary_name,
             "{gem_binary_name}": gem_binary_name,
             "{env}": repr(env),
+        },
+    )
+
+    repository_ctx.template(
+        "engine/BUILD",
+        repository_ctx.attr._build_engine_tpl,
+        executable = False,
+        substitutions = {
+            "{ruby_engine}": engine,
         },
     )
 
@@ -270,6 +284,10 @@ which isn't available in this ruby-build yet.
         "_build_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//:ruby/private/download/BUILD.tpl",
+        ),
+        "_build_engine_tpl": attr.label(
+            allow_single_file = True,
+            default = "@rules_ruby//:ruby/private/download/BUILD.engine.tpl",
         ),
     },
 )

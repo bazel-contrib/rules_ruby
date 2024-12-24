@@ -38,7 +38,11 @@ rb_test(
         "LOCATION_SRC": "$(location :env_spec)",
         "LOCATION_DEP": "$(location //lib/gem:add)",
         "LOCATION_DATA": "$(location //spec/support:file)",
-    },
+    } | select({
+        "@ruby//engine:jruby": {"RUBY_ENGINE": "jruby"},
+        "@ruby//engine:truffleruby": {"RUBY_ENGINE": "truffleruby"},
+        "//conditions:default": {"RUBY_ENGINE": "ruby"},
+    }),
     env_inherit = [
         "USER",  # POSIX
         "USERNAME",  # Windows
