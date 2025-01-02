@@ -1,0 +1,31 @@
+"Bazel dependencies"
+
+bazel_dep(name = "aspect_bazel_lib", version = "2.9.4", dev_dependency = True)
+bazel_dep(name = "rules_ruby", version = "0.0.0", dev_dependency = True)
+local_path_override(
+    module_name = "rules_ruby",
+    path = "../..",
+)
+
+ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
+ruby.toolchain(
+    name = "ruby",
+    version = "3.2.6",
+)
+use_repo(ruby, "ruby")
+ruby.bundle_fetch(
+    name = "bundle",
+    srcs = [
+        "//:lib/native_ext/version.rb",
+        "//:native_ext.gemspec",
+    ],
+    gem_checksums = {
+        "rake-13.2.1": "46cb38dae65d7d74b6020a4ac9d48afed8eb8149c040eccf0523bec91907059d",
+        "rake-compiler-1.2.9": "5a3213a5dda977dfdf73e28beed6f4cd6a2cc86ac640bb662728eb7049a23607",
+    },
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+)
+use_repo(ruby, "bundle", "ruby_toolchains")
+
+register_toolchains("@ruby_toolchains//:all")
