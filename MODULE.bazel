@@ -14,7 +14,7 @@ bazel_dep(name = "bazel_skylib", version = "1.3.0")
 bazel_dep(name = "platforms", version = "0.0.5")
 
 # Ruleset development dependencies.
-bazel_dep(name = "aspect_bazel_lib", version = "2.10.0", dev_dependency = True)
+bazel_dep(name = "aspect_bazel_lib", version = "2.11.0", dev_dependency = True)
 bazel_dep(name = "bazel_skylib_gazelle_plugin", version = "1.7.1", dev_dependency = True)
 bazel_dep(name = "buildifier_prebuilt", version = "8.0.0", dev_dependency = True)
 bazel_dep(name = "gazelle", version = "0.41.0", dev_dependency = True)
