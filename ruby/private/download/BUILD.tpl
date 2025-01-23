@@ -16,6 +16,15 @@ rb_binary(
     main = ":ruby_file",
 )
 
+cc_library(
+    name = "headers",
+    hdrs = glob(
+        ["dist/include/**/*.h"],
+        allow_empty = True,
+    ),
+    includes = {includes},
+)
+
 rb_toolchain(
     name = "toolchain",
     bundle = select({
