@@ -25,6 +25,14 @@ cc_library(
     includes = {includes},
 )
 
+java_import(
+    name = "jars",
+    jars = glob(
+        ["dist/lib/**/*.jar"],
+        allow_empty = True,
+    ),
+)
+
 rb_toolchain(
     name = "toolchain",
     bundle = select({
