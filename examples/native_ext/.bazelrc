@@ -1,0 +1,3 @@
+# Allow to run Bazel without pre-installed JDK.
+# Docs: https://bazel.build/reference/command-line-reference#flag--java_runtime_version
+build --java_runtime_version=remotejdk_11
