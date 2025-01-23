@@ -6,11 +6,19 @@ cc_library(
         "ext/**/*.c",
         "ext/**/*.h",
     ]),
+    target_compatible_with = select({
+        "@ruby//engine:ruby": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = ["@ruby//:headers"],
 )
 
 java_library(
     name = "ext_java",
     srcs = glob(["ext/**/*.java"]),
+    target_compatible_with = select({
+        "@ruby//engine:jruby": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = ["@ruby//:jars"],
 )
