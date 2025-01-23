@@ -1,5 +1,6 @@
 "Bazel dependencies"
 
+bazel_dep(name = "platforms", version = "0.0.5", dev_dependency = True)
 bazel_dep(name = "rules_java", version = "8.7.1", dev_dependency = True)
 bazel_dep(name = "rules_ruby", version = "0.0.0", dev_dependency = True)
 local_path_override(

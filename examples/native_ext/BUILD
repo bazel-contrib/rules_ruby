@@ -1,7 +1,7 @@
 load("@rules_java//java:defs.bzl", "java_library")
 
 cc_library(
-    name = "ext",
+    name = "ext_c",
     srcs = glob([
         "ext/**/*.c",
         "ext/**/*.h",
