@@ -113,6 +113,15 @@ def _rb_download_impl(repository_ctx):
         # https://www.graalvm.org/dev/reference-manual/ruby/UTF8Locale/
         env.update({"LANG": "en_US.UTF-8"})
 
+    includes = []
+    if repository_ctx.path("dist/include").exists:
+        for hdrdir in repository_ctx.path("dist/include").readdir():
+            if hdrdir.is_dir:
+                includes.append("dist/include/%s" % hdrdir.basename)
+                for archdir in hdrdir.readdir():
+                    if archdir.is_dir and archdir.basename != "ruby":
+                        includes.append("dist/include/%s/%s" % (hdrdir.basename, archdir.basename))
+
     repository_ctx.template(
         "BUILD",
         repository_ctx.attr._build_tpl,
@@ -122,6 +131,7 @@ def _rb_download_impl(repository_ctx):
             "{ruby_binary_name}": ruby_binary_name,
             "{gem_binary_name}": gem_binary_name,
             "{env}": repr(env),
+            "{includes}": repr(includes),
         },
     )
 
