@@ -1,3 +1,6 @@
+# Not ready for the MODULE.lock file yet, as of Bazel 7.0.0 there are still some stability issues.
+common --lockfile_mode=off
+
 # Allow to run Bazel without pre-installed JDK.
 # Docs: https://bazel.build/reference/command-line-reference#flag--java_runtime_version
 build --java_runtime_version=remotejdk_11
