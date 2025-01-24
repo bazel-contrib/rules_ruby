@@ -1,8 +1,0 @@
-bazel-*
-MODULE.bazel.lock
-/tmp/
-*.bundle
-*.so
-*.o
-*.a
-mkmf.log
