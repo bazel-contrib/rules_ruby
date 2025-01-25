@@ -79,7 +79,15 @@ def _get_gem_executables(repository_ctx, gem, cache_path):
     so some exotic gems might not work correctly.
     """
     executables = []
-    repository_ctx.symlink(cache_path + "/" + gem.filename, gem.filename + ".tar")
+    gem_filepath = cache_path + "/" + gem.filename
+
+    # Some gems are empty (e.g. date-4.2.1-java), so we should not try to unpack them.
+    # Metadata has "files: []" which we could use to detect this, but Bazel cannot
+    # decompress `.gz` files (see above).
+    if len(repository_ctx.read(gem_filepath)) == 4096:
+        return executables
+
+    repository_ctx.symlink(gem_filepath, gem.filename + ".tar")
     repository_ctx.extract(gem.filename + ".tar", output = gem.full_name)
     data = "/".join([gem.full_name, "data"])
     repository_ctx.extract("/".join([gem.full_name, "data.tar.gz"]), output = data)
