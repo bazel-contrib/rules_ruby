@@ -1,3 +1,5 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_java//java:defs.bzl", "java_import")
 load("@rules_ruby//ruby:defs.bzl", "rb_binary")
 load("@rules_ruby//ruby:toolchain.bzl", "rb_toolchain")
 
