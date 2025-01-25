@@ -96,7 +96,7 @@ The following toolchains are known to work and tested on CI.
 
 | Ruby             | Linux | macOS | Windows |
 |------------------|-------|-------|---------|
-| MRI 3.4          | 🟩    | 🟩    | 🟥      |
+| MRI 3.4          | 🟩    | 🟩    | 🟩      |
 | MRI 3.3          | 🟩    | 🟩    | 🟩      |
 | MRI 3.2          | 🟩    | 🟩    | 🟩      |
 | MRI 3.1          | 🟩    | 🟩    | 🟩      |

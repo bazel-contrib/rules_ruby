@@ -36,9 +36,9 @@ jobs:
         ruby:
           - 3.1.6
           - 3.2.6
-          - 3.3.6
-          - 3.4.0-preview2
-          - jruby-9.4.9.0
+          - 3.3.7
+          - 3.4.1
+          - jruby-9.4.10.0
           - truffleruby-24.1.1
           - system
         os:
@@ -50,9 +50,6 @@ jobs:
           - bzlmod
           - WORKSPACE
         exclude:
-          # Previews are unavailable on Windows.
-          - os: windows-latest
-            ruby: 3.4.0-preview2
           # TruffleRuby doesn't work on Windows.
           - os: windows-latest
             ruby: truffleruby-24.1.1
@@ -115,8 +112,8 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - 3.3.6
-          - jruby-9.4.9.0
+          - 3.3.7
+          - jruby-9.4.10.0
     defaults:
       run:
         working-directory: examples/native_ext
