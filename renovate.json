@@ -5,6 +5,8 @@
   ],
   "ignoreDeps": [
     "bazel_skylib",
-    "platforms"
+    "platforms",
+    "rules_cc",
+    "rules_java"
   ]
 }
