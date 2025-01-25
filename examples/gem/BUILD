@@ -1,3 +1,5 @@
+load("@aspect_bazel_lib//lib:expand_template.bzl", "expand_template")
+load("@aspect_bazel_lib//lib:paths.bzl", "BASH_RLOCATION_FUNCTION")
 load(
     "@rules_ruby//ruby:defs.bzl",
     "rb_binary",
@@ -8,6 +10,31 @@ load(
 )
 
 package(default_visibility = ["//:__subpackages__"])
+
+expand_template(
+    name = "shell_wrapper",
+    out = "wrapper.sh",
+    data = [
+        ":Rakefile",
+        ":rake",
+    ],
+    substitutions = {
+        "@@rlocation_lib@@": BASH_RLOCATION_FUNCTION.replace("$", "$$"),
+        "@@rake_binary@@": "$(rlocationpaths :rake)",
+        "@@rakefile@@": "$(rlocationpaths :Rakefile)",
+    },
+    template = "wrapper.tpl.sh",
+)
+
+sh_test(
+    name = "shell_wrapper_test",
+    srcs = [":shell_wrapper"],
+    data = [
+        ":Rakefile",
+        ":rake",
+    ],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
+)
 
 rb_binary(
     name = "rake",

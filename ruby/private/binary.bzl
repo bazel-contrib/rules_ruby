@@ -129,13 +129,14 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
 # buildifier: disable=function-docstring
 def rb_binary_impl(ctx):
     bundler = False
+    bundler_srcs = []
     env = {}
     java_bin = ""
 
     # TODO: avoid expanding the depset to a list, it may be expensive in a large graph
-    transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
-    transitive_deps = get_transitive_deps(ctx.attr.deps).to_list()
-    transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
+    transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps)
+    transitive_deps = get_transitive_deps(ctx.attr.deps)
+    transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps)
 
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
     if ctx.attr.ruby != None:
@@ -148,14 +149,14 @@ def rb_binary_impl(ctx):
         tools.extend(java_toolchain.java_runtime.files.to_list())
         java_bin = java_toolchain.java_runtime.java_executable_runfiles_path[3:]
 
-    for dep in transitive_deps:
+    for dep in transitive_deps.to_list():
         # TODO: Remove workspace name check together with `rb_bundle()`
         if dep.label.workspace_name.endswith("bundle"):
             bundler = True
 
         if BundlerInfo in dep:
             info = dep[BundlerInfo]
-            transitive_srcs.extend([info.gemfile, info.bin, info.path])
+            bundler_srcs.extend([info.gemfile, info.bin, info.path])
             bundler = True
 
             # See https://bundler.io/v2.5/man/bundle-config.1.html for confiugration keys.
@@ -163,13 +164,15 @@ def rb_binary_impl(ctx):
                 "BUNDLE_GEMFILE": _to_rlocation_path(info.gemfile),
                 "BUNDLE_PATH": _to_rlocation_path(info.path),
             })
+    if len(bundler_srcs) > 0:
+        transitive_srcs = depset(bundler_srcs, transitive = [transitive_srcs])
 
     bundle_env = get_bundle_env(ctx.attr.env, ctx.attr.deps)
     env.update(bundle_env)
     env.update(ruby_toolchain.env)
     env.update(ctx.attr.env)
 
-    runfiles = ctx.runfiles(transitive_srcs + transitive_data + tools)
+    runfiles = ctx.runfiles(tools, transitive_files = depset(transitive = [transitive_srcs, transitive_data]))
     runfiles = get_transitive_runfiles(runfiles, ctx.attr.srcs, ctx.attr.deps, ctx.attr.data)
 
     # Propagate executable from source rb_binary() targets.
@@ -188,14 +191,13 @@ def rb_binary_impl(ctx):
     return [
         DefaultInfo(
             executable = script,
-            files = depset(transitive_srcs + transitive_data + tools),
             runfiles = runfiles,
         ),
         RubyFilesInfo(
             binary = executable,
-            transitive_data = depset(transitive_data + tools),
-            transitive_deps = depset(transitive_deps),
-            transitive_srcs = depset(transitive_srcs),
+            transitive_data = depset(tools, transitive = [transitive_data]),
+            transitive_deps = transitive_deps,
+            transitive_srcs = transitive_srcs,
             bundle_env = bundle_env,
         ),
         RunEnvironmentInfo(

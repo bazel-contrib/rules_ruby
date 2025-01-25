@@ -1,0 +1,4 @@
+desc "say goodnight to bash"
+task "goodnight" do
+  puts "exit 0"
+end
