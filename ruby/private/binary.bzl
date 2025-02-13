@@ -191,6 +191,7 @@ def rb_binary_impl(ctx):
     return [
         DefaultInfo(
             executable = script,
+            files = depset(transitive = [transitive_srcs, depset(tools, transitive = [transitive_data])]),
             runfiles = runfiles,
         ),
         RubyFilesInfo(
