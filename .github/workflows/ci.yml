@@ -38,8 +38,8 @@ jobs:
           - 3.2.6
           - 3.3.7
           - 3.4.1
-          - jruby-9.4.10.0
-          - truffleruby-24.1.1
+          - jruby-9.4.12.0
+          - truffleruby-24.1.2
           - system
         os:
           - ubuntu-latest
@@ -52,7 +52,7 @@ jobs:
         exclude:
           # TruffleRuby doesn't work on Windows.
           - os: windows-latest
-            ruby: truffleruby-24.1.1
+            ruby: truffleruby-24.1.2
     defaults:
       run:
         working-directory: examples/gem
@@ -113,7 +113,7 @@ jobs:
       matrix:
         ruby:
           - 3.3.7
-          - jruby-9.4.10.0
+          - jruby-9.4.12.0
     defaults:
       run:
         working-directory: examples/native_ext
