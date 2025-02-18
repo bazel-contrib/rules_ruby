@@ -33,6 +33,7 @@ sh_test(
         ":Rakefile",
         ":rake",
     ],
+    tags = ["bcr-presubmit-failure"],
     deps = ["@bazel_tools//tools/bash/runfiles"],
 )
 
