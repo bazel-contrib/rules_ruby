@@ -284,7 +284,7 @@ rb_download = repository_rule(
             doc = "Ruby version to install.",
         ),
         "version_file": attr.label(
-            allow_single_file = [".ruby-version"],
+            allow_single_file = [".ruby-version", ".tool-versions"],
             doc = "File to read Ruby version from.",
         ),
         "msys2_packages": attr.string_list(
