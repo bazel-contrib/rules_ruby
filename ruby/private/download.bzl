@@ -85,36 +85,34 @@ def _rb_download_impl(repository_ctx):
     else:
         fail("missing value for one of mandatory attributes 'version' or 'version_file'")
 
+    engine = "ruby"
+    env = {}
+    ruby_binary_name = "ruby"
+    gem_binary_name = "gem"
     if version.startswith("jruby"):
         _install_jruby(repository_ctx, version)
-    elif version == "system":
-        _symlink_system_ruby(repository_ctx)
-    elif repository_ctx.os.name.startswith("windows"):
-        _install_via_rubyinstaller(repository_ctx, version)
-    else:
-        _install_via_ruby_build(repository_ctx, version)
 
-    if version.startswith("jruby"):
+        engine = "jruby"
         ruby_binary_name = "jruby"
         gem_binary_name = "jgem"
-    else:
-        ruby_binary_name = "ruby"
-        gem_binary_name = "gem"
-
-    env = {}
-    engine = "ruby"
-    if version.startswith("jruby"):
-        engine = "jruby"
 
         # JRuby might fail with "Errno::EACCES: Permission denied - NUL" on Windows:
         # https://github.com/jruby/jruby/issues/7182#issuecomment-1112953015
         env.update({"JAVA_OPTS": "-Djdk.io.File.enableADS=true"})
     elif version.startswith("truffleruby"):
+        _install_via_ruby_build(repository_ctx, version)
+
         engine = "truffleruby"
 
         # TruffleRuby needs explicit locale
         # https://www.graalvm.org/dev/reference-manual/ruby/UTF8Locale/
         env.update({"LANG": "en_US.UTF-8"})
+    elif version == "system":
+        engine = _symlink_system_ruby(repository_ctx)
+    elif repository_ctx.os.name.startswith("windows"):
+        _install_via_rubyinstaller(repository_ctx, version)
+    else:
+        _install_via_ruby_build(repository_ctx, version)
 
     includes = []
     if repository_ctx.path("dist/include").exists:
@@ -262,11 +260,22 @@ def _symlink_system_ruby(repository_ctx):
     result = repository_ctx.execute(["ruby", "-e", "puts RbConfig.ruby"])
     if result.return_code != 0:
         fail("Failed to determine the system Ruby path:\n%s\n%s" % (result.stdout, result.stderr))
-    ruby_path = result.stdout.strip()
-    ruby_dir = repository_ctx.path(ruby_path).dirname
-    repository_ctx.symlink(ruby_dir, "dist/bin")
-    if repository_ctx.os.name.startswith("windows"):
-        repository_ctx.symlink(ruby_dir.dirname.get_child("lib"), "dist/lib")
+
+    _symlink_system_ruby_dir("bindir", repository_ctx)
+    _symlink_system_ruby_dir("libdir", repository_ctx)
+    _symlink_system_ruby_dir("rubyhdrdir", repository_ctx)
+
+    engine = repository_ctx.execute(["ruby", "-e", "puts RbConfig::CONFIG['RUBY_BASE_NAME']"]).stdout.strip()
+    return engine
+
+def _symlink_system_ruby_dir(dirname, repository_ctx):
+    prefix = repository_ctx.execute(["ruby", "-e", "puts RbConfig::CONFIG['prefix']"]).stdout.strip()
+    path = repository_ctx.execute(["ruby", "-e", "puts RbConfig::CONFIG['{dirname}']".format(dirname = dirname)]).stdout.strip()
+    src = repository_ctx.path(path)
+    dirname = path.removeprefix(prefix).removeprefix("/")
+    dst = repository_ctx.path("dist/{dirname}".format(dirname = dirname))
+    if not dst.exists:
+        repository_ctx.symlink(src, dst)
 
 rb_download = repository_rule(
     implementation = _rb_download_impl,
