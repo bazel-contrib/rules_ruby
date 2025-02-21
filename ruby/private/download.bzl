@@ -192,7 +192,7 @@ def _install_via_rubyinstaller(repository_ctx, version):
     )
 
     repository_ctx.report_progress("Installing Ruby %s" % version)
-    result = repository_ctx.execute([
+    _execute_command(repository_ctx, [
         "./ruby-installer.exe",
         "/components=ruby,msys2",
         "/currentuser",
@@ -201,30 +201,19 @@ def _install_via_rubyinstaller(repository_ctx, version):
         "/verysilent",
     ])
     repository_ctx.delete("ruby-installer.exe")
-    if result.return_code != 0:
-        fail("%s\n%s" % (result.stdout, result.stderr))
 
-    result = repository_ctx.execute(["./dist/bin/ridk.cmd", "install", "1", "3"])
-    if result.return_code != 0:
-        fail("%s\n%s" % (result.stdout, result.stderr))
+    _execute_command(repository_ctx, ["./dist/bin/ridk.cmd", "install", "1", "3"])
 
     if len(repository_ctx.attr.msys2_packages) > 0:
-        mingw_package_prefix = None
-        result = repository_ctx.execute([
+        mingw_package_prefix = _execute_command(repository_ctx, [
             "./dist/bin/ruby.exe",
             "-rruby_installer",
             "-e",
             "puts RubyInstaller::Runtime::Msys2Installation.new.mingw_package_prefix",
         ])
-        if result.return_code != 0:
-            fail("%s\n%s" % (result.stdout, result.stderr))
-        else:
-            mingw_package_prefix = result.stdout.strip()
 
         packages = ["%s-%s" % (mingw_package_prefix, package) for package in repository_ctx.attr.msys2_packages]
-        result = repository_ctx.execute(["./dist/bin/ridk.cmd", "exec", "pacman", "--sync", "--noconfirm"] + packages)
-        if result.return_code != 0:
-            fail("%s\n%s" % (result.stdout, result.stderr))
+        _execute_command(repository_ctx, ["./dist/bin/ridk.cmd", "exec", "pacman", "--sync", "--noconfirm"] + packages)
 
     # Ruby 3.0 compatibility
     binpath = repository_ctx.path("dist/bin")
@@ -245,7 +234,8 @@ def _install_via_ruby_build(repository_ctx, version):
     )
 
     repository_ctx.report_progress("Installing Ruby %s" % version)
-    result = repository_ctx.execute(
+    _execute_command(
+        repository_ctx,
         ["ruby-build/bin/ruby-build", "--verbose", version, "dist", "--", "--disable-install-doc"],
         timeout = 1200,
         quiet = not repository_ctx.os.environ.get("RUBY_RULES_DEBUG", default = False),
@@ -253,29 +243,33 @@ def _install_via_ruby_build(repository_ctx, version):
 
     repository_ctx.delete("ruby-build")
 
-    if result.return_code != 0:
-        fail("%s\n%s" % (result.stdout, result.stderr))
-
 def _symlink_system_ruby(repository_ctx):
-    result = repository_ctx.execute(["ruby", "-e", "puts RbConfig.ruby"])
-    if result.return_code != 0:
-        fail("Failed to determine the system Ruby path:\n%s\n%s" % (result.stdout, result.stderr))
-
     _symlink_system_ruby_dir("bindir", repository_ctx)
     _symlink_system_ruby_dir("libdir", repository_ctx)
     _symlink_system_ruby_dir("rubyhdrdir", repository_ctx)
 
-    engine = repository_ctx.execute(["ruby", "-e", "puts RbConfig::CONFIG['RUBY_BASE_NAME']"]).stdout.strip()
+    engine = _execute_command(repository_ctx, ["ruby", "-e", "puts RbConfig::CONFIG['RUBY_BASE_NAME']"])
     return engine
 
 def _symlink_system_ruby_dir(dirname, repository_ctx):
-    prefix = repository_ctx.execute(["ruby", "-e", "puts RbConfig::CONFIG['prefix']"]).stdout.strip()
-    path = repository_ctx.execute(["ruby", "-e", "puts RbConfig::CONFIG['{dirname}']".format(dirname = dirname)]).stdout.strip()
+    prefix = _execute_command(repository_ctx, ["ruby", "-e", "puts RbConfig::CONFIG['prefix']"])
+    path = _execute_command(repository_ctx, ["ruby", "-e", "puts RbConfig::CONFIG['{dirname}']".format(dirname = dirname)])
     src = repository_ctx.path(path)
     dirname = path.removeprefix(prefix).removeprefix("/")
     dst = repository_ctx.path("dist/{dirname}".format(dirname = dirname))
     if not dst.exists:
         repository_ctx.symlink(src, dst)
+
+def _execute_command(repository_ctx, command, timeout = 600, quiet = False):
+    result = repository_ctx.execute(command, timeout = timeout, quiet = quiet)
+    if result.return_code != 0:
+        fail("Command '{command}' failed ({code} exit code):\n{stdout}\n{stderr}".format(
+            command = " ".join(command),
+            code = result.return_code,
+            stdout = result.stdout,
+            stderr = result.stderr,
+        ))
+    return result.stdout.strip()
 
 rb_download = repository_rule(
     implementation = _rb_download_impl,
