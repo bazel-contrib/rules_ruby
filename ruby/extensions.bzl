@@ -32,6 +32,8 @@ ruby_toolchain = tag_class(attrs = {
 })
 
 def _ruby_module_extension(module_ctx):
+    direct_dep_names = []
+    direct_dev_dep_names = []
     registrations = {}
     for mod in module_ctx.modules:
         for bundle in mod.tags.bundle:
@@ -42,6 +44,10 @@ def _ruby_module_extension(module_ctx):
                 gemfile = bundle.gemfile,
                 toolchain = bundle.toolchain,
             )
+            if module_ctx.is_dev_dependency(bundle):
+                direct_dev_dep_names.append(bundle.name)
+            else:
+                direct_dep_names.append(bundle.name)
 
         for bundle_fetch in mod.tags.bundle_fetch:
             rb_bundle_fetch(
@@ -54,6 +60,10 @@ def _ruby_module_extension(module_ctx):
                 bundler_remote = bundle_fetch.bundler_remote,
                 bundler_checksums = bundle_fetch.bundler_checksums,
             )
+            if module_ctx.is_dev_dependency(bundle_fetch):
+                direct_dev_dep_names.append(bundle_fetch.name)
+            else:
+                direct_dep_names.append(bundle_fetch.name)
 
         for toolchain in mod.tags.toolchain:
             # Prevent a users dependencies creating conflicting toolchain names
@@ -78,6 +88,12 @@ def _ruby_module_extension(module_ctx):
                     toolchain.msys2_packages,
                     toolchain.ruby_build_version,
                 )
+                if module_ctx.is_dev_dependency(toolchain):
+                    direct_dev_dep_names.append(toolchain.name)
+                    direct_dev_dep_names.append("%s_toolchains" % toolchain.name)
+                else:
+                    direct_dep_names.append(toolchain.name)
+                    direct_dep_names.append("%s_toolchains" % toolchain.name)
 
     for name, (version, version_file, msys2_packages, ruby_build_version) in registrations.items():
         rb_register_toolchains(
@@ -88,6 +104,12 @@ def _ruby_module_extension(module_ctx):
             ruby_build_version = ruby_build_version,
             register = False,
         )
+
+    return module_ctx.extension_metadata(
+        reproducible = True,
+        root_module_direct_deps = direct_dep_names,
+        root_module_direct_dev_deps = direct_dev_dep_names,
+    )
 
 ruby = module_extension(
     implementation = _ruby_module_extension,
