@@ -1,6 +1,7 @@
 "Implementation details for rb_bundle_fetch"
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
+load("@bazel_tools//tools/build_defs/repo:utils.bzl", "get_auth")
 load("//ruby/private:bundler_checksums.bzl", "BUNDLER_CHECKSUMS")
 load(
     "//ruby/private:utils.bzl",
@@ -63,7 +64,7 @@ def _download_gem(repository_ctx, gem, cache_path, sha256 = None):
     kwargs = {}
     if sha256:
         kwargs["sha256"] = sha256
-    download = repository_ctx.download(url = url, output = "%s/%s" % (cache_path, gem.filename), **kwargs)
+    download = repository_ctx.download(url = url, output = "%s/%s" % (cache_path, gem.filename), auth = get_auth(repository_ctx, [url]), **kwargs)
     return download.sha256
 
 def _get_gem_executables(repository_ctx, gem, cache_path):
@@ -275,6 +276,12 @@ rb_bundle_fetch = repository_rule(
         "_bin_build_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//:ruby/private/bundle_fetch/bin/BUILD.tpl",
+        ),
+        "auth_patterns": attr.string_dict(
+            doc = "A list of patterns to match against urls for which the auth object should be used.",
+        ),
+        "netrc": attr.string(
+            doc = "Path to .netrc file to read credentials from",
         ),
     },
     doc = """
