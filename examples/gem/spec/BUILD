@@ -18,7 +18,13 @@ rb_test(
     srcs = ["add_spec.rb"],
     args = ["spec/add_spec.rb"],
     main = "@bundle//bin:rspec",
-    deps = [":spec_helper"],
+    # Decompose deps into individual parts to display how :spec_helper doesnt matter
+    # for require_relative but does matter for require
+    deps = [
+        "//lib:gem",
+        "@bundle",
+        # ":spec_helper",
+    ],
 )
 
 rb_library(
