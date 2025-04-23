@@ -33,6 +33,7 @@ java_import(
         ["dist/lib/**/*.jar"],
         allow_empty = True,
     ),
+    neverlink = True,
 )
 
 rb_toolchain(
