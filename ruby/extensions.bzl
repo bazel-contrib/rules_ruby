@@ -1,5 +1,6 @@
 "Module extensions used by bzlmod"
 
+load("@bazel_features//:features.bzl", "bazel_features")
 load("//ruby/private:download.bzl", "RUBY_BUILD_VERSION")
 load("//ruby/private:toolchain.bzl", "DEFAULT_RUBY_REPOSITORY")
 load(":deps.bzl", "rb_bundle", "rb_bundle_fetch", "rb_register_toolchains")
@@ -105,11 +106,17 @@ def _ruby_module_extension(module_ctx):
             register = False,
         )
 
-    return module_ctx.extension_metadata(
-        reproducible = True,
-        root_module_direct_deps = direct_dep_names,
-        root_module_direct_dev_deps = direct_dev_dep_names,
-    )
+    if bazel_features.external_deps.extension_metadata_has_reproducible:
+        return module_ctx.extension_metadata(
+            reproducible = True,
+            root_module_direct_deps = direct_dep_names,
+            root_module_direct_dev_deps = direct_dev_dep_names,
+        )
+    else:
+        return module_ctx.extension_metadata(
+            root_module_direct_deps = direct_dep_names,
+            root_module_direct_dev_deps = direct_dev_dep_names,
+        )
 
 ruby = module_extension(
     implementation = _ruby_module_extension,
