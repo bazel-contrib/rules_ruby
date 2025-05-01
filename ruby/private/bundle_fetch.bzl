@@ -1,7 +1,12 @@
 "Implementation details for rb_bundle_fetch"
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
-load("@bazel_tools//tools/build_defs/repo:utils.bzl", "get_auth")
+load(
+    "@bazel_tools//tools/build_defs/repo:utils.bzl",
+    "read_netrc",
+    "read_user_netrc",
+    "use_netrc",
+)
 load("//ruby/private:bundler_checksums.bzl", "BUNDLER_CHECKSUMS")
 load(
     "//ruby/private:utils.bzl",
@@ -64,7 +69,7 @@ def _download_gem(repository_ctx, gem, cache_path, sha256 = None):
     kwargs = {}
     if sha256:
         kwargs["sha256"] = sha256
-    download = repository_ctx.download(url = url, output = "%s/%s" % (cache_path, gem.filename), auth = get_auth(repository_ctx, [url]), **kwargs)
+    download = repository_ctx.download(url = url, output = "%s/%s" % (cache_path, gem.filename), auth = _get_auth(repository_ctx, [url]), **kwargs)
     return download.sha256
 
 def _get_gem_executables(repository_ctx, gem, cache_path):
@@ -233,6 +238,22 @@ def _rb_bundle_fetch_impl(repository_ctx):
             "gem_checksums": gem_checksums,
         }
     return None
+
+# The function is copied from the main branch of bazel_tools.
+# It should become available there from version 7.1.0,
+# We should remove this function when we upgrade minimum supported version to 7.1.0.
+# https://github.com/bazelbuild/bazel/blob/d37762b494a4e122d46a5a71e3a8cc77fa15aa25/tools/build_defs/repo/utils.bzl#L424-L446
+def _get_auth(ctx, urls):
+    if hasattr(ctx.attr, "netrc") and ctx.attr.netrc:
+        netrc = read_netrc(ctx, ctx.attr.netrc)
+    elif "NETRC" in ctx.os.environ:
+        netrc = read_netrc(ctx, ctx.os.environ["NETRC"])
+    else:
+        netrc = read_user_netrc(ctx)
+    auth_patterns = {}
+    if hasattr(ctx.attr, "auth_patterns") and ctx.attr.auth_patterns:
+        auth_patterns = ctx.attr.auth_patterns
+    return use_netrc(netrc, urls, auth_patterns)
 
 rb_bundle_fetch = repository_rule(
     implementation = _rb_bundle_fetch_impl,
