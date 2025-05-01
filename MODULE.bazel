@@ -10,6 +10,7 @@ module(
 # Lower-bound dependency versions.
 # These should NOT be increased unless needed, as bumping our lower-bound may change
 # the versions resolved in users repositories.
+bazel_dep(name = "bazel_features", version = "1.9.0")
 bazel_dep(name = "bazel_skylib", version = "1.3.0")
 bazel_dep(name = "platforms", version = "0.0.5")
 bazel_dep(name = "rules_cc", version = "0.0.9")
