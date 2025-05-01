@@ -34,25 +34,27 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - 3.1.6
-          - 3.2.6
-          - 3.3.7
-          - 3.4.1
-          - jruby-9.4.12.0
-          - truffleruby-24.1.2
+          - 3.2.8
+          - 3.3.8
+          - 3.4.3
+          - 3.5.0-preview1
+          - jruby-10.0.0.0
+          - truffleruby-24.2.1
           - system
         os:
           - ubuntu-latest
-          # Use Intel-based macOS for now because Ruby 3.1 doesn't compile on Apple Silicon.
-          - macos-13
+          - macos-latest
           - windows-latest
         mode:
           - bzlmod
           - WORKSPACE
         exclude:
+          # Previews are not available via RubyInstaller.
+          - os: windows-latest
+            ruby: 3.5.0-preview1
           # TruffleRuby doesn't work on Windows.
           - os: windows-latest
-            ruby: truffleruby-24.1.2
+            ruby: truffleruby-24.2.1
     defaults:
       run:
         working-directory: examples/gem
@@ -69,7 +71,7 @@ jobs:
       - if: matrix.ruby == 'system'
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.1.6
+          ruby-version: 3.2.8
       - run: bazel build ...
       - run: bazel run lib/gem:add-numbers 2
       - run: bazel run lib/gem:print-version
@@ -114,8 +116,8 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - 3.3.7
-          - jruby-9.4.12.0
+          - 3.3.8
+          - jruby-10.0.0.0
         use-system-ruby:
           - true
           - false
