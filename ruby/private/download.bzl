@@ -108,6 +108,17 @@ def _rb_download_impl(repository_ctx):
         # TruffleRuby needs explicit locale
         # https://www.graalvm.org/dev/reference-manual/ruby/UTF8Locale/
         env.update({"LANG": "en_US.UTF-8"})
+
+        # TruffleRuby dynamically locates libyaml/openssl which are not available in sandbox,
+        # so we need to preserve explicit paths to them and propagate down the builds.
+        # https://github.com/oracle/truffleruby/blob/ac88a0fe68bf957f75af7d316594b89731fdec4e/lib/truffle/rbconfig.rb#L119-L135
+        libyaml_prefix = _execute_command(repository_ctx, ["dist/bin/ruby", "-rrbconfig", "-e", "puts ENV['LIBYAML_PREFIX']"])
+        if libyaml_prefix:
+            env.update({"LIBYAML_PREFIX": libyaml_prefix})
+        openssl_prefix = _execute_command(repository_ctx, ["dist/bin/ruby", "-rrbconfig", "-e", "puts ENV['OPENSSL_PREFIX']"])
+        if openssl_prefix:
+            env.update({"OPENSSL_PREFIX": openssl_prefix})
+
     elif version == "system":
         engine = _symlink_system_ruby(repository_ctx)
     elif repository_ctx.os.name.startswith("windows"):
