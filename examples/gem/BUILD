@@ -8,6 +8,7 @@ load(
     "rb_gem_push",
     "rb_test",
 )
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
 
 package(default_visibility = ["//:__subpackages__"])
 

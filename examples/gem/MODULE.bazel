@@ -3,6 +3,8 @@
 bazel_dep(name = "bazel_skylib", version = "1.5.0", dev_dependency = True)
 bazel_dep(name = "aspect_bazel_lib", version = "2.11.0", dev_dependency = True)
 bazel_dep(name = "rules_ruby", version = "0.0.0", dev_dependency = True)
+bazel_dep(name = "rules_shell", version = "0.4.0", dev_dependency = True)
+
 local_path_override(
     module_name = "rules_ruby",
     path = "../..",
