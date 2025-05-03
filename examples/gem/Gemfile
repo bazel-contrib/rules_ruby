@@ -7,3 +7,4 @@ gem 'debug', '>= 1.0.0', platforms: %i[mri mswin64]
 gem 'psych', '~> 5.1' # Gem with native extensions.
 gem 'rspec', '~> 3.0'
 gem 'rubocop', '~> 1.64'
+gem 'mathematical', '~> 1.6', '>= 1.6.7'
