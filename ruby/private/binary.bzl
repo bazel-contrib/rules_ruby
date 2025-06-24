@@ -140,7 +140,7 @@ def rb_binary_impl(ctx):
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
     if ctx.attr.ruby != None:
         ruby_toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
-    tools.extend(ruby_toolchain.files)
+    tools = ruby_toolchain.files
 
     if ruby_toolchain.version.startswith("jruby"):
         java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
