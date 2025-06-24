@@ -56,7 +56,6 @@ Supports `$(location)` expansion for targets from `srcs`, `data` and `deps`.
         default = "@rules_ruby//ruby/private/binary:binary.sh.tpl",
     ),
     "_runfiles_library": attr.label(
-        allow_single_file = True,
         default = "@bazel_tools//tools/bash/runfiles",
     ),
     "_windows_constraint": attr.label(
@@ -141,7 +140,6 @@ def rb_binary_impl(ctx):
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
     if ctx.attr.ruby != None:
         ruby_toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
-    tools = [ctx.file._runfiles_library]
     tools.extend(ruby_toolchain.files)
 
     if ruby_toolchain.version.startswith("jruby"):
@@ -174,6 +172,7 @@ def rb_binary_impl(ctx):
 
     runfiles = ctx.runfiles(tools, transitive_files = depset(transitive = [transitive_srcs, transitive_data]))
     runfiles = get_transitive_runfiles(runfiles, ctx.attr.srcs, ctx.attr.deps, ctx.attr.data)
+    runfiles = runfiles.merge(ctx.attr._runfiles_library[DefaultInfo].default_runfiles)
 
     # Propagate executable from source rb_binary() targets.
     executable = ctx.executable.main
