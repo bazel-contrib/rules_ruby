@@ -10,7 +10,7 @@ def _rb_gem_push_impl(ctx):
     if ctx.attr.ruby != None:
         ruby_toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
     srcs = [ctx.file.gem]
-    tools = [ruby_toolchain.gem, ctx.file._runfiles_library]
+    tools = [ruby_toolchain.gem]
 
     if ruby_toolchain.version.startswith("jruby"):
         env["JAVA_HOME"] = java_toolchain.java_runtime.java_home
@@ -24,6 +24,7 @@ def _rb_gem_push_impl(ctx):
     )
 
     runfiles = ctx.runfiles(srcs + tools)
+    runfiles = runfiles.merge(ctx.attr._runfiles_library[DefaultInfo].default_runfiles)
     env.update(ctx.attr.env)
 
     return [
