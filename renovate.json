@@ -4,6 +4,7 @@
     "config:recommended"
   ],
   "ignoreDeps": [
+    "bazel_features",
     "bazel_skylib",
     "platforms",
     "rules_cc",
