@@ -143,10 +143,6 @@ rb_bundle_install = rule(
             doc = "Override Ruby toolchain to use when installing the gem.",
             providers = [platform_common.ToolchainInfo],
         ),
-        "_runfiles_library": attr.label(
-            allow_single_file = True,
-            default = "@bazel_tools//tools/bash/runfiles",
-        ),
         "_bundle_install_sh_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//ruby/private/bundle_install:bundle_install.sh.tpl",
