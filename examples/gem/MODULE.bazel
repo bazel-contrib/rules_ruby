@@ -16,6 +16,7 @@ ruby.toolchain(
     version_file = "//:.ruby-version",
 )
 use_repo(ruby, "ruby")
+
 ruby.bundle_fetch(
     name = "bundle",
     srcs = [
