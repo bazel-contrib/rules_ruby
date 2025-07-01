@@ -62,7 +62,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: bazel-contrib/setup-bazel@0.15.0
         with:
-          bazelrc: common --announce_rc --color=yes ${{ matrix.mode == 'WORKSPACE' && '--enable_workspace' || '' }}
+          # Move autoload_externally to .bazelrc once Bazel 6 support is dropped.
+          bazelrc: common --announce_rc --color=yes --incompatible_autoload_externally= ${{ matrix.mode == 'WORKSPACE' && '--enable_workspace' || '' }}
           module-root: examples/gem
           # Workaround for long path issues: https://github.com/jruby/jruby/issues/3995.
           output-base: ${{ matrix.os == 'windows-latest' && 'D:/b' || '' }}
