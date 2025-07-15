@@ -1,10 +1,3 @@
-# Import Aspect bazelrc presets
-# https://docs.aspect.build/guides/bazelrc/
-import %workspace%/.aspect/bazelrc/convenience.bazelrc
-import %workspace%/.aspect/bazelrc/correctness.bazelrc
-import %workspace%/.aspect/bazelrc/debug.bazelrc
-import %workspace%/.aspect/bazelrc/performance.bazelrc
-
 # Enable runfiles on all platforms. Runfiles are on by default on Linux and MacOS but off on
 # Windows.
 #
