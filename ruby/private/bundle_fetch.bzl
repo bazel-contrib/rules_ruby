@@ -121,14 +121,8 @@ def _rb_bundle_fetch_impl(repository_ctx):
         path_str = str(path)
         return paths.relativize(path_str, wksp_root_str)
 
-    def _is_path_type(label_or_path):
-        return type(label_or_path) == type(repository_ctx.workspace_root)
-
     def _copy_file(label_or_path):
-        if _is_path_type(label_or_path):
-            path = label_or_path
-        else:
-            path = repository_ctx.path(label_or_path)
+        path = repository_ctx.path(label_or_path)
         rel_path = _relativize(path)
         repository_ctx.file(rel_path, repository_ctx.read(path))
         return rel_path
