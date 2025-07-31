@@ -115,26 +115,40 @@ def _cleanup_downloads(repository_ctx, gem):
     repository_ctx.delete(gem.filename + ".tar")
 
 def _rb_bundle_fetch_impl(repository_ctx):
-    # Define vendor/cache relative to the location of Gemfile.
-    # This is expected by Bundler to operate correctly.
-    gemfile_dir = repository_ctx.attr.gemfile.name.rpartition("/")[0]
-    cache_path = ("%s/vendor/cache" % gemfile_dir).removeprefix("/")
+    wksp_root_str = str(repository_ctx.workspace_root)
+
+    def _relativize(path):
+        path_str = str(path)
+        return paths.relativize(path_str, wksp_root_str)
+
+    def _is_path_type(label_or_path):
+        return type(label_or_path) == type(repository_ctx.workspace_root)
+
+    def _copy_file(label_or_path):
+        if _is_path_type(label_or_path):
+            path = label_or_path
+        else:
+            path = repository_ctx.path(label_or_path)
+        rel_path = _relativize(path)
+        repository_ctx.file(rel_path, repository_ctx.read(path))
+        return rel_path
 
     # Copy all necessary inputs to the repository.
     gemfile_path = repository_ctx.path(repository_ctx.attr.gemfile)
+    gemfile_rel_path = _copy_file(gemfile_path)
     gemfile_lock_path = repository_ctx.path(repository_ctx.attr.gemfile_lock)
-    repository_ctx.file(repository_ctx.attr.gemfile.name, repository_ctx.read(gemfile_path))
-    repository_ctx.file(repository_ctx.attr.gemfile_lock.name, repository_ctx.read(gemfile_lock_path))
+    gemfile_lock_rel_path = _copy_file(gemfile_lock_path)
+
+    # Define vendor/cache relative to the location of Gemfile.
+    # This is expected by Bundler to operate correctly.
+    cache_path = paths.join(paths.dirname(gemfile_rel_path), "vendor/cache")
 
     srcs = []
-    wksp_root_str = str(repository_ctx.workspace_root)
     for src in repository_ctx.attr.srcs:
         # Create the source files in the same shape that they exist in the
         # source tree. Otherwise, the relative_requires may not work.
-        src_path = repository_ctx.path(src)
-        rel_path = paths.relativize(str(src_path), wksp_root_str)
+        rel_path = _copy_file(src)
         srcs.append(rel_path)
-        repository_ctx.file(rel_path, repository_ctx.read(src))
 
     # We insert our default value here, not on the attribute's default, so it
     # isn't documented. # The BUNDLER_CHECKSUMS value is huge and not useful to
@@ -223,8 +237,10 @@ def _rb_bundle_fetch_impl(repository_ctx):
         substitutions = {
             "{name}": repository_name,
             "{srcs}": _join_and_indent(srcs),
-            "{gemfile_path}": repository_ctx.attr.gemfile.name,
-            "{gemfile_lock_path}": repository_ctx.attr.gemfile_lock.name,
+            "{gemfile_path}": gemfile_rel_path,
+            "{gemfile_lock_path}": gemfile_lock_rel_path,
+            # "{gemfile_path}": repository_ctx.attr.gemfile.name,
+            # "{gemfile_lock_path}": repository_ctx.attr.gemfile_lock.name,
             "{gems}": _join_and_indent(gem_full_names),
             "{gem_fragments}": "".join(gem_fragments),
             "{gem_install_fragments}": "".join(gem_install_fragments),
