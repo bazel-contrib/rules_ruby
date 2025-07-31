@@ -64,9 +64,7 @@ if [ -n "{bundler_command}" ]; then
   export BUNDLE_PATH=$(rlocation $BUNDLE_PATH)
 fi
 
-if [[ -z "{binary}" ]]; then
-  fail "The binary value was not specified. Please file a bug."
-elif [ -n "{locate_binary_in_runfiles}" ]; then
+if [ -n "{locate_binary_in_runfiles}" ]; then
   binary="$(rlocation "{binary}")" \
     || (fail "Failed to locate {binary} in the runfiles." \
       "Did you forget to add the binary to the deps?")
