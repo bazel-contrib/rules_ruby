@@ -2,6 +2,24 @@
 
 {rlocation_function}
 
+warn() {
+  if [[ "${#}" -gt 0 ]]; then
+    echo >&2 "${@}"
+  else
+    cat >&2
+  fi
+}
+
+# shellcheck disable=SC2120
+fail() {
+  local cmd=(warn)
+  if [[ "${#}" -gt 0 ]]; then
+    cmd+=("${@}")
+  fi
+  "${cmd[@]}"
+  exit 1
+}
+
 # Provide a realpath implementation for macOS.
 realpath() (
   OURPWD=$PWD
@@ -46,10 +64,14 @@ if [ -n "{bundler_command}" ]; then
   export BUNDLE_PATH=$(rlocation $BUNDLE_PATH)
 fi
 
-if [ -n "{locate_binary_in_runfiles}" ]; then
-  binary=$(rlocation {binary})
+if [[ -z "{binary}" ]]; then
+  fail "The binary value was not specified. Please file a bug."
+elif [ -n "{locate_binary_in_runfiles}" ]; then
+  binary="$(rlocation "{binary}")" \
+    || (fail "Failed to locate {binary} in the runfiles." \
+      "Did you forget to add the binary to the deps?")
 else
-  binary={binary}
+  binary="{binary}"
 fi
 
 exec {bundler_command} {ruby_binary_name} $binary {args} "$@"
