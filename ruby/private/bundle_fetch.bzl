@@ -1,5 +1,6 @@
 "Implementation details for rb_bundle_fetch"
 
+load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_skylib//lib:versions.bzl", "versions")
 load(
     "@bazel_tools//tools/build_defs/repo:utils.bzl",
@@ -124,10 +125,16 @@ def _rb_bundle_fetch_impl(repository_ctx):
     gemfile_lock_path = repository_ctx.path(repository_ctx.attr.gemfile_lock)
     repository_ctx.file(repository_ctx.attr.gemfile.name, repository_ctx.read(gemfile_path))
     repository_ctx.file(repository_ctx.attr.gemfile_lock.name, repository_ctx.read(gemfile_lock_path))
+
     srcs = []
+    wksp_root_str = str(repository_ctx.workspace_root)
     for src in repository_ctx.attr.srcs:
-        srcs.append(src.name)
-        repository_ctx.file(src.name, repository_ctx.read(src))
+        # Create the source files in the same shape that they exist in the
+        # source tree. Otherwise, the relative_requires may not work.
+        src_path = repository_ctx.path(src)
+        rel_path = paths.relativize(str(src_path), wksp_root_str)
+        srcs.append(rel_path)
+        repository_ctx.file(rel_path, repository_ctx.read(src))
 
     # We insert our default value here, not on the attribute's default, so it
     # isn't documented. # The BUNDLER_CHECKSUMS value is huge and not useful to
