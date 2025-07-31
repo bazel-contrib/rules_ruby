@@ -239,8 +239,6 @@ def _rb_bundle_fetch_impl(repository_ctx):
             "{srcs}": _join_and_indent(srcs),
             "{gemfile_path}": gemfile_rel_path,
             "{gemfile_lock_path}": gemfile_lock_rel_path,
-            # "{gemfile_path}": repository_ctx.attr.gemfile.name,
-            # "{gemfile_lock_path}": repository_ctx.attr.gemfile_lock.name,
             "{gems}": _join_and_indent(gem_full_names),
             "{gem_fragments}": "".join(gem_fragments),
             "{gem_install_fragments}": "".join(gem_install_fragments),
