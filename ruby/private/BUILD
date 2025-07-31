@@ -73,6 +73,7 @@ bzl_library(
         ":bundler_checksums",
         ":utils",
         "//ruby/private/bundle_fetch:gemfile_lock_parser",
+        "@bazel_skylib//lib:paths",
         "@bazel_skylib//lib:versions",
         "@bazel_tools//tools/build_defs/repo:utils.bzl",
     ],
