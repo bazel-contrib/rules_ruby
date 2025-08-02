@@ -1,0 +1,47 @@
+bazel_dep(name = "rules_ruby", version = "0.0.0", dev_dependency = True)
+local_path_override(
+    module_name = "rules_ruby",
+    path = "../..",
+)
+
+ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
+ruby.toolchain(
+    name = "ruby",
+    # ruby-build is used to download CRuby
+    # https://github.com/rbenv/ruby-build
+    ruby_build_version = "20250724",
+    version_file = "//:.ruby-version",
+)
+ruby.bundle_fetch(
+    name = "bundle",
+    # List the gemspec and any files that it requires. We cannot use an
+    # rb_library to tidy this up because bundle fetch is executed during the
+    # loading phase.
+    srcs = [
+        "//hello_world:hello_world.gemspec",
+        "//hello_world/lib/hello_world:version.rb",
+    ],
+    gem_checksums = {
+        "date-3.4.1-java": "74740d914c65a922a15657c25ff0e203c16f1d0f7aa910a9ebed712afe9819c4",
+        "diff-lcs-1.6.2": "9ae0d2cba7d4df3075fe8cd8602a8604993efc0dfa934cff568969efb1909962",
+        "erb-5.0.2-java": "d000d963afebc166ec7f2499b2b3198d526790cf962c37514d7a85843a60423c",
+        "io-console-0.8.1-java": "9457a61a7b23aab11e9e9ff67f71ae81d7f1a6a2e582bb5d65d754cbb546c06f",
+        "irb-1.15.2": "222f32952e278da34b58ffe45e8634bf4afc2dc7aa9da23fed67e581aa50fdba",
+        "jar-dependencies-0.5.5": "2972b9fcba4b014e6446a84b5c09674a3e8648b95b71768e729f0e8e40568059",
+        "pp-0.6.2": "947ec3120c6f92195f8ee8aa25a7b2c5297bb106d83b41baa02983686577b6ff",
+        "prettyprint-0.2.0": "2bc9e15581a94742064a3cc8b0fb9d45aae3d03a1baa6ef80922627a0766f193",
+        "psych-5.2.6-java": "0a5f65d47ed1ae3475d062b254e7b2035a259eac578038016d62172dd4cfbd91",
+        "rdoc-6.14.2": "9fdd44df130f856ae70cc9a264dfd659b9b40de369b16581f4ab746e42439226",
+        "reline-0.6.2": "1dad26a6008872d59c8e05244b119347c9f2ddaf4a53dce97856cd5f30a02846",
+        "rspec-3.13.1": "b9f9a58fa915b8d94a1d6b3195fe6dd28c4c34836a6097015142c4a9ace72140",
+        "rspec-core-3.13.5": "ab3f682897c6131c67f9a17cfee5022a597f283aebe654d329a565f9937a4fa3",
+        "rspec-expectations-3.13.5": "33a4d3a1d95060aea4c94e9f237030a8f9eae5615e9bd85718fe3a09e4b58836",
+        "rspec-mocks-3.13.5": "e4338a6f285ada9fe56f5893f5457783af8194f5d08884d17a87321d5195ea81",
+        "rspec-support-3.13.4": "184b1814f6a968102b57df631892c7f1990a91c9a3b9e80ef892a0fc2a71a3f7",
+    },
+    gemfile = "//hello_world:Gemfile",
+    gemfile_lock = "//hello_world:Gemfile.lock",
+)
+use_repo(ruby, "bundle", "ruby", "ruby_toolchains")
+
+register_toolchains("@ruby_toolchains//:all")
