@@ -18,3 +18,14 @@ rb_test(
         "//hello_world/lib:hello_world",
     ],
 )
+
+rb_test(
+    name = "speaker_spec",
+    srcs = ["speaker_spec.rb"],
+    args = ["hello_world/spec/speaker_spec.rb"],
+    main = "@bundle//bin:rspec",
+    deps = [
+        ":spec_helper",
+        "//hello_world/lib:hello_world",
+    ],
+)
