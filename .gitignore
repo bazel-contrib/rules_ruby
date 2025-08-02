@@ -1,2 +1,5 @@
 # Ignore all Bazel symlinks
 bazel-*
+
+# Ignore Bazel lock file.
+MODULE.bazel.lock
