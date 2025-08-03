@@ -1,0 +1,61 @@
+PATH
+  remote: .
+  specs:
+    hello_world (0.0.0)
+      irb
+      rspec (~> 3.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    date (3.4.1-java)
+    diff-lcs (1.6.2)
+    erb (5.0.2-java)
+    io-console (0.8.1-java)
+    irb (1.15.2)
+      pp (>= 0.6.0)
+      rdoc (>= 4.0.0)
+      reline (>= 0.4.2)
+    jar-dependencies (0.5.5)
+    pp (0.6.2)
+      prettyprint
+    prettyprint (0.2.0)
+    psych (5.2.6-java)
+      date
+      jar-dependencies (>= 0.1.7)
+    rdoc (6.14.2)
+      erb
+      psych (>= 4.0.0)
+    reline (0.6.2)
+      io-console (~> 0.5)
+    rspec (3.13.1)
+      rspec-core (~> 3.13.0)
+      rspec-expectations (~> 3.13.0)
+      rspec-mocks (~> 3.13.0)
+    rspec-core (3.13.5)
+      rspec-support (~> 3.13.0)
+    rspec-expectations (3.13.5)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-mocks (3.13.5)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-support (3.13.4)
+
+PLATFORMS
+  arm64-darwin-23
+  arm64-darwin-24
+  java
+  ruby
+  universal-java-1.8
+  universal-java-11
+  universal-java-17
+  universal-java-18
+  universal-java-21
+  x64-mingw32
+
+DEPENDENCIES
+  hello_world!
+
+BUNDLED WITH
+   2.3.3

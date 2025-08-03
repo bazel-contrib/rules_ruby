@@ -1,6 +1,5 @@
-bazel-bin
-bazel-gem
-bazel-out
-bazel-native_ext
-bazel-rules_ruby
-bazel-testlogs
+# Ignore all Bazel symlinks
+bazel-*
+
+# Ignore Bazel lock file.
+MODULE.bazel.lock

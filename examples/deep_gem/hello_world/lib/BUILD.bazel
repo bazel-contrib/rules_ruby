@@ -1,0 +1,11 @@
+load("@rules_ruby//ruby:defs.bzl", "rb_library")
+
+rb_library(
+    name = "hello_world",
+    srcs = ["hello_world.rb"],
+    visibility = ["//hello_world:__subpackages__"],
+    deps = [
+        "//hello_world/lib/hello_world:speaker",
+        "//hello_world/lib/hello_world:version",
+    ],
+)
