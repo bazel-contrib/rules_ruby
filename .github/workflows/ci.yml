@@ -16,7 +16,7 @@ jobs:
     name: Ruleset
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.15.0
         with:
           bazelrc: common --announce_rc --color=yes
@@ -59,7 +59,7 @@ jobs:
       run:
         working-directory: examples/gem
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.15.0
         with:
           # Move autoload_externally to .bazelrc once Bazel 6 support is dropped.
@@ -99,7 +99,7 @@ jobs:
       run:
         working-directory: examples/jekyll
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.15.0
         with:
           bazelrc: common --announce_rc --color=yes
@@ -126,7 +126,7 @@ jobs:
       run:
         working-directory: examples/native_ext
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.15.0
         with:
           bazelrc: common --announce_rc --color=yes
@@ -167,7 +167,7 @@ jobs:
       run:
         working-directory: examples/deep_gem
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.15.0
         with:
           # Move autoload_externally to .bazelrc once Bazel 6 support is dropped.
