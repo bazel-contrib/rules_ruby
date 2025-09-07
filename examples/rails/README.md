@@ -40,6 +40,32 @@ so there is no need to run `bundle install` separately.
 
 ## Implementation Notes
 
+### Rails Test Setup
+
+To run Rails tests with Bazel, you need to create test macros that configure the
+Rails test environment. Create a file at `people_tracker/test/rails_test.bzl`:
+
+```starlark
+"""Module for app-specific rails helpers and macros."""
+
+load("@rules_ruby//rails:rails_test_factory.bzl", "rails_test_factory")
+
+# This is the directory in the Bazel workspace where the test helpers reside.
+# This is used to generate the test helper labels and appropriate includes.
+_TEST_PKG = "people_tracker/test"
+
+# The rails_test macro is used to define Bazel test targets for Rails model and
+# controller tests. See examples in people_tracker/test/models/BUILD.bazel.
+rails_test = rails_test_factory.new_test(test_package = _TEST_PKG)
+
+# The rails_system_test macro is used to define Bazel test targets for Rails
+# system tests.  See examples in people_tracker/test/system/BUILD.bazel.
+rails_system_test = rails_test_factory.new_system_test(test_package = _TEST_PKG)
+```
+
+These macros (`rails_test` and `rails_system_test`) can then be used in your
+`BUILD.bazel` files to define test targets for your Rails application.
+
 ### Patches
 
 To prevent Ruby from escaping the sandbox, Ruby requires patches to `Kernel`
