@@ -1,0 +1,16 @@
+load("//people_tracker:rails.bzl", "rails_test")
+
+rails_test(
+    name = "people_controller_test",
+    src = "people_controller_test.rb",
+)
+
+rails_test(
+    name = "troops_controller_test",
+    src = "troops_controller_test.rb",
+)
+
+rails_test(
+    name = "units_controller_test",
+    src = "units_controller_test.rb",
+)

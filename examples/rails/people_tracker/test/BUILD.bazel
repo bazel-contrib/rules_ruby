@@ -1,0 +1,27 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@rules_ruby//ruby:defs.bzl", "rb_library")
+
+rb_library(
+    name = "test_helper",
+    srcs = ["test_helper.rb"],
+    visibility = ["//people_tracker/test:__subpackages__"],
+    deps = [
+        "//people_tracker/config",
+    ],
+)
+
+rb_library(
+    name = "application_system_test_case",
+    srcs = ["application_system_test_case.rb"],
+    visibility = ["//people_tracker/test:__subpackages__"],
+    deps = [
+        ":test_helper",
+    ],
+)
+
+bzl_library(
+    name = "rails",
+    srcs = ["rails.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//bzl/rails:rails_test_factory"],
+)

@@ -1,0 +1,7 @@
+load("@rules_ruby//ruby:defs.bzl", "rb_library")
+
+rb_library(
+    name = "environments",
+    srcs = glob(["*.rb"]),
+    visibility = ["//people_tracker/config:__subpackages__"],
+)

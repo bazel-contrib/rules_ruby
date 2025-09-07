@@ -1,0 +1,6 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+# Rails for generating and running the People Tracker Rails application
+gem "rails", "~> 8.0"

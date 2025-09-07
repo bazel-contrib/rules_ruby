@@ -1,0 +1,9 @@
+filegroup(
+    name = "files",
+    srcs = [
+        "//people_tracker/app/views/layouts:files",
+        "//people_tracker/app/views/people:files",
+        "//people_tracker/app/views/pwa:files",
+    ],
+    visibility = ["//people_tracker/app:__subpackages__"],
+)

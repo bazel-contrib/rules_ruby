@@ -1,0 +1,64 @@
+<%= turbo_stream_from "people" %>
+<%= turbo_refreshes_with method: :morph, scroll: :preserve %>
+
+<div class="w-full">
+  <% if notice.present? %>
+    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium
+              rounded-lg inline-block" id="notice">
+      <%= notice %>
+    </p>
+  <% end %>
+
+  <div class="flex justify-between items-center pb-8">
+    <h1 class="mx-auto font-bold text-4xl">People</h1>
+  </div>
+
+  <table id="people" class="mx-auto">
+    <tfoot>
+      <tr>
+        <td colspan="3">
+          <div class="mt-8">
+            <%= link_to 'New person', 
+                        new_person_path,
+                        class: "inline rounded-lg py-3 px-5 bg-green-600
+                                text-white block font-medium" %>
+          </div>
+        </td>
+      </tr>
+    </tfoot>
+
+    <tbody>
+      <% @people.each do |person| %>
+        <tr class="<%= cycle('bg-green-50', 'bg-white') %>">
+
+          <td>
+            <h1 class="text-xl font-bold"><%= person.full_name %></h1>
+          </td>
+
+          <td class="px-3">
+            <ul>
+              <li>
+                <%= link_to 'Show', 
+                             person,
+                             class: 'hover:underline' %>
+              </li>
+              <li>
+                <%= link_to 'Edit',
+                             edit_person_path(person),
+                             class: 'hover:underline' %>
+              </li>
+
+              <li>
+                <%= button_to 'Destroy',
+                             person,
+                             method: :delete,
+                             class: 'hover:underline',
+                             data: { turbo_confirm: "Are you sure?" } %>
+              </li>
+            </ul>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

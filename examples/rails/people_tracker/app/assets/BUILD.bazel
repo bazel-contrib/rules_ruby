@@ -1,0 +1,5 @@
+filegroup(
+    name = "files",
+    srcs = glob(["**/*.css"]),
+    visibility = ["//people_tracker:__subpackages__"],
+)
