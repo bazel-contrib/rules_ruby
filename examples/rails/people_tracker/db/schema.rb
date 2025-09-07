@@ -17,23 +17,4 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_170124) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
-
-  create_table "troops", force: :cascade do |t|
-    t.string "rank"
-    t.integer "person_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["person_id"], name: "index_troops_on_person_id"
-  end
-
-  create_table "units", force: :cascade do |t|
-    t.string "name", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.integer "parent_id"
-    t.index ["parent_id"], name: "index_units_on_parent_id"
-  end
-
-  add_foreign_key "troops", "people"
-  add_foreign_key "units", "units", column: "parent_id"
 end

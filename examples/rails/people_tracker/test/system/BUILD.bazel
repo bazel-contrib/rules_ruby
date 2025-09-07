@@ -1,16 +1,6 @@
-load("//people_tracker:rails.bzl", "rails_system_test")
+load("//people_tracker/test:rails_test.bzl", "rails_system_test")
 
 rails_system_test(
     name = "people_test",
     src = "people_test.rb",
-)
-
-rails_system_test(
-    name = "troops_test",
-    src = "troops_test.rb",
-)
-
-rails_system_test(
-    name = "units_test",
-    src = "units_test.rb",
 )
