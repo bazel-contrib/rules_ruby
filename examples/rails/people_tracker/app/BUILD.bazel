@@ -1,0 +1,18 @@
+load("@rules_ruby//ruby:defs.bzl", "rb_library")
+
+rb_library(
+    name = "app",
+    data = [
+        "//people_tracker/app/assets:files",
+        "//people_tracker/app/javascript:files",
+        "//people_tracker/app/views:files",
+    ],
+    visibility = ["//people_tracker:__subpackages__"],
+    deps = [
+        "//people_tracker/app/controllers",
+        "//people_tracker/app/helpers",
+        "//people_tracker/app/jobs",
+        "//people_tracker/app/mailers",
+        "//people_tracker/app/models",
+    ],
+)

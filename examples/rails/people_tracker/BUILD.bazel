@@ -1,0 +1,37 @@
+load("@bazel_env.bzl", "bazel_env")
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("@cgrindel_bazel_starlib//bzltidy:defs.bzl", "tidy")
+
+# This is a runnable target that is used to configure direnv to make the listed
+# tools available at the command-line.
+bazel_env(
+    name = "bazel_env",
+    tools = {
+        "rails": "@people_tracker_bundle//bin:rails",
+    },
+)
+
+tidy(
+    name = "all_bazel_env",
+    targets = [
+        # Use fully-qualified labels here. There may be a bug in tidy that does
+        # not resolve relative labels properly.
+        "//:bazel_env",
+        "//people_tracker:bazel_env",
+    ],
+)
+
+build_test(
+    name = "bazel_env_build_test",
+    targets = [
+        ":bazel_env",
+    ],
+)
+
+bzl_library(
+    name = "rails",
+    srcs = ["rails.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//bzl/rails:rails_test_factory"],
+)

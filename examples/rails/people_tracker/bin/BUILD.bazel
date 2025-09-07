@@ -1,0 +1,14 @@
+filegroup(
+    name = "files",
+    srcs = [
+        "brakeman",
+        "dev",
+        "docker-entrypoint",
+        "rails",
+        "rake",
+        "rubocop",
+        "setup",
+        "thrust",
+    ],
+    visibility = ["//people_tracker:__subpackages__"],
+)
