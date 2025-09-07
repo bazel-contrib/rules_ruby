@@ -1,5 +1,4 @@
 load("@bazel_env.bzl", "bazel_env")
-load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@cgrindel_bazel_starlib//bzltidy:defs.bzl", "tidy")
 
@@ -27,11 +26,4 @@ build_test(
     targets = [
         ":bazel_env",
     ],
-)
-
-bzl_library(
-    name = "rails",
-    srcs = ["rails.bzl"],
-    visibility = ["//visibility:public"],
-    deps = ["//bzl/rails:rails_test_factory"],
 )

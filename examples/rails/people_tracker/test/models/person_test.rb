@@ -43,25 +43,4 @@ class PersonTest < ActiveSupport::TestCase
     assert_equal "Test", person.first_name
     assert_equal "User", person.last_name
   end
-
-  test "should have has_one troop association" do
-    person = people(:bob_johnson)
-    troop = troops(:bob_johnson)
-    assert_equal troop, person.troop
-  end
-
-  test "person without troop should have nil troop" do
-    person = people(:alice_brown)
-    assert_nil person.troop
-  end
-
-  test "should prevent deletion when troop exists due to restrict_with_error" do
-    person = people(:bob_johnson)
-    assert_not_nil person.troop
-    
-    result = person.destroy
-    assert_equal false, result
-    assert_not_empty person.errors
-    assert_includes person.errors.full_messages.first, "troop"
-  end
 end

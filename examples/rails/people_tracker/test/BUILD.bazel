@@ -20,8 +20,8 @@ rb_library(
 )
 
 bzl_library(
-    name = "rails",
-    srcs = ["rails.bzl"],
+    name = "rails_test",
+    srcs = ["rails_test.bzl"],
     visibility = ["//visibility:public"],
-    deps = ["//bzl/rails:rails_test_factory"],
+    deps = ["//rails:rails_test_factory"],
 )
