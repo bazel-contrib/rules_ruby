@@ -66,6 +66,9 @@ rails_system_test = rails_test_factory.new_system_test(test_package = _TEST_PKG)
 These macros (`rails_test` and `rails_system_test`) can then be used in your
 `BUILD.bazel` files to define test targets for your Rails application.
 
+The tests are configured to use a SQLite in-memory database for fast, isolated
+test execution.
+
 ### Patches
 
 To prevent Ruby from escaping the sandbox, Ruby requires patches to `Kernel`
