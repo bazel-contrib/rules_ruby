@@ -23,5 +23,5 @@ bzl_library(
     name = "rails_test",
     srcs = ["rails_test.bzl"],
     visibility = ["//visibility:public"],
-    deps = ["//rails:rails_test_factory"],
+    deps = ["@rules_ruby//rails:rails_test_factory"],
 )

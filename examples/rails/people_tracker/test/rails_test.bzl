@@ -1,8 +1,8 @@
 """Module for app-specific rails helpers and macros."""
 
-load("//rails:rails_test_factory.bzl", "rails_test_factory")
+load("@rules_ruby//rails:rails_test_factory.bzl", "rails_test_factory")
 
-_TEST_PKG = "lrtc/test"
+_TEST_PKG = "people_tracker/test"
 
 rails_test = rails_test_factory.new_test(test_package = _TEST_PKG)
 

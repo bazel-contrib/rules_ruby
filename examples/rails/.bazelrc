@@ -1,0 +1,17 @@
+# Verbose Failures
+build --verbose_failures
+
+# Test output information
+test --test_output=errors --test_summary=detailed
+
+# Strict PATH. Helps prevent build cache invalidation due to PATH differences.
+build --incompatible_strict_action_env=true
+
+# Don't allow empty glob patterns by default
+build --incompatible_disallow_empty_glob
+
+# Enable bzlmod
+common --enable_bzlmod
+
+# Download the JDK to run Bazel
+build --java_runtime_version=remotejdk_11
