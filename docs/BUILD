@@ -12,4 +12,9 @@ stardoc_with_diff_test(
     bzl_library_target = "//ruby:deps",
 )
 
+stardoc_with_diff_test(
+    name = "rails",
+    bzl_library_target = "//rails:rails_test_factory",
+)
+
 update_docs(name = "update")

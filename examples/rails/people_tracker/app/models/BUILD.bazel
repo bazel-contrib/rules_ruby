@@ -1,0 +1,7 @@
+load("@rules_ruby//ruby:defs.bzl", "rb_library")
+
+rb_library(
+    name = "models",
+    srcs = glob(["*.rb"]),
+    visibility = ["//people_tracker/app:__subpackages__"],
+)

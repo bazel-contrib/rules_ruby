@@ -1,0 +1,40 @@
+load("@bazel_env.bzl", "bazel_env")
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# MARK: - bazel_env
+
+_RUBY_BINARIES = [
+    "bundle",
+    "bundler",
+    "erb",
+    "gem",
+    "irb",
+    "racc",
+    "rake",
+    "rbs",
+    "rdbg",
+    "rdoc",
+    "ri",
+    "ruby",
+]
+
+# This is a runnable target that is used to configure direnv to make the listed
+# tools available at the command-line.
+bazel_env(
+    name = "bazel_env",
+    tools = {
+        "buildifier": "@buildifier_prebuilt//:buildifier",
+        "rails": "@root_bundle//bin:rails",
+    } | {
+        rbin: "@ruby//:{}".format(rbin)
+        for rbin in _RUBY_BINARIES
+    },
+    visibility = ["//:__subpackages__"],
+)
+
+build_test(
+    name = "bazel_env_build_test",
+    targets = [
+        ":bazel_env",
+    ],
+)

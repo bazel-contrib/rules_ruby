@@ -3,3 +3,9 @@ bazel-*
 
 # Ignore Bazel lock file.
 MODULE.bazel.lock
+
+
+examples/rails/people_tracker/log/**
+examples/rails/people_tracker/storage/**
+examples/rails/people_tracker/tmp/***
+

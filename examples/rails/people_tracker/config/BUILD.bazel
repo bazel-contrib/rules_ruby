@@ -1,0 +1,29 @@
+load("@rules_ruby//ruby:defs.bzl", "rb_library")
+
+package(default_visibility = ["//people_tracker:__subpackages__"])
+
+rb_library(
+    name = "config",
+    srcs = glob(["*.rb"]),
+    data = [
+        ":files",
+        "//people_tracker/config/locales:files",
+    ],
+    deps = [
+        "//people_tracker/app",
+        "//people_tracker/config/environments",
+        "//people_tracker/config/initializers",
+        "//people_tracker/db",
+        "@people_tracker_bundle",
+    ],
+)
+
+filegroup(
+    name = "files",
+    srcs = glob(
+        [
+            "*",
+        ],
+        exclude = ["*.rb"],
+    ),
+)

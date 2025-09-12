@@ -1,0 +1,5 @@
+filegroup(
+    name = "files",
+    srcs = glob(["*.yml"]),
+    visibility = ["//people_tracker/test:__subpackages__"],
+)

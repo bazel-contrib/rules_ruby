@@ -85,6 +85,7 @@ register_toolchains("@ruby_toolchains//:all")
 
 - See [repository rules][3] for the documentation of `WORKSPACE` rules.
 - See [rules][4] for the documentation of `BUILD` rules.
+- See [rails][18] for the documentation of Ruby on Rails rules.
 
 ## Examples
 
@@ -173,3 +174,4 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
 [15]: https://bazel.build/remote/rbe
 [16]: https://bazel.build/reference/command-line-reference#flag--experimental_inprocess_symlink_creation
 [17]: https://github.com/bazelbuild/bazel/issues/4327
+[18]: docs/rails.md
