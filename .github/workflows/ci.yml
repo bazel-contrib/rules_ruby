@@ -154,15 +154,6 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
-        mode:
-          - bzlmod
-        exclude:
-          # Previews are not available via RubyInstaller.
-          - os: windows-latest
-            ruby: 3.5.0-preview1
-          # TruffleRuby doesn't work on Windows.
-          - os: windows-latest
-            ruby: truffleruby-24.2.1
     defaults:
       run:
         working-directory: examples/deep_gem
@@ -196,15 +187,6 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
-        mode:
-          - bzlmod
-        exclude:
-          # Previews are not available via RubyInstaller.
-          - os: windows-latest
-            ruby: 3.5.0-preview1
-          # TruffleRuby doesn't work on Windows.
-          - os: windows-latest
-            ruby: truffleruby-24.2.1
     defaults:
       run:
         working-directory: examples/rails
@@ -215,14 +197,8 @@ jobs:
           # Move autoload_externally to .bazelrc once Bazel 6 support is dropped.
           bazelrc: common --announce_rc --incompatible_autoload_externally=
           module-root: examples/rails
-          # Workaround for long path issues: https://github.com/jruby/jruby/issues/3995.
-          output-base: ${{ matrix.os == 'windows-latest' && 'D:/b' || '' }}
           repository-cache: true
       - run: echo ${{ matrix.ruby }} > .ruby-version
-      - if: matrix.ruby == 'system'
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.4.5
       - run: ./do_test
 
   release:
