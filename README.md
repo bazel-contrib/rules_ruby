@@ -22,7 +22,7 @@ The ruleset is known to work with:
 load("@rules_ruby//ruby:deps.bzl", "rb_register_toolchains")
 
 rb_register_toolchains(
-    version = "3.1.6",
+    version = "3.3.9",
     # alternatively, load version from .ruby-version file
     # version_file = "//:.ruby-version",
 )
@@ -102,7 +102,7 @@ The following toolchains are known to work and tested on CI.
 | MRI 3.3          | 🟩    | 🟩    | 🟩      |
 | MRI 3.2          | 🟩    | 🟩    | 🟩      |
 | JRuby 10.0       | 🟩    | 🟩    | 🟩      |
-| TruffleRuby 24.0 | 🟩    | 🟩    | 🟥      |
+| TruffleRuby 25.0 | 🟩    | 🟩    | 🟥      |
 
 The following toolchains were previously known to work but *no longer tested on CI*.
 
@@ -113,6 +113,7 @@ The following toolchains were previously known to work but *no longer tested on 
 | MRI 2.7          | 🟩    | 🟩    | 🟩      |
 | JRuby 9.4        | 🟩    | 🟩    | 🟩      |
 | JRuby 9.3        | 🟩    | 🟩    | 🟩      |
+| TruffleRuby 24.0 | 🟩    | 🟩    | 🟥      |
 | TruffleRuby 23.0 | 🟩    | 🟩    | 🟥      |
 | TruffleRuby 22.0 | 🟩    | 🟩    | 🟥      |
 
