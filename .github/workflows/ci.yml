@@ -210,6 +210,7 @@ jobs:
       - examples-gem
       - examples-jekyll
       - examples-native_ext
+      - examples-rails
     uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7
     with:
       mount_bazel_caches: false
