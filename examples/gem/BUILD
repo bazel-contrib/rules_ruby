@@ -51,7 +51,10 @@ rb_test(
     name = "rubocop",
     size = "small",
     timeout = "moderate",  # JRuby startup can be slow
-    data = [".rubocop.yml"],
+    data = [
+        ".rubocop.yml",
+        "Gemfile",
+    ],
     main = "@bundle//bin:rubocop",
     tags = ["no-sandbox"],
     deps = [

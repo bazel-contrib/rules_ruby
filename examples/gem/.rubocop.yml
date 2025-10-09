@@ -2,6 +2,8 @@ AllCops:
   NewCops: enable
   SuggestExtensions: false
   TargetRubyVersion: 3.0
+  Exclude:
+    - 'external/**/*'
 
 # There is a difference in line endings between
 # GitHub Actions and Bazel CI.
