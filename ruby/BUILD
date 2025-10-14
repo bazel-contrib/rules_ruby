@@ -24,6 +24,12 @@ bzl_library(
     ],
 )
 
+starlark_doc_extract(
+    name = "defs.doc_extract",
+    src = "defs.bzl",
+    deps = [":defs"],
+)
+
 bzl_library(
     name = "deps",
     srcs = ["deps.bzl"],
@@ -32,6 +38,12 @@ bzl_library(
         "//ruby/private:bundle_fetch",
         "//ruby/private:toolchain",
     ],
+)
+
+starlark_doc_extract(
+    name = "deps.doc_extract",
+    src = "deps.bzl",
+    deps = [":deps"],
 )
 
 bzl_library(
