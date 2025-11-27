@@ -2,6 +2,7 @@
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_skylib//lib:versions.bzl", "versions")
+load("@bazel_tools//tools/build_defs/repo:git_worker.bzl", _git_add_origin = "add_origin", _git_clean = "clean", _git_fetch = "fetch", _git_init = "init", _git_reset = "reset")
 load(
     "@bazel_tools//tools/build_defs/repo:utils.bzl",
     "read_netrc",
@@ -26,6 +27,20 @@ rb_gem(
 )
 """
 
+_GIT_GEM_BUILD_FRAGMENT = """
+rb_git_gem(
+    name = "{full_name}",
+    srcs = glob(["{extracted_path}/**"])
+)
+"""
+
+_GIT_GEM_SUBDIRECTORY_BUILD_FRAGMENT = """
+rb_git_gem(
+    name = "{full_name}",
+    srcs = glob(["{extracted_path}/{name}/**"])
+)
+"""
+
 _GEM_INSTALL_BUILD_FRAGMENT = """
 rb_gem_install(
     name = "{name}",
@@ -43,13 +58,6 @@ rb_binary(
 )
 """
 
-_GIT_UNSUPPORTED_ERROR = """
-
-rb_bundle_fetch(...) does not support gems installed from Git yet.
-See https://github.com/bazel-contrib/rules_ruby/issues/62 for more details.
-
-"""
-
 _OUTDATED_BUNDLER_ERROR = """
 
 rb_bundle_fetch(...) requires Bundler 2.2.19 or later in Gemfile.lock.
@@ -57,6 +65,8 @@ Please update Bundler version and try again.
 See https://github.com/rubygems/rubygems/issues/4620 for more details.
 
 """
+
+_EXECUTABLE_DIRNAMES = ["bin", "exe"]
 
 def _download_gem(repository_ctx, gem, cache_path, sha256 = None):
     """Downloads gem into a predefined vendor/cache location.
@@ -73,6 +83,51 @@ def _download_gem(repository_ctx, gem, cache_path, sha256 = None):
     download = repository_ctx.download(url = url, output = "%s/%s" % (cache_path, gem.filename), auth = _get_auth(repository_ctx, [url]), **kwargs)
     return download.sha256
 
+def _fetch_git_repository(rctx, git_package, cache_path):
+    remote_name = git_package.remote.rpartition("/")[-1]
+    if remote_name.endswith(".git"):
+        remote_name = remote_name[:-4]
+
+    extracted_path = "%s/%s-%s" % (cache_path, remote_name, git_package.revision[:12])
+    git_repo = struct(
+        directory = rctx.path(extracted_path),
+        shallow = "--depth=1",
+        reset_ref = git_package.revision,
+        fetch_ref = git_package.revision,
+        remote = git_package.remote,
+    )
+    rctx.report_progress("Fetching %s of %s" % (git_package.revision, git_package.remote))
+    _git_init(rctx, git_repo)
+    _git_add_origin(rctx, git_repo, git_package.remote)
+    _git_fetch(rctx, git_repo)
+    _git_reset(rctx, git_repo)
+    _git_clean(rctx, git_repo)
+
+    git_metadata_folder = git_repo.directory.get_child(".git")
+    if not rctx.delete(git_metadata_folder):
+        fail("Failed to delete .git folder in %s" % str(git_repo.directory))
+
+    return extracted_path
+
+def _get_executables_from_dir(contents):
+    # type: (path) -> list[string]
+    executables = []
+    for executable_dirname in _EXECUTABLE_DIRNAMES:
+        if contents.get_child(executable_dirname).exists:
+            for executable in contents.get_child(executable_dirname).readdir():
+                executables.append(executable.basename)
+    return executables
+
+def _get_git_gem_executables(repository_ctx, extracted_path):
+    # type: (repository_ctx, list[Unknown], string) -> list[string]
+    executables = []
+    result = repository_ctx.execute(["find", extracted_path, "-type", "f", "-name", "*.gemspec"])
+    gemspec_paths = [line for line in result.stdout.splitlines() if line]
+    for gemspec_path in gemspec_paths:
+        gemspec_dirname, _, _ = gemspec_path.rpartition("/")
+        executables.extend(_get_executables_from_dir(repository_ctx.path(gemspec_dirname)))
+    return executables
+
 def _get_gem_executables(repository_ctx, gem, cache_path):
     """Unpacks downloaded gem and returns its executables.
 
@@ -85,14 +140,16 @@ def _get_gem_executables(repository_ctx, gem, cache_path):
     by looking into its `bin` and `exe` locations. This is accurate enough so far,
     so some exotic gems might not work correctly.
     """
-    executables = []
+    if gem.name in repository_ctx.attr.skip_get_executables_gems:
+        return []
+
     gem_filepath = cache_path + "/" + gem.filename
 
     # Some gems are empty (e.g. date-4.2.1-java), so we should not try to unpack them.
     # Metadata has "files: []" which we could use to detect this, but Bazel cannot
     # decompress `.gz` files (see above).
     if len(repository_ctx.read(gem_filepath)) == 4096:
-        return executables
+        return []
 
     repository_ctx.symlink(gem_filepath, gem.filename + ".tar")
     repository_ctx.extract(gem.filename + ".tar", output = gem.full_name)
@@ -100,11 +157,7 @@ def _get_gem_executables(repository_ctx, gem, cache_path):
     repository_ctx.extract("/".join([gem.full_name, "data.tar.gz"]), output = data)
     gem_contents = repository_ctx.path(data)
 
-    executable_dirnames = ["bin", "exe"]
-    for executable_dirname in executable_dirnames:
-        if gem_contents.get_child(executable_dirname).exists:
-            for executable in gem_contents.get_child(executable_dirname).readdir():
-                executables.append(executable.basename)
+    executables = _get_executables_from_dir(gem_contents)
 
     _cleanup_downloads(repository_ctx, gem)
     return executables
@@ -159,11 +212,9 @@ def _rb_bundle_fetch_impl(repository_ctx):
     if not versions.is_at_least("2.2.19", gemfile_lock.bundler.version):
         fail(_OUTDATED_BUNDLER_ERROR)
 
-    if len(gemfile_lock.git_packages) > 0:
-        fail(_GIT_UNSUPPORTED_ERROR)
-
     executables = []
     gem_full_names = []
+    git_gem_srcs = []
     gem_fragments = []
     gem_install_fragments = []
     gem_checksums = {}
@@ -192,6 +243,20 @@ def _rb_bundle_fetch_impl(repository_ctx):
                 cache_path = cache_path,
             ),
         )
+
+    for git_package in gemfile_lock.git_packages:
+        extracted_path = _fetch_git_repository(repository_ctx, git_package, cache_path)
+        executables.extend(_get_git_gem_executables(repository_ctx, extracted_path))
+        fragment = _GIT_GEM_BUILD_FRAGMENT if len(git_package.gems) == 1 else _GIT_GEM_SUBDIRECTORY_BUILD_FRAGMENT
+        for gem in git_package.gems:
+            git_gem_srcs.append(":%s" % gem.full_name)
+            gem_fragments.append(
+                fragment.format(
+                    full_name = gem.full_name,
+                    extracted_path = extracted_path,
+                    name = gem.name,
+                ),
+            )
 
     # Fetch Bundler and define an `rb_gem_install()` target for it.
     _download_gem(repository_ctx, gemfile_lock.bundler, cache_path, gemfile_lock.bundler.sha256)
@@ -239,6 +304,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
             "{gemfile_path}": gemfile_rel_path,
             "{gemfile_lock_path}": gemfile_lock_rel_path,
             "{gems}": _join_and_indent(gem_full_names),
+            "{git_gem_srcs}": _join_and_indent(git_gem_srcs),
             "{gem_fragments}": "".join(gem_fragments),
             "{gem_install_fragments}": "".join(gem_install_fragments),
             "{env}": repr(repository_ctx.attr.env),
@@ -330,6 +396,10 @@ with Ruby (e.g., psych, stringio).\
         ),
         "netrc": attr.string(
             doc = "Path to .netrc file to read credentials from",
+        ),
+        "skip_get_executables_gems": attr.string_list(
+            doc = "List of gems for which to skip finding executables.",
+            default = [],
         ),
     },
     doc = """
