@@ -1,0 +1,17 @@
+# Line length enforcement for Ruby files
+# This is a minimal RuboCop configuration that ONLY checks line length.
+# StandardRB handles all other style rules.
+
+AllCops:
+  NewCops: disable
+  SuggestExtensions: false
+  DisabledByDefault: true
+  Exclude:
+    - 'bazel-*/**/*'
+
+Layout/LineLength:
+  Enabled: true
+  Max: 80
+  # Ignore URLs in comments that cannot be reasonably split
+  AllowedPatterns:
+    - '\A\s*#.*https?://'
