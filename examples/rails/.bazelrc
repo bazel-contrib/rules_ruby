@@ -15,3 +15,6 @@ common --enable_bzlmod
 
 # Download the JDK to run Bazel
 build --java_runtime_version=remotejdk_11
+
+# Enable bytecode compilation
+build --@rules_ruby//ruby:compile_bytecode=True

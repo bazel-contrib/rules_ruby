@@ -208,7 +208,7 @@ def _write_bytecode_manifest_file(ctx, transitive_deps):
         content = json.encode_indent(manifest_content, indent = "  "),
     )
 
-    return struct(
+    return _new_manifest_info(
         file = manifest_file,
         bytecode_files = bytecode_files,
     )
@@ -264,14 +264,6 @@ def rb_binary_impl(ctx):
     env.update(bundle_env)
     env.update(ruby_toolchain.env)
     env.update(ctx.attr.env)
-
-    setup_rfi = ctx.attr._setup[RubyFilesInfo]
-    setup_di = ctx.attr._setup[DefaultInfo]
-
-    # DEBUG BEGIN
-    print("*** CHUCK setup_rfi: ", setup_rfi)
-    print("*** CHUCK setup_di: ", setup_di)
-    # DEBUG END
 
     # Add bytecode files and manifest to runfiles
     runfiles_files = tools + manifest.bytecode_files

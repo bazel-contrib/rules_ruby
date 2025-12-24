@@ -37,7 +37,7 @@ def compile_ruby_sources(ctx, srcs, ruby_toolchain, compile_script):
             continue
 
         # Declare .rbc output file in same relative location
-        output_path = src.short_path + "c"
+        output_path = src.basename + "c"
         bytecode_file = ctx.actions.declare_file(output_path)
 
         # Create compilation action
