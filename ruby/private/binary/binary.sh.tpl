@@ -36,7 +36,7 @@ realpath() (
 
 export RUNFILES_DIR="$(realpath "${RUNFILES_DIR:-$0.runfiles}")"
 
-# Do not export the variable if it is empty
+export BAZEL_WORKSPACE="{bazel_workspace}"
 export RULES_RUBY_SETUP="$(rlocation {rules_ruby_setup})"
 
 # Find location of Ruby in runfiles.

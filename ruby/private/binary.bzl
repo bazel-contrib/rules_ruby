@@ -151,6 +151,7 @@ def generate_rb_binary_script(
             "{locate_binary_in_runfiles}": locate_binary_in_runfiles,
             "{manifest_path}": manifest_path,
             "{rules_ruby_setup}": _to_rlocation_path(_get_setup_file(ctx)),
+            "{bazel_workspace}": ctx.workspace_name,
         },
     )
 

@@ -17,14 +17,22 @@ unless File.singleton_class.method_defined?(:rules_ruby_original_expand_path)
   File.singleton_class.class_eval do
     alias_method :rules_ruby_original_expand_path, :expand_path
 
+    def bazel_runfiles_dir
+      @bazel_runfiles_dir ||= ENV["RUNFILES_DIR"]
+    end
+
+    def bazel_workspace_name
+      @bazel_workspace_name || ENV["BAZEL_WORKSPACE"]
+    end
+
     def expand_path(path, dir = nil)
-      runfiles_dir = ENV["RUNFILES_DIR"]
       dir = if dir && File.absolute_path?(dir)
         dir
-      elsif dir && runfiles_dir
-        File.join(runfiles_dir, dir)
+      elsif dir && bazel_workspace_name && bazel_runfiles_dir
+        # Assume that the relative dir is under the workspace.
+        File.join(bazel_runfiles_dir, bazel_workspace_name, dir)
       else
-        runfiles_dir
+        bazel_runfiles_dir
       end
       rules_ruby_original_expand_path(path, dir)
     end
