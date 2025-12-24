@@ -8,6 +8,7 @@ rb_library(
     data = [
         ":files",
         "//people_tracker/config/locales:files",
+        "@rules_ruby//ruby/runtime:setup",
     ],
     deps = [
         "//people_tracker/app",

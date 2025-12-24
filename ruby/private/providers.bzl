@@ -29,6 +29,14 @@ GemInfo = provider(
     },
 )
 
+RubyBytecodeInfo = provider(
+    "Provider for Ruby bytecode compilation outputs",
+    fields = {
+        "mappings": "Dict mapping source path (string) to bytecode File (direct outputs)",
+        "transitive_mappings": "Dict of all mappings from this rule and its deps (cumulative)",
+    },
+)
+
 # https://bazel.build/rules/depsets
 
 def get_transitive_srcs(srcs, deps):
@@ -72,20 +80,25 @@ def get_transitive_deps(deps):
         transitive = [dep[RubyFilesInfo].transitive_deps for dep in deps],
     )
 
+_ITERABLE_TYPES = [type([]), type(())]
+
 # https://bazel.build/extending/rules#runfiles
-def get_transitive_runfiles(runfiles, srcs, data, deps):
+# def get_transitive_runfiles(runfiles, srcs, data, deps):
+def get_transitive_runfiles(runfiles, *attribs):
     """Obtain the runfiles for a target, its transitive data files and dependencies.
 
     Args:
         runfiles: the runfiles
-        srcs: a list of source files
-        data: a list of data files
-        deps: a list of targets that are direct dependencies
+        *attribs: Attributes to be evaluated for their runfiles.
     Returns:
         the runfiles
     """
     transitive_runfiles = []
-    for targets in (srcs, data, deps):
+    for attrib in attribs:
+        if type(attrib) in _ITERABLE_TYPES:
+            targets = attrib
+        else:
+            targets = [attrib]
         for target in targets:
             transitive_runfiles.append(target[DefaultInfo].default_runfiles)
     return runfiles.merge_all(transitive_runfiles)

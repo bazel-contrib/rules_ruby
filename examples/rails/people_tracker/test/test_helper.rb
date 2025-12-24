@@ -1,4 +1,6 @@
-require_relative "../config/initializers/bazel_ruby_patches"
+# Load Bazel runtime support FIRST, before any require_relative
+rules_ruby_setup = ENV["RULES_RUBY_SETUP"]
+require rules_ruby_setup if rules_ruby_setup
 
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"

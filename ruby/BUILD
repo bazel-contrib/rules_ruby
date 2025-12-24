@@ -1,6 +1,17 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 
 package(default_visibility = ["//visibility:public"])
+
+bool_flag(
+    name = "compile_bytecode",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "bytecode_enabled",
+    flag_values = {":compile_bytecode": "True"},
+)
 
 exports_files(glob(["*.bzl"]))
 

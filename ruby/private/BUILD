@@ -5,9 +5,11 @@ bzl_library(
     srcs = ["binary.bzl"],
     visibility = ["//ruby:__subpackages__"],
     deps = [
+        ":compile",
         ":library",
         ":providers",
         ":utils",
+        "@bazel_skylib//rules:common_settings",
     ],
 )
 
@@ -33,10 +35,21 @@ bzl_library(
 )
 
 bzl_library(
+    name = "compile",
+    srcs = ["compile.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+    deps = [":utils"],
+)
+
+bzl_library(
     name = "library",
     srcs = ["library.bzl"],
     visibility = ["//ruby:__subpackages__"],
-    deps = [":providers"],
+    deps = [
+        ":compile",
+        ":providers",
+        "@bazel_skylib//rules:common_settings",
+    ],
 )
 
 bzl_library(

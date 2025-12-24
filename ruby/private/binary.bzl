@@ -1,9 +1,12 @@
 "Implementation details for rb_binary"
 
+load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
+load("//ruby/private:compile.bzl", "to_runfiles_path")
 load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
 load(
     "//ruby/private:providers.bzl",
     "BundlerInfo",
+    "RubyBytecodeInfo",
     "RubyFilesInfo",
     "get_bundle_env",
     "get_transitive_data",
@@ -20,6 +23,8 @@ load(
     _normalize_path = "normalize_path",
     _to_rlocation_path = "to_rlocation_path",
 )
+
+_JDK_TOOLCHAIN = "@bazel_tools//tools/jdk:runtime_toolchain_type"
 
 ATTRS = {
     "main": attr.label(
@@ -41,7 +46,9 @@ Supports `$(location)` expansion for targets from `srcs`, `data` and `deps`.
 """,
     ),
     "env_inherit": attr.string_list(
-        doc = "List of environment variable names to be inherited by the test runner.",
+        doc = """\
+List of environment variable names to be inherited by the test runner.\
+""",
     ),
     "ruby": attr.label(
         doc = "Override Ruby toolchain to use when running the script.",
@@ -61,10 +68,24 @@ Supports `$(location)` expansion for targets from `srcs`, `data` and `deps`.
     "_windows_constraint": attr.label(
         default = "@platforms//os:windows",
     ),
+    "_compile_bytecode": attr.label(
+        default = "@rules_ruby//ruby:compile_bytecode",
+    ),
+    "_setup": attr.label(
+        allow_files = True,
+        default = "@rules_ruby//ruby/runtime:setup",
+    ),
 }
 
 # buildifier: disable=function-docstring
-def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {}, java_bin = ""):
+def generate_rb_binary_script(
+        ctx,
+        binary,
+        bundler = False,
+        args = [],
+        env = {},
+        java_bin = "",
+        manifest_path = ""):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
     if ctx.attr.ruby != None:
         toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
@@ -76,7 +97,8 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
 
         # Runfiles library for Windows does not support generated directories,
         # so for now we skip locating the binary in runfiles. This only prevents
-        # running binary scripts directly and should not affect normal `bazel run`.
+        # running binary scripts directly and should not affect normal
+        # `bazel run`.
         # See BATCH_RLOCATION_FUNCTION comments for more details.
         if binary_path.startswith("../") and not _is_windows(ctx):
             binary_path = _to_rlocation_path(binary)
@@ -87,7 +109,10 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
     environment = {}
     environment.update(env)
     for k, v in environment.items():
-        environment[k] = ctx.expand_location(v, ctx.attr.srcs + ctx.attr.data + ctx.attr.deps)
+        environment[k] = ctx.expand_location(
+            v,
+            ctx.attr.srcs + ctx.attr.data + ctx.attr.deps,
+        )
 
     if _is_windows(ctx):
         rlocation_function = BATCH_RLOCATION_FUNCTION
@@ -104,7 +129,10 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
         bundler_command = ""
 
     args = " ".join(args)
-    args = ctx.expand_location(args, ctx.attr.srcs + ctx.attr.data + ctx.attr.deps)
+    args = ctx.expand_location(
+        args,
+        ctx.attr.srcs + ctx.attr.data + ctx.attr.deps,
+    )
 
     ctx.actions.expand_template(
         template = template,
@@ -120,10 +148,70 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
             "{java_bin}": java_bin,
             "{rlocation_function}": rlocation_function,
             "{locate_binary_in_runfiles}": locate_binary_in_runfiles,
+            "{manifest_path}": manifest_path,
+            "{rules_ruby_setup}": _to_rlocation_path(_get_setup_file(ctx)),
         },
     )
 
     return script
+
+def _get_setup_file(ctx):
+    for file in ctx.files._setup:
+        # This is a bit unholy, but avoids adding more targets or updating
+        # the providers to expose the direct src files for an rb_library target.
+        if file.basename == "setup.rb":
+            return file
+    fail("Expected to find `setup.rb` from _setup attribute.")
+
+def _new_manifest_info(file = None, bytecode_files = []):
+    return struct(
+        file = file,
+        path = _to_rlocation_path(file) if file else "",
+        bytecode_files = bytecode_files,
+    )
+
+def _write_bytecode_manifest_file(ctx, transitive_deps):
+    if not ctx.attr._compile_bytecode[BuildSettingInfo].value:
+        return _new_manifest_info()
+
+    # TODO(chuck): Probably do not want to flatten out the transitive_deps to a
+    # list twice.
+
+    # Collect all bytecode mappings from dependencies
+    all_mappings = {}
+    for dep in transitive_deps.to_list():
+        if RubyBytecodeInfo in dep:
+            all_mappings.update(dep[RubyBytecodeInfo].transitive_mappings)
+
+    if len(all_mappings) == 0:
+        return _new_manifest_info()
+
+    # Generate manifest JSON
+    manifest_content = {
+        "version": 1,
+        "entries": {},
+    }
+
+    # Convert File objects to runfiles paths for the manifest
+    bytecode_files = []
+    for source_path, bytecode_file in all_mappings.items():
+        bytecode_runfiles_path = to_runfiles_path(ctx, bytecode_file)
+        manifest_content["entries"][source_path] = bytecode_runfiles_path
+        bytecode_files.append(bytecode_file)
+
+    # Write manifest file
+    manifest_file = ctx.actions.declare_file(
+        "{}_bytecode_manifest.json".format(ctx.label.name),
+    )
+    ctx.actions.write(
+        output = manifest_file,
+        content = json.encode_indent(manifest_content, indent = "  "),
+    )
+
+    return struct(
+        file = manifest_file,
+        bytecode_files = bytecode_files,
+    )
 
 # buildifier: disable=function-docstring
 def rb_binary_impl(ctx):
@@ -132,10 +220,13 @@ def rb_binary_impl(ctx):
     env = {}
     java_bin = ""
 
-    # TODO: avoid expanding the depset to a list, it may be expensive in a large graph
+    # TODO: avoid expanding the depset to a list, it may be expensive in a
+    # large graph
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps)
     transitive_deps = get_transitive_deps(ctx.attr.deps)
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps)
+
+    transitive_deps = depset([ctx.attr._setup], transitive = [transitive_deps])
 
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
     if ctx.attr.ruby != None:
@@ -143,7 +234,7 @@ def rb_binary_impl(ctx):
     tools = list(ruby_toolchain.files)
 
     if ruby_toolchain.version.startswith("jruby"):
-        java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
+        java_toolchain = ctx.toolchains[_JDK_TOOLCHAIN]
         tools.extend(java_toolchain.java_runtime.files.to_list())
         java_bin = java_toolchain.java_runtime.java_executable_runfiles_path[3:]
 
@@ -157,7 +248,8 @@ def rb_binary_impl(ctx):
             bundler_srcs.extend([info.gemfile, info.bin, info.path])
             bundler = True
 
-            # See https://bundler.io/v2.5/man/bundle-config.1.html for confiugration keys.
+            # See https://bundler.io/v2.5/man/bundle-config.1.html for
+            # confiugration keys.
             env.update({
                 "BUNDLE_GEMFILE": _to_rlocation_path(info.gemfile),
                 "BUNDLE_PATH": _to_rlocation_path(info.path),
@@ -165,18 +257,46 @@ def rb_binary_impl(ctx):
     if len(bundler_srcs) > 0:
         transitive_srcs = depset(bundler_srcs, transitive = [transitive_srcs])
 
+    # Bytecode compilation support
+    manifest = _write_bytecode_manifest_file(ctx, transitive_deps)
+
     bundle_env = get_bundle_env(ctx.attr.env, ctx.attr.deps)
     env.update(bundle_env)
     env.update(ruby_toolchain.env)
     env.update(ctx.attr.env)
 
-    runfiles = ctx.runfiles(tools, transitive_files = depset(transitive = [transitive_srcs, transitive_data]))
-    runfiles = get_transitive_runfiles(runfiles, ctx.attr.srcs, ctx.attr.deps, ctx.attr.data)
-    runfiles = runfiles.merge(ctx.attr._runfiles_library[DefaultInfo].default_runfiles)
+    setup_rfi = ctx.attr._setup[RubyFilesInfo]
+    setup_di = ctx.attr._setup[DefaultInfo]
+
+    # DEBUG BEGIN
+    print("*** CHUCK setup_rfi: ", setup_rfi)
+    print("*** CHUCK setup_di: ", setup_di)
+    # DEBUG END
+
+    # Add bytecode files and manifest to runfiles
+    runfiles_files = tools + manifest.bytecode_files
+    if manifest.file:
+        runfiles_files.append(manifest.file)
+
+    runfiles = ctx.runfiles(
+        runfiles_files,
+        transitive_files = depset(
+            transitive = [transitive_srcs, transitive_data],
+        ),
+    )
+    runfiles = get_transitive_runfiles(
+        runfiles,
+        ctx.attr.srcs,
+        ctx.attr.deps,
+        ctx.attr.data,
+        ctx.attr._runfiles_library,
+        ctx.attr._setup,
+    )
 
     # Propagate executable from source rb_binary() targets.
     executable = ctx.executable.main
-    if ctx.attr.main and RubyFilesInfo in ctx.attr.main and ctx.attr.main[RubyFilesInfo].binary:
+    if ctx.attr.main and RubyFilesInfo in ctx.attr.main and \
+       ctx.attr.main[RubyFilesInfo].binary:
         executable = ctx.attr.main[RubyFilesInfo].binary
 
     script = generate_rb_binary_script(
@@ -185,12 +305,18 @@ def rb_binary_impl(ctx):
         bundler = bundler,
         env = env,
         java_bin = java_bin,
+        manifest_path = manifest.path,
     )
 
     return [
         DefaultInfo(
             executable = script,
-            files = depset(transitive = [transitive_srcs, depset(tools, transitive = [transitive_data])]),
+            files = depset(
+                transitive = [
+                    transitive_srcs,
+                    depset(tools, transitive = [transitive_data]),
+                ],
+            ),
             runfiles = runfiles,
         ),
         RubyFilesInfo(

@@ -36,6 +36,9 @@ realpath() (
 
 export RUNFILES_DIR="$(realpath "${RUNFILES_DIR:-$0.runfiles}")"
 
+# Do not export the variable if it is empty
+export RULES_RUBY_SETUP="$(rlocation {rules_ruby_setup})"
+
 # Find location of Ruby in runfiles.
 export PATH=$(dirname $(rlocation {ruby})):$PATH
 
@@ -57,6 +60,11 @@ fi
 
 # Set environment variables.
 {env}
+
+# Set bytecode manifest path if available.
+if [ -n "{manifest_path}" ]; then
+  export RUBY_BYTECODE_MANIFEST=$(rlocation "{manifest_path}")
+fi
 
 # Find location of Bundle path in runfiles.
 if [ -n "{bundler_command}" ]; then
