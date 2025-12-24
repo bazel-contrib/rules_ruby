@@ -1,5 +1,6 @@
 "Implementation details for rb_binary"
 
+load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 load("//ruby/private:compile.bzl", "to_runfiles_path")
 load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
@@ -163,10 +164,10 @@ def _get_setup_file(ctx):
             return file
     fail("Expected to find `setup.rb` from _setup attribute.")
 
-def _new_manifest_info(file = None, bytecode_files = []):
+def _new_manifest_info(file = None, path = "", bytecode_files = []):
     return struct(
         file = file,
-        path = _to_rlocation_path(file) if file else "",
+        path = path,
         bytecode_files = bytecode_files,
     )
 
@@ -208,8 +209,17 @@ def _write_bytecode_manifest_file(ctx, transitive_deps):
         content = json.encode_indent(manifest_content, indent = "  "),
     )
 
+    # TODO: We should update to_rlocation_path to evaluate whether the is
+    # external or not. If it is not, we should prefix the short_path with the
+    # workspace name. This provides a value that will properly find a file that
+    # is from the client repo.
+    manifest_path = paths.join(
+        ctx.workspace_name,
+        _to_rlocation_path(manifest_file),
+    )
     return _new_manifest_info(
         file = manifest_file,
+        path = manifest_path,
         bytecode_files = bytecode_files,
     )
 
