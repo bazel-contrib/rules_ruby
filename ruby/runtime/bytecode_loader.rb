@@ -36,8 +36,8 @@ module RulesRuby
         return if @enabled
 
         @enabled = true
-        load_manifest
         setup_logging
+        load_manifest
 
         RubyVM::InstructionSequence.singleton_class.prepend(
           InstructionSequenceMixin
@@ -88,18 +88,25 @@ module RulesRuby
         @runfiles_dir ||= ENV["RUNFILES_DIR"]
       end
 
+      def runfiles_prefix
+        @runfiles_prefix ||= "#{runfiles_dir}/"
+      end
+
       def manifest
         @manifest ||= {}
       end
 
       def load(path)
+        # Normalize the path for the lookup.
+        path = path.delete_prefix(runfiles_prefix)
+
         # Look up bytecode path in manifest
         bytecode_runfiles_path = manifest[path]
 
         debug do
           [
             "-----",
-            "Path:     #{path}",
+            "Path: #{path}",
             "Manifest lookup: #{bytecode_runfiles_path || "not found"}"
           ]
         end
@@ -157,11 +164,11 @@ module RulesRuby
 
       def load_manifest
         manifest_path = ENV["RUBY_BYTECODE_MANIFEST"]
+        debug { "Manifest path: #{manifest_path}" }
         return unless manifest_path
 
         unless File.exist?(manifest_path)
-          warn "[RulesRuby::BytecodeLoader] Manifest file not found: \
-          #{manifest_path}"
+          error { "Manifest file not found: #{manifest_path}" }
           return
         end
 
@@ -188,6 +195,9 @@ end
 
 # Auto-enable if manifest is present
 if ENV["RUBY_BYTECODE_MANIFEST"]
+  # DEBUG BEGIN
+  ENV["RUBY_BYTECODE_LOADER_LOG_LEVEL"] = "debug"
+  # DEBUG END
   RulesRuby::BytecodeLoader.enable!
 
   # Print statistics at program exit
