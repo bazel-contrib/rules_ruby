@@ -39,7 +39,9 @@ module RulesRuby
         load_manifest
         setup_logging
 
-        RubyVM::InstructionSequence.singleton_class.prepend(InstructionSequenceMixin)
+        RubyVM::InstructionSequence.singleton_class.prepend(
+          InstructionSequenceMixin
+        )
       end
 
       def disable!
@@ -148,7 +150,8 @@ module RulesRuby
 
       def setup_logging
         @log_level = (ENV["RUBY_BYTECODE_LOADER_LOG_LEVEL"] || "error").to_sym
-        log_level_idx = ALL_LOG_LEVELS.index(@log_level) || ALL_LOG_LEVELS.index(:error)
+        log_level_idx = ALL_LOG_LEVELS.index(@log_level) ||
+          ALL_LOG_LEVELS.index(:error)
         @log_levels = ALL_LOG_LEVELS[log_level_idx..]
       end
 
@@ -157,7 +160,8 @@ module RulesRuby
         return unless manifest_path
 
         unless File.exist?(manifest_path)
-          warn "[RulesRuby::BytecodeLoader] Manifest file not found: #{manifest_path}"
+          warn "[RulesRuby::BytecodeLoader] Manifest file not found: \
+          #{manifest_path}"
           return
         end
 
@@ -166,7 +170,8 @@ module RulesRuby
 
         info { "Loaded manifest with #{@manifest.size} entries" }
       rescue => e
-        warn "[RulesRuby::BytecodeLoader] Failed to load manifest: #{e.class}: #{e.message}"
+        warn "[RulesRuby::BytecodeLoader] Failed to load manifest: #{e.class}: \
+        #{e.message}"
       end
     end
 
