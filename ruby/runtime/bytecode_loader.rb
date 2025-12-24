@@ -3,10 +3,6 @@
 
 require "json"
 
-# DEBUG BEGIN
-warn("*** CHUCK bytecode_loader.rb MADE IT!")
-# DEBUG END
-
 module RulesRuby
   module BytecodeLoader
     class Stats

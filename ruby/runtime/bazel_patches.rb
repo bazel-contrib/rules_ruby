@@ -10,10 +10,6 @@
 #
 # See: https://github.com/bazel-contrib/rules_ruby/issues/225
 
-# DEBUG BEGIN
-warn("*** CHUCK bazel_patches.rb MADE IT!")
-# DEBUG END
-
 $LOAD_PATH.uniq!
 
 # Patch File.expand_path to resolve paths relative to the RUNFILES_DIR.
