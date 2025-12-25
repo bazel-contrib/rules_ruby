@@ -22,7 +22,7 @@ unless File.singleton_class.method_defined?(:rules_ruby_original_expand_path)
     end
 
     def bazel_workspace_name
-      @bazel_workspace_name || ENV["BAZEL_WORKSPACE"]
+      @bazel_workspace_name ||= ENV["BAZEL_WORKSPACE"]
     end
 
     def expand_path(path, dir = nil)
