@@ -195,9 +195,6 @@ end
 
 # Auto-enable if manifest is present
 if ENV["RUBY_BYTECODE_MANIFEST"]
-  # DEBUG BEGIN
-  ENV["RUBY_BYTECODE_LOADER_LOG_LEVEL"] = "debug"
-  # DEBUG END
   RulesRuby::BytecodeLoader.enable!
 
   # Print statistics at program exit
