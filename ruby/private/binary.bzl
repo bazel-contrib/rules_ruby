@@ -86,7 +86,8 @@ def generate_rb_binary_script(
         args = [],
         env = {},
         java_bin = "",
-        manifest_path = ""):
+        manifest_path = "",
+        gem_manifest_path = ""):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
     if ctx.attr.ruby != None:
         toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
@@ -150,6 +151,7 @@ def generate_rb_binary_script(
             "{rlocation_function}": rlocation_function,
             "{locate_binary_in_runfiles}": locate_binary_in_runfiles,
             "{manifest_path}": manifest_path,
+            "{gem_manifest_path}": gem_manifest_path,
             "{rules_ruby_setup}": _to_rlocation_path(_get_setup_file(ctx)),
             "{bazel_workspace}": ctx.workspace_name,
         },
@@ -271,13 +273,30 @@ def rb_binary_impl(ctx):
     # Bytecode compilation support
     manifest = _write_bytecode_manifest_file(ctx, transitive_deps)
 
+    # Check for gem bytecode from bundle
+    gem_manifest_path = ""
+    gem_bytecode_files = []
+    if ctx.attr._compile_bytecode[BuildSettingInfo].value:
+        for dep in transitive_deps.to_list():
+            if BundlerInfo in dep:
+                # Check for gem bytecode manifest
+                for file in dep.files.to_list():
+                    if file.basename.endswith("_gems_bytecode_manifest.json"):
+                        gem_manifest_path = paths.join(
+                            ctx.workspace_name,
+                            _to_rlocation_path(file),
+                        )
+                        gem_bytecode_files.append(file)
+                    elif file.basename.endswith("_gems_bytecode"):
+                        gem_bytecode_files.append(file)
+
     bundle_env = get_bundle_env(ctx.attr.env, ctx.attr.deps)
     env.update(bundle_env)
     env.update(ruby_toolchain.env)
     env.update(ctx.attr.env)
 
     # Add bytecode files and manifest to runfiles
-    runfiles_files = tools + manifest.bytecode_files
+    runfiles_files = tools + manifest.bytecode_files + gem_bytecode_files
     if manifest.file:
         runfiles_files.append(manifest.file)
 
@@ -309,6 +328,7 @@ def rb_binary_impl(ctx):
         env = env,
         java_bin = java_bin,
         manifest_path = manifest.path,
+        gem_manifest_path = gem_manifest_path,
     )
 
     return [
