@@ -2,13 +2,19 @@
 
 load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 load("//ruby/private:bundle_fetch.bzl", "BINSTUBS_LOCATION")
-load("//ruby/private:providers.bzl", "BundlerInfo", "GemInfo", "RubyBytecodeInfo", "RubyFilesInfo")
+load("//ruby/private:providers.bzl", "BundlerInfo", "GemBytecodeInfo", "GemInfo", "RubyFilesInfo")
 load(
     "//ruby/private:utils.bzl",
     _convert_env_to_script = "convert_env_to_script",
     _is_windows = "is_windows",
     _normalize_path = "normalize_path",
 )
+
+def _new_gem_bytecode_info(files = [], provider = None):
+    return struct(
+        files = files,
+        provider = provider,
+    )
 
 def _compile_gem_bytecode(ctx, bundle_path, toolchain):
     """Compile all .rb files in bundle gems to bytecode.
@@ -24,12 +30,18 @@ def _compile_gem_bytecode(ctx, bundle_path, toolchain):
             bytecode_dir: Directory containing all bytecode files
             manifest_file: JSON manifest file
     """
+    if not ctx.attr._compile_bytecode[BuildSettingInfo].value:
+        return _new_gem_bytecode_info()
 
     # Declare output directory for bytecode files
-    bytecode_dir = ctx.actions.declare_directory("{}_gems_bytecode".format(ctx.label.name))
-
     # Declare manifest file
-    manifest_file = ctx.actions.declare_file("{}_gems_bytecode_manifest.json".format(ctx.label.name))
+    bytecode_dir = ctx.actions.declare_directory("{}_gems_bytecode".format(
+        ctx.label.name,
+    ))
+    manifest_file = ctx.actions.declare_file(
+        "{}_gems_bytecode_manifest.json".format(ctx.label.name),
+    )
+    outputs = [bytecode_dir, manifest_file]
 
     # Run compile_gems.rb script
     ctx.actions.run(
@@ -41,14 +53,17 @@ def _compile_gem_bytecode(ctx, bundle_path, toolchain):
             manifest_file.path,
         ],
         inputs = [bundle_path, ctx.file._compile_gems_script],
-        outputs = [bytecode_dir, manifest_file],
+        outputs = outputs,
         mnemonic = "CompileGems",
         progress_message = "Compiling gem bytecode for %{label}",
     )
-
-    return struct(
-        bytecode_dir = bytecode_dir,
+    provider = GemBytecodeInfo(
         manifest_file = manifest_file,
+    )
+
+    return _new_gem_bytecode_info(
+        files = outputs,
+        provider = provider,
     )
 
 def _rb_bundle_install_impl(ctx):
@@ -121,7 +136,10 @@ def _rb_bundle_install_impl(ctx):
 
     ctx.actions.run(
         executable = script,
-        inputs = depset([ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs + ctx.files.gems),
+        inputs = depset([
+            ctx.file.gemfile,
+            ctx.file.gemfile_lock,
+        ] + ctx.files.srcs + ctx.files.gems),
         outputs = [binstubs, bundle_path],
         mnemonic = "BundleInstall",
         progress_message = "Running bundle install (%{label})",
@@ -129,15 +147,16 @@ def _rb_bundle_install_impl(ctx):
         use_default_shell_env = True,
     )
 
+    gem_bytecode_info = _compile_gem_bytecode(ctx, bundle_path, toolchain)
+
     files = [
         ctx.file.gemfile,
         ctx.file.gemfile_lock,
         binstubs,
         bundle_path,
-    ] + ctx.files.srcs
+    ] + ctx.files.srcs + gem_bytecode_info.files
 
     # Compile gem bytecode if enabled
-    bytecode_enabled = ctx.attr._compile_bytecode[BuildSettingInfo].value
     providers = [
         DefaultInfo(
             files = depset(files),
@@ -145,7 +164,9 @@ def _rb_bundle_install_impl(ctx):
         ),
         RubyFilesInfo(
             binary = None,
-            transitive_srcs = depset([ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs),
+            transitive_srcs = depset(
+                [ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs,
+            ),
             transitive_deps = depset(),
             transitive_data = depset(),
             bundle_env = {},
@@ -157,27 +178,8 @@ def _rb_bundle_install_impl(ctx):
             path = bundle_path,
         ),
     ]
-
-    if bytecode_enabled:
-        compile_result = _compile_gem_bytecode(ctx, bundle_path, toolchain)
-
-        # Add bytecode files to outputs
-        files.extend([compile_result.bytecode_dir, compile_result.manifest_file])
-
-        # For now, we'll create the mappings dict in a follow-up action
-        # The compile_gems.rb script outputs the manifest which rb_binary will use
-        providers.append(
-            RubyBytecodeInfo(
-                mappings = {},
-                transitive_mappings = {},
-            ),
-        )
-
-        # Update DefaultInfo to include bytecode files
-        providers[0] = DefaultInfo(
-            files = depset(files),
-            runfiles = ctx.runfiles(files),
-        )
+    if gem_bytecode_info.provider:
+        providers.append(gem_bytecode_info.provider)
 
     return providers
 

@@ -111,6 +111,7 @@ module RulesRuby
           ]
         end
 
+
         unless bytecode_runfiles_path
           stats.misses += 1
           debug { "No bytecode in manifest, returning nil" }
@@ -163,39 +164,22 @@ module RulesRuby
       end
 
       def load_manifest
-        @manifest = {}
-
-        # Load app bytecode manifest
         manifest_path = ENV["RUBY_BYTECODE_MANIFEST"]
-        if manifest_path
-          debug { "App manifest path: #{manifest_path}" }
-          load_manifest_file(manifest_path, "app")
-        end
+        debug { "Manifest path: #{manifest_path}" }
+        return unless manifest_path
 
-        # Load gem bytecode manifest
-        gem_manifest_path = ENV["RUBY_BYTECODE_GEM_MANIFEST"]
-        if gem_manifest_path
-          debug { "Gem manifest path: #{gem_manifest_path}" }
-          load_manifest_file(gem_manifest_path, "gem")
-        end
-
-        info { "Loaded manifest with #{@manifest.size} total entries" }
-      end
-
-      def load_manifest_file(path, source_type)
-        unless File.exist?(path)
-          error { "#{source_type} manifest file not found: #{path}" }
+        unless File.exist?(manifest_path)
+          error { "Manifest file not found: #{manifest_path}" }
           return
         end
 
-        manifest_data = JSON.parse(File.read(path))
-        entries = manifest_data["entries"] || manifest_data["mappings"] || {}
-        @manifest.merge!(entries)
+        manifest_data = JSON.parse(File.read(manifest_path))
+        @manifest = manifest_data["entries"] || {}
 
-        info { "Loaded #{entries.size} entries from #{source_type} manifest" }
+        info { "Loaded manifest with #{@manifest.size} entries" }
       rescue => e
-        warn "[RulesRuby::BytecodeLoader] Failed to load #{source_type} manifest: \
-        #{e.class}: #{e.message}"
+        warn "[RulesRuby::BytecodeLoader] Failed to load manifest: #{e.class}: \
+        #{e.message}"
       end
     end
 

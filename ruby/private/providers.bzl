@@ -37,6 +37,13 @@ RubyBytecodeInfo = provider(
     },
 )
 
+GemBytecodeInfo = provider(
+    "Provider for pre-compiled gem bytecode manifest",
+    fields = {
+        "manifest_file": "JSON manifest File mapping gem source paths to bytecode paths",
+    },
+)
+
 # https://bazel.build/rules/depsets
 
 def get_transitive_srcs(srcs, deps):
