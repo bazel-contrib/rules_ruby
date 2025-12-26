@@ -125,9 +125,9 @@ module Kernel
   end
 end
 
-# Patch Zeitwerk::GemInflector to normalize @version_file to absolute path
-# This fixes the issue where bytecode-embedded relative paths don't match
-# the absolute paths Zeitwerk uses when scanning directories.
+# Patch Zeitwerk classes to normalize bytecode-embedded relative paths.
+# This fixes issues where paths like ../rules_ruby++.../gem.rb don't match
+# absolute paths Zeitwerk uses when scanning directories.
 module Kernel
   alias_method :rules_ruby_original_require, :require
 
@@ -150,6 +150,34 @@ module Kernel
           # Use the patched expand_path which handles ../rules_ruby++ prefix
           normalized_root_file = File.expand_path(root_file)
           rules_ruby_original_initialize(normalized_root_file)
+        end
+      end
+    end
+
+    # Patch GemLoader to normalize root_file before initialize
+    # This ensures @root_dir is derived from an absolute path, fixing warnings
+    # that would otherwise show relative bytecode paths
+    if path.include?("zeitwerk") && defined?(Zeitwerk::GemLoader) &&
+        !Zeitwerk::GemLoader.method_defined?(:rules_ruby_gem_loader_patched?)
+      Zeitwerk::GemLoader.class_eval do
+        def rules_ruby_gem_loader_patched?
+          true
+        end
+
+        class << self
+          alias_method :rules_ruby_original___new, :__new
+
+          def __new(root_file, namespace:, warn_on_extra_files:)
+            # Normalize root_file to absolute path BEFORE creating the loader
+            # This ensures @root_dir (set via File.dirname(root_file)) is
+            # absolute
+            normalized_root_file = File.expand_path(root_file)
+            rules_ruby_original___new(
+              normalized_root_file,
+              namespace: namespace,
+              warn_on_extra_files: warn_on_extra_files
+            )
+          end
         end
       end
     end
