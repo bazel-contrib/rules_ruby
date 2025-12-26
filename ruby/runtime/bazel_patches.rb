@@ -75,6 +75,24 @@ unless File.singleton_class.method_defined?(:rules_ruby_original_expand_path)
 
       rules_ruby_original_expand_path(path, dir)
     end
+
+    # Patch File.open to normalize relative bytecode paths to absolute paths.
+    # This fixes issues where gems use File.open(__FILE__) for feature detection
+    # (e.g., logger/log_device.rb) and the bytecode-embedded relative path
+    # doesn't exist as an actual file.
+    alias_method :rules_ruby_original_open, :open
+
+    def open(path, *args, **kwargs, &block)
+      # Normalize relative bytecode paths to absolute paths
+      # Handle Pathname objects by converting to string first
+      path = path.to_path if path.respond_to?(:to_path)
+      if path.is_a?(String) &&
+          path.match?(RULES_RUBY_GENERATED_REPO_PREFIX_REGEX)
+        path = expand_path(path)
+      end
+
+      rules_ruby_original_open(path, *args, **kwargs, &block)
+    end
   end
 end
 
