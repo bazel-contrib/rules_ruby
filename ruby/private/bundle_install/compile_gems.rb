@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "json"
 require "fileutils"
 
 # Compile all .rb files in bundle gems to bytecode
@@ -11,7 +10,7 @@ require "fileutils"
 # Arguments:
 #   bundle_path: Path to vendor/bundle directory
 #   output_dir: Directory to write .rbc files (preserving structure)
-#   manifest_output: Path to write JSON manifest of mappings
+#   manifest_output: Path to write Marshal manifest of mappings
 
 bundle_path = ARGV[0]
 output_dir = ARGV[1]
@@ -85,7 +84,7 @@ rb_files.each do |src_path|
   end
 end
 
-# Write manifest
+# Write manifest using Marshal for fast loading
 manifest = {
   "version" => 1,
   "compiled" => compiled_count,
@@ -93,7 +92,7 @@ manifest = {
   "mappings" => mappings
 }
 
-File.write(manifest_output, JSON.pretty_generate(manifest))
+File.binwrite(manifest_output, Marshal.dump(manifest))
 
 warn "[compile_gems.rb] Compiled #{compiled_count} files, " \
      "#{failed_count} failed"

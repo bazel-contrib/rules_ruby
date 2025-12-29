@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "json"
-
 module RulesRuby
   module BytecodeLoader
     class Stats
@@ -111,7 +109,6 @@ module RulesRuby
           ]
         end
 
-
         unless bytecode_runfiles_path
           stats.misses += 1
           debug { "No bytecode in manifest, returning nil" }
@@ -173,13 +170,14 @@ module RulesRuby
           return
         end
 
-        manifest_data = JSON.parse(File.read(manifest_path))
+        # Use Marshal for fast deserialization (no parsing overhead)
+        manifest_data = Marshal.load(File.binread(manifest_path))
         @manifest = manifest_data["entries"] || {}
 
         info { "Loaded manifest with #{@manifest.size} entries" }
       rescue => e
-        warn "[RulesRuby::BytecodeLoader] Failed to load manifest: #{e.class}: \
-        #{e.message}"
+        warn "[RulesRuby::BytecodeLoader] Failed to load manifest: #{e.class}: " \
+             "#{e.message}"
       end
     end
 
