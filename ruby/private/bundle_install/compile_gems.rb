@@ -1,23 +1,21 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "fileutils"
+require_relative "pack_bytecode"
 
-# Compile all .rb files in bundle gems to bytecode
+# Compile all .rb files in bundle gems to bytecode pack
 #
-# Usage: compile_gems.rb <bundle_path> <output_dir> <manifest_output>
+# Usage: compile_gems.rb <bundle_path> <output_pack>
 #
 # Arguments:
 #   bundle_path: Path to vendor/bundle directory
-#   output_dir: Directory to write .rbc files (preserving structure)
-#   manifest_output: Path to write Marshal manifest of mappings
+#   output_pack: Path to write bytecode pack file
 
 bundle_path = ARGV[0]
-output_dir = ARGV[1]
-manifest_output = ARGV[2]
+output_pack = ARGV[1]
 
-unless bundle_path && output_dir && manifest_output
-  warn "Usage: compile_gems.rb <bundle_path> <output_dir> <manifest_output>"
+unless bundle_path && output_pack
+  warn "Usage: compile_gems.rb <bundle_path> <output_pack>"
   exit 1
 end
 
@@ -32,7 +30,7 @@ rb_files = Dir.glob(File.join(gems_dir, "**", "*.rb"))
 
 warn "[compile_gems.rb] Found #{rb_files.size} Ruby files in gems"
 
-mappings = {}
+packer = BytecodePacker.new(output_pack)
 compiled_count = 0
 failed_count = 0
 
@@ -52,51 +50,29 @@ rb_files.each do |src_path|
   # Calculate the src key for the mapping
   src_key = strip_external_prefix(src_path)
 
-  # Calculate relative path from bundle_path
-  out_rel_path = src_path.delete_prefix("#{bundle_path}/") + "c"
-  # out_rel_path = src_key + "c"
-
-  # Create output path with .rbc extension
-  out_path = File.join(output_dir, out_rel_path)
-  out_value = strip_external_prefix(out_path)
-
-  # Ensure output directory exists
-  FileUtils.mkdir_p(File.dirname(out_path))
-
   begin
     # Compile to bytecode with custom embedded path (without bazel-out prefix)
     # This ensures __FILE__ resolves correctly at runtime in runfiles
     source = File.read(src_path)
     embed_path = embed_path_for_bytecode(src_path)
     iseq = RubyVM::InstructionSequence.compile(source, embed_path)
-    File.binwrite(out_path, iseq.to_binary)
 
-    # Store mapping (relative paths within bundle)
-    mappings[src_key] = out_value
+    # Add to pack
+    packer.add(src_key, iseq.to_binary)
     compiled_count += 1
   rescue SyntaxError
     # Skip files with syntax errors (test fixtures, examples, etc.)
     failed_count += 1
   rescue => e
-    warn "[compile_gems.rb] Failed to compile \
-    #{out_rel_path}: #{e.class} - #{e.message}"
+    warn "[compile_gems.rb] Failed to compile #{src_key}: #{e.class} - #{e.message}"
     failed_count += 1
   end
 end
 
-# Write manifest using Marshal for fast loading
-manifest = {
-  "version" => 1,
-  "compiled" => compiled_count,
-  "failed" => failed_count,
-  "mappings" => mappings
-}
+packer.write
 
-File.binwrite(manifest_output, Marshal.dump(manifest))
-
-warn "[compile_gems.rb] Compiled #{compiled_count} files, " \
-     "#{failed_count} failed"
-warn "[compile_gems.rb] Manifest written to #{manifest_output}"
+warn "[compile_gems.rb] Compiled #{compiled_count} files, #{failed_count} failed"
+warn "[compile_gems.rb] Pack written to #{output_pack}"
 
 # Only exit with error if no files were successfully compiled
 # Some gems include test fixtures or example code with syntax errors

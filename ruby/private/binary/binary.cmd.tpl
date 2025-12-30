@@ -28,6 +28,11 @@ if defined TEST_TMPDIR (
 :: Set environment variables.
 {env}
 
+:: Set bytecode pack path if available.
+if "{pack_path}" neq "" (
+  call :rlocation "{pack_path}" RUBY_BYTECODE_PACK
+)
+
 :: Find location of Bundle path in runfiles.
 if "{bundler_command}" neq "" (
   call :rlocation "!BUNDLE_GEMFILE!" BUNDLE_GEMFILE

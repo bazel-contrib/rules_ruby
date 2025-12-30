@@ -17,7 +17,7 @@ def _new_gem_bytecode_info(files = [], provider = None):
     )
 
 def _compile_gem_bytecode(ctx, bundle_path, toolchain):
-    """Compile all .rb files in bundle gems to bytecode.
+    """Compile all .rb files in bundle gems to a bytecode pack.
 
     Args:
         ctx: Rule context
@@ -26,22 +26,17 @@ def _compile_gem_bytecode(ctx, bundle_path, toolchain):
 
     Returns:
         struct with:
-            mappings: Dict mapping source path (string) to bytecode File
-            bytecode_dir: Directory containing all bytecode files
-            manifest_file: JSON manifest file
+            files: List of output files (pack file)
+            provider: GemBytecodeInfo provider
     """
     if not ctx.attr._compile_bytecode[BuildSettingInfo].value:
         return _new_gem_bytecode_info()
 
-    # Declare output directory for bytecode files
-    # Declare manifest file
-    bytecode_dir = ctx.actions.declare_directory("{}_gems_bytecode".format(
-        ctx.label.name,
-    ))
-    manifest_file = ctx.actions.declare_file(
-        "{}_gems_bytecode_manifest.json".format(ctx.label.name),
+    # Declare output pack file
+    pack_file = ctx.actions.declare_file(
+        "{}_gems_bytecode.pack".format(ctx.label.name),
     )
-    outputs = [bytecode_dir, manifest_file]
+    outputs = [pack_file]
 
     # Run compile_gems.rb script
     ctx.actions.run(
@@ -49,16 +44,15 @@ def _compile_gem_bytecode(ctx, bundle_path, toolchain):
         arguments = [
             ctx.file._compile_gems_script.path,
             bundle_path.path,
-            bytecode_dir.path,
-            manifest_file.path,
+            pack_file.path,
         ],
-        inputs = [bundle_path, ctx.file._compile_gems_script],
+        inputs = [bundle_path, ctx.file._compile_gems_script, ctx.file._pack_bytecode_script],
         outputs = outputs,
         mnemonic = "CompileGems",
         progress_message = "Compiling gem bytecode for %{label}",
     )
     provider = GemBytecodeInfo(
-        manifest_file = manifest_file,
+        pack_file = pack_file,
     )
 
     return _new_gem_bytecode_info(
@@ -223,6 +217,10 @@ rb_bundle_install = rule(
         "_compile_gems_script": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//ruby/private/bundle_install:compile_gems.rb",
+        ),
+        "_pack_bytecode_script": attr.label(
+            allow_single_file = True,
+            default = "@rules_ruby//ruby/private/bundle_install:pack_bytecode.rb",
         ),
         "_compile_bytecode": attr.label(
             default = "@rules_ruby//ruby:compile_bytecode",

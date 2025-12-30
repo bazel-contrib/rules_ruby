@@ -18,6 +18,9 @@ rb_library_wo_toolchains(
 
 rb_library_wo_toolchains(
     name = "bytecode_loader",
-    srcs = ["bytecode_loader.rb"],
+    srcs = [
+        "bytecode_loader.rb",
+        "pack_reader.rb",
+    ],
     visibility = ["//visibility:public"],
 )

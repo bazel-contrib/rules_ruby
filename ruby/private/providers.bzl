@@ -38,9 +38,9 @@ RubyBytecodeInfo = provider(
 )
 
 GemBytecodeInfo = provider(
-    "Provider for pre-compiled gem bytecode manifest",
+    "Provider for pre-compiled gem bytecode pack",
     fields = {
-        "manifest_file": "JSON manifest File mapping gem source paths to bytecode paths",
+        "pack_file": "Bytecode pack File containing all compiled gem bytecode",
     },
 )
 

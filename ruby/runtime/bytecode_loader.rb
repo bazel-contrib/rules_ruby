@@ -1,14 +1,20 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require_relative "pack_reader"
+
 module RulesRuby
   module BytecodeLoader
     class Stats
       attr_accessor :hits, :misses
+      attr_accessor :pack_load_time, :total_lookup_time, :total_iseq_load_time
 
       def initialize(hits = 0, misses = 0)
         @hits = hits
         @misses = misses
+        @pack_load_time = 0.0
+        @total_lookup_time = 0.0
+        @total_iseq_load_time = 0.0
       end
 
       def total
@@ -20,6 +26,10 @@ module RulesRuby
         return nil if total.zero?
 
         (hits.to_f / total * 100).round(2)
+      end
+
+      def total_bytecode_time
+        @total_lookup_time + @total_iseq_load_time
       end
     end
 
@@ -35,7 +45,7 @@ module RulesRuby
 
         @enabled = true
         setup_logging
-        load_manifest
+        load_pack
 
         RubyVM::InstructionSequence.singleton_class.prepend(
           InstructionSequenceMixin
@@ -76,9 +86,24 @@ module RulesRuby
           info { "No bytecode was loaded." }
         else
           info do
-            "Final stats: #{stats.hits} hits, #{stats.misses} misses " \
-              "(#{stats.hit_rate}% hit rate)"
+            [
+              "Final stats: #{stats.hits} hits, #{stats.misses} misses (#{stats.hit_rate}% hit rate)",
+              "  Pack load time:  #{format_time(stats.pack_load_time)}",
+              "  Index lookups:   #{format_time(stats.total_lookup_time)} (#{stats.total} lookups)",
+              "  ISeq loads:      #{format_time(stats.total_iseq_load_time)} (#{stats.hits} loads)",
+              "  Total bytecode:  #{format_time(stats.total_bytecode_time)}"
+            ]
           end
+        end
+      end
+
+      def format_time(seconds)
+        if seconds < 0.001
+          "%.3f µs" % (seconds * 1_000_000)
+        elsif seconds < 1
+          "%.3f ms" % (seconds * 1000)
+        else
+          "%.3f s" % seconds
         end
       end
 
@@ -90,50 +115,43 @@ module RulesRuby
         @runfiles_prefix ||= "#{runfiles_dir}/"
       end
 
-      def manifest
-        @manifest ||= {}
+      def pack_reader
+        @pack_reader
       end
 
       def load(path)
+        return nil unless @pack_reader
+
         # Normalize the path for the lookup.
         path = path.delete_prefix(runfiles_prefix)
 
-        # Look up bytecode path in manifest
-        bytecode_runfiles_path = manifest[path]
+        # Time the index lookup
+        lookup_start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        bytecode = @pack_reader.get(path)
+        lookup_end = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        stats.total_lookup_time += (lookup_end - lookup_start)
 
         debug do
           [
             "-----",
             "Path: #{path}",
-            "Manifest lookup: #{bytecode_runfiles_path || "not found"}"
+            "Pack lookup: #{bytecode ? "found (#{bytecode.bytesize} bytes)" : "not found"}"
           ]
         end
 
-        unless bytecode_runfiles_path
+        unless bytecode
           stats.misses += 1
-          debug { "No bytecode in manifest, returning nil" }
-          return nil
-        end
-
-        # Resolve bytecode path using runfiles
-        unless runfiles_dir
-          stats.misses += 1
-          debug { "RUNFILES_DIR not set, returning nil" }
-          return nil
-        end
-
-        bytecode_path = File.join(runfiles_dir, bytecode_runfiles_path)
-
-        unless File.exist?(bytecode_path)
-          stats.misses += 1
-          debug { "Bytecode file not found at #{bytecode_path}, returning nil" }
           return nil
         end
 
         stats.hits += 1
-        result = RubyVM::InstructionSequence.load_from_binary(
-          File.binread(bytecode_path)
-        )
+
+        # Time the ISeq load
+        iseq_start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        result = RubyVM::InstructionSequence.load_from_binary(bytecode)
+        iseq_end = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        stats.total_iseq_load_time += (iseq_end - iseq_start)
+
         debug { "Successfully loaded bytecode: #{result.class}" }
 
         result
@@ -160,24 +178,24 @@ module RulesRuby
         @log_levels = ALL_LOG_LEVELS[log_level_idx..]
       end
 
-      def load_manifest
-        manifest_path = ENV["RUBY_BYTECODE_MANIFEST"]
-        debug { "Manifest path: #{manifest_path}" }
-        return unless manifest_path
+      def load_pack
+        pack_path = ENV["RUBY_BYTECODE_PACK"]
+        debug { "Pack path: #{pack_path}" }
+        return unless pack_path
 
-        unless File.exist?(manifest_path)
-          error { "Manifest file not found: #{manifest_path}" }
+        unless File.exist?(pack_path)
+          error { "Pack file not found: #{pack_path}" }
           return
         end
 
-        # Use Marshal for fast deserialization (no parsing overhead)
-        manifest_data = Marshal.load(File.binread(manifest_path))
-        @manifest = manifest_data["entries"] || {}
+        load_start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        @pack_reader = BytecodePackReader.new(pack_path)
+        load_end = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        stats.pack_load_time = load_end - load_start
 
-        info { "Loaded manifest with #{@manifest.size} entries" }
+        info { "Loaded pack with #{@pack_reader.size} entries (mmap: #{@pack_reader.instance_variable_get(:@use_mmap)}) in #{format_time(stats.pack_load_time)}" }
       rescue => e
-        warn "[RulesRuby::BytecodeLoader] Failed to load manifest: #{e.class}: " \
-             "#{e.message}"
+        warn "[RulesRuby::BytecodeLoader] Failed to load pack: #{e.class}: #{e.message}"
       end
     end
 
@@ -192,8 +210,8 @@ module RulesRuby
   end
 end
 
-# Auto-enable if manifest is present
-if ENV["RUBY_BYTECODE_MANIFEST"]
+# Auto-enable if pack is present
+if ENV["RUBY_BYTECODE_PACK"]
   RulesRuby::BytecodeLoader.enable!
 
   # Print statistics at program exit

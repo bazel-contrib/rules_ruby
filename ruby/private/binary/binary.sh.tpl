@@ -61,9 +61,9 @@ fi
 # Set environment variables.
 {env}
 
-# Set bytecode manifest path if available.
-if [ -n "{manifest_path}" ]; then
-  export RUBY_BYTECODE_MANIFEST=$(rlocation "{manifest_path}")
+# Set bytecode pack path if available.
+if [ -n "{pack_path}" ]; then
+  export RUBY_BYTECODE_PACK=$(rlocation "{pack_path}")
 fi
 
 # Find location of Bundle path in runfiles.

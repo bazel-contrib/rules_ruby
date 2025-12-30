@@ -2,7 +2,6 @@
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
-load("//ruby/private:compile.bzl", "to_runfiles_path")
 load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
 load(
     "//ruby/private:providers.bzl",
@@ -77,9 +76,13 @@ List of environment variable names to be inherited by the test runner.\
         allow_files = True,
         default = "@rules_ruby//ruby/runtime:setup",
     ),
-    "_merge_manifests_script": attr.label(
+    "_merge_packs_script": attr.label(
         allow_single_file = True,
-        default = "@rules_ruby//ruby/private/binary:merge_manifests.rb",
+        default = "@rules_ruby//ruby/private/binary:merge_packs.rb",
+    ),
+    "_pack_bytecode_script": attr.label(
+        allow_single_file = True,
+        default = "@rules_ruby//ruby/private/bundle_install:pack_bytecode.rb",
     ),
 }
 
@@ -91,7 +94,7 @@ def generate_rb_binary_script(
         args = [],
         env = {},
         java_bin = "",
-        manifest_path = ""):
+        pack_path = ""):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
     if ctx.attr.ruby != None:
         toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
@@ -154,7 +157,7 @@ def generate_rb_binary_script(
             "{java_bin}": java_bin,
             "{rlocation_function}": rlocation_function,
             "{locate_binary_in_runfiles}": locate_binary_in_runfiles,
-            "{manifest_path}": manifest_path,
+            "{pack_path}": pack_path,
             "{rules_ruby_setup}": _to_rlocation_path(_get_setup_file(ctx)),
             "{bazel_workspace}": ctx.workspace_name,
         },
@@ -170,84 +173,186 @@ def _get_setup_file(ctx):
             return file
     fail("Expected to find `setup.rb` from _setup attribute.")
 
-def _new_manifest_info(file = None, path = "", bytecode_files = []):
+def _new_pack_info(file = None, path = "", bytecode_files = []):
     return struct(
         file = file,
         path = path,
         bytecode_files = bytecode_files,
     )
 
-def _write_bytecode_manifest_file(
+def _write_bytecode_pack_file(
         ctx,
         transitive_deps,
-        gem_manifest_file = None):
+        gem_pack_file = None):
     if not ctx.attr._compile_bytecode[BuildSettingInfo].value:
-        return _new_manifest_info()
+        return _new_pack_info()
 
-    # Collect all bytecode mappings from dependencies
+    # Collect all bytecode mappings from dependencies (app bytecode)
     all_mappings = {}
     for dep in transitive_deps.to_list():
         if RubyBytecodeInfo in dep:
             all_mappings.update(dep[RubyBytecodeInfo].transitive_mappings)
 
-    # If no app mappings and no gem manifest, return empty
-    if len(all_mappings) == 0 and not gem_manifest_file:
-        return _new_manifest_info()
+    # If no app mappings and no gem pack, return empty
+    if len(all_mappings) == 0 and not gem_pack_file:
+        return _new_pack_info()
 
-    # Generate app manifest JSON
-    manifest_content = {
-        "version": 1,
-        "entries": {},
-    }
+    toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
-    # Convert File objects to runfiles paths for the manifest
-    bytecode_files = []
-    for source_path, bytecode_file in all_mappings.items():
-        bytecode_runfiles_path = to_runfiles_path(ctx, bytecode_file)
-        manifest_content["entries"][source_path] = bytecode_runfiles_path
-        bytecode_files.append(bytecode_file)
+    # Collect bytecode files from app mappings
+    bytecode_files = list(all_mappings.values())
 
-    # Write app manifest file
-    app_manifest_file = ctx.actions.declare_file(
-        "{}_app_bytecode_manifest.json".format(ctx.label.name),
-    )
-    ctx.actions.write(
-        output = app_manifest_file,
-        content = json.encode_indent(manifest_content, indent = "  "),
-    )
-
-    # If gem manifest exists, merge it with app manifest
-    if gem_manifest_file:
-        merged_manifest_file = ctx.actions.declare_file(
-            "{}_bytecode_manifest.json".format(ctx.label.name),
+    # If we have app bytecode, create an app pack first
+    app_pack_file = None
+    if len(all_mappings) > 0:
+        app_pack_file = ctx.actions.declare_file(
+            "{}_app_bytecode.pack".format(ctx.label.name),
         )
 
-        toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
+        # Create app pack using a simple script that reads the bytecode files
+        # and writes them to a pack
+        app_pack_script = ctx.actions.declare_file(
+            "{}_create_app_pack.rb".format(ctx.label.name),
+        )
+
+        # Generate script content to create app pack
+        script_lines = [
+            "#!/usr/bin/env ruby",
+            "# frozen_string_literal: true",
+            "",
+            "require_relative '../../bundle_install/pack_bytecode'",
+            "",
+            "packer = BytecodePacker.new(ARGV[0])",
+        ]
+        for source_path, bytecode_file in all_mappings.items():
+            script_lines.append("packer.add({}, File.binread(ARGV[{}]))".format(
+                repr(source_path),
+                len(script_lines) - 5,  # Calculate argument index
+            ))
+        script_lines.append("packer.write")
+
+        # Actually, this approach is complex. Let's simplify:
+        # If we have both app and gem bytecode, merge them
+        # If only gem bytecode, use it directly
+        # If only app bytecode, create a pack from the files
+
+        # For now, let's use a simpler approach: create a Ruby script that
+        # reads bytecode files and creates a pack
+
+        # Simplified: Create pack script inline
+        pack_entries = []
+        for source_path, bytecode_file in all_mappings.items():
+            pack_entries.append((source_path, bytecode_file))
+
+        # Inline the BytecodePacker class to make the script self-contained
+        script_content = """#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+class BytecodePacker
+  MAGIC = "RRBC"
+  VERSION = 1
+  HEADER_SIZE = 32
+
+  def initialize(output_path)
+    @output_path = output_path
+    @entries = {}
+  end
+
+  def add(path, bytecode)
+    @entries[path] = bytecode
+  end
+
+  def write
+    File.open(@output_path, "wb") do |f|
+      f.write("\\0" * HEADER_SIZE)
+      index = {}
+      @entries.each do |path, bytecode|
+        offset = f.pos
+        f.write(bytecode)
+        index[path] = [offset, bytecode.bytesize]
+      end
+      index_offset = f.pos
+      index_data = Marshal.dump(index)
+      f.write(index_data)
+      index_size = index_data.bytesize
+      f.seek(0)
+      f.write(MAGIC)
+      f.write([VERSION].pack("L<"))
+      f.write([index_offset].pack("Q<"))
+      f.write([index_size].pack("Q<"))
+    end
+  end
+end
+
+packer = BytecodePacker.new(ARGV[0])
+"""
+        arg_idx = 1
+        for source_path, _ in pack_entries:
+            script_content += "packer.add({}, File.binread(ARGV[{}]))\n".format(
+                repr(source_path),
+                arg_idx,
+            )
+            arg_idx += 1
+        script_content += "packer.write\n"
+
+        ctx.actions.write(
+            output = app_pack_script,
+            content = script_content,
+        )
+
+        # Build arguments list: output_path, then all bytecode file paths
+        args = [app_pack_file.path]
+        for _, bytecode_file in pack_entries:
+            args.append(bytecode_file.path)
+
+        ctx.actions.run(
+            executable = toolchain.ruby,
+            arguments = [app_pack_script.path] + args,
+            inputs = [app_pack_script] + bytecode_files,
+            outputs = [app_pack_file],
+            mnemonic = "CreateAppBytecodePack",
+            progress_message = "Creating app bytecode pack for %{label}",
+        )
+
+    # Determine final pack file
+    if app_pack_file and gem_pack_file:
+        # Merge both packs
+        merged_pack_file = ctx.actions.declare_file(
+            "{}_bytecode.pack".format(ctx.label.name),
+        )
+
         ctx.actions.run(
             executable = toolchain.ruby,
             arguments = [
-                ctx.file._merge_manifests_script.path,
-                app_manifest_file.path,
-                gem_manifest_file.path,
-                merged_manifest_file.path,
+                ctx.file._merge_packs_script.path,
+                merged_pack_file.path,
+                gem_pack_file.path,
+                app_pack_file.path,
             ],
-            inputs = [app_manifest_file, gem_manifest_file, ctx.file._merge_manifests_script],
-            outputs = [merged_manifest_file],
-            mnemonic = "MergeBytecodeManifests",
-            progress_message = "Merging bytecode manifests for %{label}",
+            inputs = [
+                gem_pack_file,
+                app_pack_file,
+                ctx.file._merge_packs_script,
+                ctx.file._pack_bytecode_script,
+            ],
+            outputs = [merged_pack_file],
+            mnemonic = "MergeBytecodePacks",
+            progress_message = "Merging bytecode packs for %{label}",
         )
 
-        final_manifest_file = merged_manifest_file
+        final_pack_file = merged_pack_file
+    elif gem_pack_file:
+        final_pack_file = gem_pack_file
     else:
-        final_manifest_file = app_manifest_file
+        final_pack_file = app_pack_file
 
-    manifest_path = paths.join(
+    pack_path = paths.join(
         ctx.workspace_name,
-        _to_rlocation_path(final_manifest_file),
+        _to_rlocation_path(final_pack_file),
     )
-    return _new_manifest_info(
-        file = final_manifest_file,
-        path = manifest_path,
+    return _new_pack_info(
+        file = final_pack_file,
+        path = pack_path,
         bytecode_files = bytecode_files,
     )
 
@@ -276,7 +381,7 @@ def rb_binary_impl(ctx):
         tools.extend(java_toolchain.java_runtime.files.to_list())
         java_bin = java_toolchain.java_runtime.java_executable_runfiles_path[3:]
 
-    gem_manifest_file = None
+    gem_pack_file = None
     compile_bytecode = ctx.attr._compile_bytecode[BuildSettingInfo].value
     for dep in transitive_deps.to_list():
         # TODO: Remove workspace name check together with `rb_bundle()`
@@ -297,24 +402,24 @@ def rb_binary_impl(ctx):
 
             # Check for gem bytecode via GemBytecodeInfo provider
             if compile_bytecode and GemBytecodeInfo in dep:
-                gem_manifest_file = dep[GemBytecodeInfo].manifest_file
+                gem_pack_file = dep[GemBytecodeInfo].pack_file
 
     if len(bundler_srcs) > 0:
         transitive_srcs = depset(bundler_srcs, transitive = [transitive_srcs])
 
-    # Bytecode compilation support (merges gem manifest if present)
-    manifest = _write_bytecode_manifest_file(ctx, transitive_deps, gem_manifest_file)
+    # Bytecode compilation support (merges gem pack if present)
+    pack = _write_bytecode_pack_file(ctx, transitive_deps, gem_pack_file)
 
     bundle_env = get_bundle_env(ctx.attr.env, ctx.attr.deps)
     env.update(bundle_env)
     env.update(ruby_toolchain.env)
     env.update(ctx.attr.env)
 
-    # Add bytecode files and manifest to runfiles
+    # Add bytecode files and pack to runfiles
     # Gem bytecode files are automatically included via DefaultInfo propagation
-    runfiles_files = tools + manifest.bytecode_files
-    if manifest.file:
-        runfiles_files.append(manifest.file)
+    runfiles_files = tools + pack.bytecode_files
+    if pack.file:
+        runfiles_files.append(pack.file)
 
     runfiles = ctx.runfiles(
         runfiles_files,
@@ -343,7 +448,7 @@ def rb_binary_impl(ctx):
         bundler = bundler,
         env = env,
         java_bin = java_bin,
-        manifest_path = manifest.path,
+        pack_path = pack.path,
     )
 
     return [
