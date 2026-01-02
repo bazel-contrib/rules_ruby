@@ -347,6 +347,10 @@ Supported platforms: {supported}
         "Downloading rv-ruby %s for %s" % (ruby_version, platform_key),
     )
 
+    # rv-ruby releases have a nested directory structure:
+    # rv-ruby@<version>/<version>/bin/ruby
+    # rv-ruby@<version>/<version>/lib/...
+    # Strip the outer directories to get the Ruby installation at dist/
     repository_ctx.download_and_extract(
         url = _RV_RUBY_URL.format(
             release = rv_version,
