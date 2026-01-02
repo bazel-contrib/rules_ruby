@@ -22,6 +22,7 @@ ruby_bundle_fetch = tag_class(attrs = {
     "gem_checksums": attr.string_dict(),
     "bundler_remote": attr.string(default = "https://rubygems.org/"),
     "bundler_checksums": attr.string_dict(),
+    "excluded_gems": attr.string_list(default = []),
 })
 
 ruby_toolchain = tag_class(attrs = {
@@ -30,6 +31,10 @@ ruby_toolchain = tag_class(attrs = {
     "version_file": attr.label(doc = "File to read Ruby version from."),
     "ruby_build_version": attr.string(doc = "Version of ruby-build to use.", default = RUBY_BUILD_VERSION),
     "msys2_packages": attr.string_list(doc = "Extra MSYS2 packages to install.", default = ["libyaml"]),
+    "checksums": attr.string_dict(
+        doc = "Platform checksums for rv-ruby downloads. Keys: linux-x86_64, linux-arm64, macos-arm64, macos-x86_64.",
+        default = {},
+    ),
 })
 
 def _ruby_module_extension(module_ctx):
@@ -60,6 +65,7 @@ def _ruby_module_extension(module_ctx):
                 gem_checksums = bundle_fetch.gem_checksums,
                 bundler_remote = bundle_fetch.bundler_remote,
                 bundler_checksums = bundle_fetch.bundler_checksums,
+                excluded_gems = bundle_fetch.excluded_gems,
             )
             if module_ctx.is_dev_dependency(bundle_fetch):
                 direct_dev_dep_names.append(bundle_fetch.name)
@@ -88,6 +94,7 @@ def _ruby_module_extension(module_ctx):
                     toolchain.version_file,
                     toolchain.msys2_packages,
                     toolchain.ruby_build_version,
+                    toolchain.checksums,
                 )
                 if module_ctx.is_dev_dependency(toolchain):
                     direct_dev_dep_names.append(toolchain.name)
@@ -96,13 +103,14 @@ def _ruby_module_extension(module_ctx):
                     direct_dep_names.append(toolchain.name)
                     direct_dep_names.append("%s_toolchains" % toolchain.name)
 
-    for name, (version, version_file, msys2_packages, ruby_build_version) in registrations.items():
+    for name, (version, version_file, msys2_packages, ruby_build_version, checksums) in registrations.items():
         rb_register_toolchains(
             name = name,
             version = version,
             version_file = version_file,
             msys2_packages = msys2_packages,
             ruby_build_version = ruby_build_version,
+            checksums = checksums,
             register = False,
         )
 

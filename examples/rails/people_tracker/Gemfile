@@ -2,6 +2,13 @@ source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 8.0.2", ">= 8.0.2.1"
+
+# Pin minitest to 5.x - minitest 6.x has breaking API changes incompatible with Rails 8.0.x
+gem "minitest", "~> 5.25"
+
+# Pin psych to the version bundled with rv-ruby 3.4.8.
+# This gem should NOT be downloaded - it's a default gem included with Ruby.
+gem "psych", "5.2.2"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
 # Use sqlite3 as the database for Active Record

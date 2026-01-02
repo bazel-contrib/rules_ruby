@@ -5,6 +5,15 @@ RUBY_BUILD_VERSION = "20250925"
 _JRUBY_BINARY_URL = "https://repo1.maven.org/maven2/org/jruby/jruby-dist/{version}/jruby-dist-{version}-bin.tar.gz"
 _RUBY_BUILD_URL = "https://github.com/rbenv/ruby-build/archive/refs/tags/v{version}.tar.gz"
 _RUBY_INSTALLER_URL = "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-{version}-1/rubyinstaller-devkit-{version}-1-x64.exe"
+_RV_RUBY_URL = "https://github.com/spinel-coop/rv-ruby/releases/download/{release}/ruby-{version}.{platform}.tar.gz"
+
+# Map Bazel OS/arch to rv-ruby artifact naming
+_RV_RUBY_PLATFORMS = {
+    "linux-x86_64": "x86_64_linux",
+    "linux-arm64": "arm64_linux",
+    "macos-arm64": "arm64_sonoma",
+    "macos-x86_64": "ventura",
+}
 
 # Maintained JRuby versions integrity from https://repo1.maven.org/maven2/org/jruby/jruby-dist.
 # Run the following script to update the list:
@@ -95,7 +104,9 @@ def _rb_download_impl(repository_ctx):
     env = {}
     ruby_binary_name = "ruby"
     gem_binary_name = "gem"
-    if version.startswith("jruby"):
+    if version.startswith("rv-"):
+        _install_rv_ruby(repository_ctx, version.removeprefix("rv-"), repository_ctx.attr.checksums)
+    elif version.startswith("jruby"):
         _install_jruby(repository_ctx, version)
 
         engine = "jruby"
@@ -260,6 +271,67 @@ def _install_via_ruby_build(repository_ctx, version):
 
     repository_ctx.delete("ruby-build")
 
+def _install_rv_ruby(repository_ctx, version, checksums):
+    """Install prebuilt Ruby from rv-ruby project.
+
+    Args:
+        repository_ctx: Repository context
+        version: Version string in format "{release}-{ruby_version}" (rv- prefix already stripped)
+        checksums: Dict mapping platform keys to SHA256 checksums
+    """
+
+    # Parse version: format is "{release}-{ruby_version}" (e.g., "20251225-3.4.5")
+    parts = version.split("-", 1)
+    if len(parts) != 2:
+        fail("Invalid rv-ruby version format. Expected 'rv-{release}-{ruby_version}', got 'rv-%s'" % version)
+    release = parts[0]
+    ruby_version = parts[1]
+
+    # Detect platform
+    os_name = repository_ctx.os.name
+    if os_name.startswith("mac"):
+        os_key = "macos"
+    elif os_name.startswith("linux"):
+        os_key = "linux"
+    else:
+        fail("rv-ruby does not support platform: " + os_name)
+
+    # Detect architecture
+    arch_result = repository_ctx.execute(["uname", "-m"])
+    arch = arch_result.stdout.strip()
+    if arch == "x86_64":
+        arch_key = "x86_64"
+    elif arch in ["arm64", "aarch64"]:
+        arch_key = "arm64"
+    else:
+        fail("rv-ruby does not support architecture: " + arch)
+
+    platform_key = os_key + "-" + arch_key
+
+    # Check if platform is supported by rv-ruby
+    if platform_key not in _RV_RUBY_PLATFORMS:
+        fail("rv-ruby does not support platform: " + platform_key)
+
+    rv_platform = _RV_RUBY_PLATFORMS[platform_key]
+
+    # Get checksum if provided (Bazel will warn if not provided)
+    kwargs = {}
+    if platform_key in checksums:
+        kwargs["sha256"] = checksums[platform_key]
+
+    repository_ctx.report_progress("Downloading rv-ruby %s for %s" % (ruby_version, platform_key))
+
+    repository_ctx.download_and_extract(
+        url = _RV_RUBY_URL.format(
+            release = release,
+            version = ruby_version,
+            platform = rv_platform,
+        ),
+        output = "dist/",
+        stripPrefix = "rv-ruby@{v}/{v}".format(v = ruby_version),
+        **kwargs
+    )
+
 def _symlink_system_ruby(repository_ctx):
     _symlink_system_ruby_dir("bindir", repository_ctx)
     _symlink_system_ruby_dir("libdir", repository_ctx)
@@ -313,6 +385,15 @@ Version of [ruby-build](https://github.com/rbenv/ruby-build/releases)
 to install. You normally don't need to change this, unless `version` you pass is a new one
 which isn't available in this ruby-build yet.
             """,
+        ),
+        "checksums": attr.string_dict(
+            default = {},
+            doc = """
+Platform checksums for rv-ruby downloads.
+
+Keys: linux-x86_64, linux-arm64, macos-arm64, macos-x86_64.
+Values: SHA256 checksums for the corresponding platform.
+""",
         ),
         "_build_tpl": attr.label(
             allow_single_file = True,

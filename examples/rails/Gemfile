@@ -4,3 +4,7 @@ source "https://rubygems.org"
 
 # Rails for generating and running the People Tracker Rails application
 gem "rails", "~> 8.0"
+
+# Pin psych to the version bundled with rv-ruby 3.4.8.
+# This gem should NOT be downloaded - it's a default gem included with Ruby.
+gem "psych", "5.2.2"
