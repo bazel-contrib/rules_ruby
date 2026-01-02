@@ -308,7 +308,10 @@ rb_bundle_fetch = repository_rule(
         ),
         "excluded_gems": attr.string_list(
             default = [],
-            doc = "List of gem names to exclude from downloading. Useful for default gems bundled with Ruby (e.g., psych, stringio).",
+            doc = """\
+List of gem names to exclude from downloading. Useful for default gems bundled \
+with Ruby (e.g., psych, stringio).\
+""",
         ),
         "ruby": attr.label(
             doc = "Override Ruby toolchain to use for installation.",

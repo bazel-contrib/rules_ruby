@@ -110,12 +110,20 @@ def _rb_download_impl(repository_ctx):
     if repository_ctx.attr.rv_version:
         if repository_ctx.os.name.startswith("windows"):
             # buildifier: disable=print
-            print("WARNING: rv-ruby is not supported on Windows. Falling back to RubyInstaller for Ruby %s." % version)
+            print("""\
+WARNING: rv-ruby is not supported on Windows. Falling back to RubyInstaller \
+for Ruby %s.\
+""" % version)
         else:
             use_rv_ruby = True
 
     if use_rv_ruby:
-        _install_rv_ruby(repository_ctx, repository_ctx.attr.rv_version, version, repository_ctx.attr.rv_checksums)
+        _install_rv_ruby(
+            repository_ctx,
+            repository_ctx.attr.rv_version,
+            version,
+            repository_ctx.attr.rv_checksums,
+        )
     elif version.startswith("jruby"):
         _install_jruby(repository_ctx, version)
 
@@ -323,7 +331,9 @@ def _install_rv_ruby(repository_ctx, rv_version, ruby_version, checksums):
     if platform_key in checksums:
         kwargs["sha256"] = checksums[platform_key]
 
-    repository_ctx.report_progress("Downloading rv-ruby %s for %s" % (ruby_version, platform_key))
+    repository_ctx.report_progress(
+        "Downloading rv-ruby %s for %s" % (ruby_version, platform_key),
+    )
 
     repository_ctx.download_and_extract(
         url = _RV_RUBY_URL.format(

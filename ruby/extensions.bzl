@@ -32,11 +32,17 @@ ruby_toolchain = tag_class(attrs = {
     "ruby_build_version": attr.string(doc = "Version of ruby-build to use.", default = RUBY_BUILD_VERSION),
     "msys2_packages": attr.string_list(doc = "Extra MSYS2 packages to install.", default = ["libyaml"]),
     "rv_version": attr.string(
-        doc = "rv-ruby release version (e.g., '20251225'). When set, downloads prebuilt Ruby from rv-ruby instead of compiling via ruby-build.",
+        doc = """\
+rv-ruby release version (e.g., '20251225'). When set, downloads prebuilt Ruby \
+from rv-ruby instead of compiling via ruby-build.\
+""",
         default = "",
     ),
     "rv_checksums": attr.string_dict(
-        doc = "Platform checksums for rv-ruby downloads. Keys: linux-x86_64, linux-arm64, macos-arm64, macos-x86_64.",
+        doc = """\
+Platform checksums for rv-ruby downloads. Keys: linux-x86_64, linux-arm64, \
+macos-arm64, macos-x86_64.\
+""",
         default = {},
     ),
 })
