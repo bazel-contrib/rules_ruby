@@ -55,6 +55,9 @@ jobs:
           # TruffleRuby doesn't work on Windows.
           - os: windows-latest
             ruby: truffleruby-25.0.0
+          # GH282: System Ruby on Windows is no longer working.
+          - os: windows-latest
+            ruby: system
     defaults:
       run:
         working-directory: examples/gem
