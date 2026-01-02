@@ -306,7 +306,7 @@ def _install_rv_ruby(repository_ctx, rv_version, ruby_version, checksums):
     elif os_name.startswith("linux"):
         os_key = "linux"
     else:
-        fail("rv-ruby does not support platform: " + os_name)
+        os_key = os_name
 
     # Detect architecture
     arch = repository_ctx.os.arch
@@ -315,13 +315,26 @@ def _install_rv_ruby(repository_ctx, rv_version, ruby_version, checksums):
     elif arch in ["arm64", "aarch64"]:
         arch_key = "arm64"
     else:
-        fail("rv-ruby does not support architecture: " + arch)
+        arch_key = arch
 
     platform_key = os_key + "-" + arch_key
 
-    # Check if platform is supported by rv-ruby
+    # Validate platform is supported by rv-ruby
     if platform_key not in _RV_RUBY_PLATFORMS:
-        fail("rv-ruby does not support platform: " + platform_key)
+        supported = ", ".join(sorted(_RV_RUBY_PLATFORMS.keys()))
+        fail("""
+rv-ruby does not support platform: {platform}
+Detected OS: {os} ({os_raw})
+Detected architecture: {arch} ({arch_raw})
+Supported platforms: {supported}
+""".format(
+            platform = platform_key,
+            os = os_key,
+            os_raw = os_name,
+            arch = arch_key,
+            arch_raw = arch,
+            supported = supported,
+        ))
 
     rv_platform = _RV_RUBY_PLATFORMS[platform_key]
 
