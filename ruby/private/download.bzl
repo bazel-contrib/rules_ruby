@@ -104,8 +104,18 @@ def _rb_download_impl(repository_ctx):
     env = {}
     ruby_binary_name = "ruby"
     gem_binary_name = "gem"
-    if version.startswith("rv-"):
-        _install_rv_ruby(repository_ctx, version.removeprefix("rv-"), repository_ctx.attr.checksums)
+
+    # Handle rv-ruby: only supported on Linux and macOS
+    use_rv_ruby = False
+    if repository_ctx.attr.rv_version:
+        if repository_ctx.os.name.startswith("windows"):
+            # buildifier: disable=print
+            print("WARNING: rv-ruby is not supported on Windows. Falling back to RubyInstaller for Ruby %s." % version)
+        else:
+            use_rv_ruby = True
+
+    if use_rv_ruby:
+        _install_rv_ruby(repository_ctx, repository_ctx.attr.rv_version, version, repository_ctx.attr.rv_checksums)
     elif version.startswith("jruby"):
         _install_jruby(repository_ctx, version)
 
@@ -271,21 +281,15 @@ def _install_via_ruby_build(repository_ctx, version):
 
     repository_ctx.delete("ruby-build")
 
-def _install_rv_ruby(repository_ctx, version, checksums):
+def _install_rv_ruby(repository_ctx, rv_version, ruby_version, checksums):
     """Install prebuilt Ruby from rv-ruby project.
 
     Args:
         repository_ctx: Repository context
-        version: Version string in format "{release}-{ruby_version}" (rv- prefix already stripped)
+        rv_version: rv-ruby release version (e.g., "20251225")
+        ruby_version: Ruby version (e.g., "3.4.8")
         checksums: Dict mapping platform keys to SHA256 checksums
     """
-
-    # Parse version: format is "{release}-{ruby_version}" (e.g., "20251225-3.4.5")
-    parts = version.split("-", 1)
-    if len(parts) != 2:
-        fail("Invalid rv-ruby version format. Expected 'rv-{release}-{ruby_version}', got 'rv-%s'" % version)
-    release = parts[0]
-    ruby_version = parts[1]
 
     # Detect platform
     os_name = repository_ctx.os.name
@@ -323,7 +327,7 @@ def _install_rv_ruby(repository_ctx, version, checksums):
 
     repository_ctx.download_and_extract(
         url = _RV_RUBY_URL.format(
-            release = release,
+            release = rv_version,
             version = ruby_version,
             platform = rv_platform,
         ),
@@ -386,7 +390,16 @@ to install. You normally don't need to change this, unless `version` you pass is
 which isn't available in this ruby-build yet.
             """,
         ),
-        "checksums": attr.string_dict(
+        "rv_version": attr.string(
+            default = "",
+            doc = """
+rv-ruby release version (e.g., "20251225").
+
+When set, downloads prebuilt Ruby from rv-ruby instead of compiling via ruby-build.
+The Ruby version is still read from the `version` or `version_file` attribute.
+""",
+        ),
+        "rv_checksums": attr.string_dict(
             default = {},
             doc = """
 Platform checksums for rv-ruby downloads.

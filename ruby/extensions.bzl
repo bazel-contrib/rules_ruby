@@ -31,7 +31,11 @@ ruby_toolchain = tag_class(attrs = {
     "version_file": attr.label(doc = "File to read Ruby version from."),
     "ruby_build_version": attr.string(doc = "Version of ruby-build to use.", default = RUBY_BUILD_VERSION),
     "msys2_packages": attr.string_list(doc = "Extra MSYS2 packages to install.", default = ["libyaml"]),
-    "checksums": attr.string_dict(
+    "rv_version": attr.string(
+        doc = "rv-ruby release version (e.g., '20251225'). When set, downloads prebuilt Ruby from rv-ruby instead of compiling via ruby-build.",
+        default = "",
+    ),
+    "rv_checksums": attr.string_dict(
         doc = "Platform checksums for rv-ruby downloads. Keys: linux-x86_64, linux-arm64, macos-arm64, macos-x86_64.",
         default = {},
     ),
@@ -94,7 +98,8 @@ def _ruby_module_extension(module_ctx):
                     toolchain.version_file,
                     toolchain.msys2_packages,
                     toolchain.ruby_build_version,
-                    toolchain.checksums,
+                    toolchain.rv_version,
+                    toolchain.rv_checksums,
                 )
                 if module_ctx.is_dev_dependency(toolchain):
                     direct_dev_dep_names.append(toolchain.name)
@@ -103,14 +108,15 @@ def _ruby_module_extension(module_ctx):
                     direct_dep_names.append(toolchain.name)
                     direct_dep_names.append("%s_toolchains" % toolchain.name)
 
-    for name, (version, version_file, msys2_packages, ruby_build_version, checksums) in registrations.items():
+    for name, (version, version_file, msys2_packages, ruby_build_version, rv_version, rv_checksums) in registrations.items():
         rb_register_toolchains(
             name = name,
             version = version,
             version_file = version_file,
             msys2_packages = msys2_packages,
             ruby_build_version = ruby_build_version,
-            checksums = checksums,
+            rv_version = rv_version,
+            rv_checksums = rv_checksums,
             register = False,
         )
 
