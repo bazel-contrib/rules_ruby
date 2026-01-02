@@ -6,9 +6,9 @@ This repository hosts [Ruby][1] language ruleset for [Bazel][2].
 
 The ruleset is known to work with:
 
-- Bazel 8 using WORKSPACE and Bzlmod *(tested on CI)*.
-- Bazel 7 using WORKSPACE and Bzlmod *(no longer tested on CI)*.
-- Bazel 6 using WORKSPACE and Bzlmod *(no longer tested on CI)*.
+- Bazel 8 using WORKSPACE and Bzlmod _(tested on CI)_.
+- Bazel 7 using WORKSPACE and Bzlmod _(no longer tested on CI)_.
+- Bazel 6 using WORKSPACE and Bzlmod _(no longer tested on CI)_.
 
 ## Getting Started
 
@@ -28,7 +28,7 @@ rb_register_toolchains(
 )
 ```
 
-3. *(Optional)* Download and install Bundler dependencies:
+3. _(Optional)_ Download and install Bundler dependencies:
 
 ```bazel
 # WORKSPACE
@@ -96,7 +96,7 @@ See [`examples`][14] directory for a comprehensive set of examples how to use th
 The following toolchains are known to work and tested on CI.
 
 | Ruby             | Linux | macOS | Windows |
-|------------------|-------|-------|---------|
+| ---------------- | ----- | ----- | ------- |
 | MRI 3.5          | 🟩    | 🟩    | 🟥      |
 | MRI 3.4          | 🟩    | 🟩    | 🟩      |
 | MRI 3.3          | 🟩    | 🟩    | 🟩      |
@@ -104,10 +104,10 @@ The following toolchains are known to work and tested on CI.
 | JRuby 10.0       | 🟩    | 🟩    | 🟩      |
 | TruffleRuby 25.0 | 🟩    | 🟩    | 🟥      |
 
-The following toolchains were previously known to work but *no longer tested on CI*.
+The following toolchains were previously known to work but _no longer tested on CI_.
 
 | Ruby             | Linux | macOS | Windows |
-|------------------|-------|-------|---------|
+| ---------------- | ----- | ----- | ------- |
 | MRI 3.1          | 🟩    | 🟩    | 🟩      |
 | MRI 3.0          | 🟩    | 🟩    | 🟩      |
 | MRI 2.7          | 🟩    | 🟩    | 🟩      |
@@ -123,6 +123,76 @@ On Linux and macOS, [ruby-build][5] is used to install MRI from sources.
 Keep in mind, that it takes some time for compilation to complete.
 
 On Windows, [RubyInstaller][6] is used to install MRI.
+
+#### Fast Installation with rv-ruby
+
+For faster MRI installation on Linux and macOS, you can use prebuilt Ruby
+binaries from [rv-ruby][19] instead of compiling from source. This significantly
+reduces installation time and ensures consistent, portable Ruby environments.
+
+**WORKSPACE:**
+
+```bazel
+load("@rules_ruby//ruby:deps.bzl", "rb_register_toolchains")
+
+rb_register_toolchains(
+    version = "3.4.8",
+    rv_version = "20251225",
+    rv_checksums = {
+        "linux-x86_64": "f36cef10365d370e0867f0c3ac36e457a26ab04f3cfbbd7edb227a18e6e9b3c3",
+        "linux-arm64": "0c08c35a99f10817643d548f98012268c5433ae25a737ab4d6751336108a941d",
+        "macos-x86_64": "e9da39082d1dd8502d322c850924d929bc45b7a1e35da593a5606c00673218d4",
+        "macos-arm64": "cd9d7a1428076bfcc6c2ca3c0eb69b8e671e9b48afb4c351fa4a84927841ffef",
+    },
+)
+```
+
+**Bzlmod:**
+
+```bazel
+ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
+ruby.toolchain(
+    name = "ruby",
+    version_file = "//:.ruby-version",
+    rv_version = "20251225",
+    rv_checksums = {
+        "linux-x86_64": "f36cef10365d370e0867f0c3ac36e457a26ab04f3cfbbd7edb227a18e6e9b3c3",
+        "linux-arm64": "0c08c35a99f10817643d548f98012268c5433ae25a737ab4d6751336108a941d",
+        "macos-x86_64": "e9da39082d1dd8502d322c850924d929bc45b7a1e35da593a5606c00673218d4",
+        "macos-arm64": "cd9d7a1428076bfcc6c2ca3c0eb69b8e671e9b48afb4c351fa4a84927841ffef",
+    },
+)
+```
+
+**Important:** When using rv-ruby, you must exclude default gems with C extensions
+from `rb_bundle_fetch` as these are pre-compiled in the rv-ruby binary:
+
+```bazel
+rb_bundle_fetch(
+    name = "bundle",
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+    excluded_gems = [
+        # Default gems with C extensions from https://stdgems.org/3.4.8
+        # These are pre-compiled in rv-ruby with portable dependencies.
+        # IMPORTANT: These gems must also be pinned in your Gemfile.
+        "date", "digest", "etc", "fcntl", "fiddle",
+        "io-console", "io-nonblock", "io-wait", "json",
+        "openssl", "pathname", "prism", "psych",
+        "stringio", "strscan", "zlib",
+    ],
+)
+```
+
+Find the list of default gems for your Ruby version at https://stdgems.org/\<version\>
+(e.g., https://stdgems.org/3.4.8 for Ruby 3.4.8). Only exclude gems with C
+extensions. Bundled gems should NOT be excluded.
+
+**Notes:**
+
+- rv-ruby is only supported on Linux and macOS (x86_64 and arm64).
+- On Windows, the toolchain automatically falls back to RubyInstaller.
+- Find available rv-ruby releases at https://github.com/spinel-coop/rv-ruby/releases
 
 ### JRuby
 
@@ -142,21 +212,20 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
 
 ## Known Issues
 
-* JRuby/TruffleRuby might need `HOME` variable exposed.
+- JRuby/TruffleRuby might need `HOME` variable exposed.
   See [`examples/gem/.bazelrc`][7] to learn how to do that.
   This is to be fixed in [`jruby/jruby#5661`][9] and [`oracle/truffleruby#2784`][10].
-* JRuby might fail with `Errno::EACCES: Permission denied - NUL` error on Windows.
+- JRuby might fail with `Errno::EACCES: Permission denied - NUL` error on Windows.
   You need to configure JDK to allow proper access.
   This is described in [`jruby/jruby#7182`][11].
-* RuboCop < 1.55 crashes with `LoadError` on Windows.
+- RuboCop < 1.55 crashes with `LoadError` on Windows.
   This is fixed in [`rubocop/rubocop#12062`][12].
-* REPL doesn't work when used with `bazel test`.
+- REPL doesn't work when used with `bazel test`.
   To work it around, use a debugger with remote client support such as [`ruby/debug`][8] .
   See [`examples/gem/.bazelrc`][7] to learn how to do that.
-* Some gems contain files with spaces which cause Bazel error `link or target filename contains space`.
+- Some gems contain files with spaces which cause Bazel error `link or target filename contains space`.
   To work it around, use [`--experimental_inprocess_symlink_creation`][16] Bazel flag.
   See [`bazelbuild/bazel#4327`][17] for more details.
-
 
 [1]: https://www.ruby-lang.org
 [2]: https://bazel.build
@@ -176,3 +245,4 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
 [16]: https://bazel.build/reference/command-line-reference#flag--experimental_inprocess_symlink_creation
 [17]: https://github.com/bazelbuild/bazel/issues/4327
 [18]: docs/rails.md
+[19]: https://github.com/spinel-coop/rv-ruby
