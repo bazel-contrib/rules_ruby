@@ -6,6 +6,8 @@ on:
       - main
     tags:
       - v*.*.*
+  schedule:
+    - cron: 14 21 * * *
 
 concurrency:
   group: ${{ github.ref }}
