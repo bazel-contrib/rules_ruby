@@ -309,9 +309,8 @@ def _install_rv_ruby(repository_ctx, rv_version, ruby_version, checksums):
         fail("rv-ruby does not support platform: " + os_name)
 
     # Detect architecture
-    arch_result = repository_ctx.execute(["uname", "-m"])
-    arch = arch_result.stdout.strip()
-    if arch == "x86_64":
+    arch = repository_ctx.os.arch
+    if arch == "amd64":
         arch_key = "x86_64"
     elif arch in ["arm64", "aarch64"]:
         arch_key = "arm64"
