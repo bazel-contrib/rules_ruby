@@ -114,7 +114,15 @@ def _ruby_module_extension(module_ctx):
                     direct_dep_names.append(toolchain.name)
                     direct_dep_names.append("%s_toolchains" % toolchain.name)
 
-    for name, (version, version_file, msys2_packages, ruby_build_version, rv_version, rv_checksums) in registrations.items():
+    for name, config in registrations.items():
+        (
+            version,
+            version_file,
+            msys2_packages,
+            ruby_build_version,
+            rv_version,
+            rv_checksums,
+        ) = config
         rb_register_toolchains(
             name = name,
             version = version,
