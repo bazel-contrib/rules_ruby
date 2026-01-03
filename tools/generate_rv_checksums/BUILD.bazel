@@ -1,0 +1,36 @@
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+
+sh_binary(
+    name = "generate_rv_checksums",
+    srcs = ["generate_rv_checksums.sh"],
+    data = [
+        "@buildifier_prebuilt//buildozer",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@cgrindel_bazel_starlib//shlib/lib:fail",
+        "@rules_shell//shell/runfiles",
+    ],
+)
+
+sh_test(
+    name = "generate_rv_checksums_test",
+    srcs = ["generate_rv_checksums_test.sh"],
+    data = [
+        "testdata/20251225",
+        "testdata/expected_checksums_output.txt",
+        "testdata/rv_ruby_release_response.json",
+        ":generate_rv_checksums",
+    ],
+    deps = [
+        "@cgrindel_bazel_starlib//shlib/lib:assertions",
+        "@rules_shell//shell/runfiles",
+    ],
+)
+
+filegroup(
+    name = "all_files",
+    srcs = glob(["**/*"]),
+    visibility = ["//:__subpackages__"],
+)
