@@ -4,3 +4,27 @@ source "https://rubygems.org"
 
 # Rails for generating and running the People Tracker Rails application
 gem "rails", "~> 8.0"
+
+# Pin default gems with C extensions to versions bundled with rv-ruby Ruby
+# binaries. The list can be found at https://stdgems.org/<ruby-version> (e.g,
+# https://stdgems.org/3.4.8 for Ruby 3.4.8).  These gems should NOT be
+# downloaded - they're pre-compiled in rv-ruby with portable dependencies.
+#
+# IMPORTANT: These gems must be listed in the excluded_gems list in the
+# bundle_fetch configured in your MODULE.bazel file.
+gem "date", "3.4.1"
+gem "digest", "3.2.0"
+gem "etc", "1.4.6"
+gem "fcntl", "1.2.0"
+gem "fiddle", "1.1.6"
+gem "io-console", "0.8.1"
+gem "io-nonblock", "0.3.2"
+gem "io-wait", "0.3.2"
+gem "json", "2.9.1"
+gem "openssl", "3.3.1"
+gem "pathname", "0.4.0"
+gem "prism", "1.5.2"
+gem "psych", "5.2.2"
+gem "stringio", "3.1.2"
+gem "strscan", "3.1.2"
+gem "zlib", "3.2.1"

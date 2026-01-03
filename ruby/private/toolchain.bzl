@@ -10,6 +10,8 @@ def rb_register_toolchains(
         version = None,
         version_file = None,
         msys2_packages = ["libyaml"],
+        rv_version = "",
+        rv_checksums = {},
         register = True,
         **kwargs):
     """
@@ -19,6 +21,7 @@ def rb_register_toolchains(
     * _(For MRI on Windows)_ Installed using [RubyInstaller](https://rubyinstaller.org).
     * _(For JRuby on any OS)_ Downloaded and installed directly from [official website](https://www.jruby.org).
     * _(For TruffleRuby on Linux and macOS)_ Installed using [ruby-build](https://github.com/rbenv/ruby-build).
+    * _(For rv-ruby)_ Prebuilt Ruby downloaded from [rv-ruby](https://github.com/spinel-coop/rv-ruby).
     * _(For "system")_ Ruby found on the PATH is used. Please note that builds are not hermetic in this case.
 
     `WORKSPACE`:
@@ -59,6 +62,10 @@ def rb_register_toolchains(
         version: a semver version of MRI, or a string like [interpreter type]-[version], or "system"
         version_file: .ruby-version or .tool-versions file to read version from
         msys2_packages: extra MSYS2 packages to install
+        rv_version: rv-ruby release version (e.g., "20251225"). When set, downloads prebuilt
+            Ruby from rv-ruby instead of compiling via ruby-build.
+        rv_checksums: platform checksums for rv-ruby downloads.
+            Keys: linux-x86_64, linux-arm64, macos-arm64, macos-x86_64.
         register: whether to register the resulting toolchains, should be False under bzlmod
         **kwargs: additional parameters to the downloader for this interpreter type
     """
@@ -69,6 +76,8 @@ def rb_register_toolchains(
             version = version,
             version_file = version_file,
             msys2_packages = msys2_packages,
+            rv_version = rv_version,
+            rv_checksums = rv_checksums,
             **kwargs
         )
         _rb_toolchain_repository_proxy(

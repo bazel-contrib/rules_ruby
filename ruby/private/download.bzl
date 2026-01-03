@@ -5,6 +5,15 @@ RUBY_BUILD_VERSION = "20250925"
 _JRUBY_BINARY_URL = "https://repo1.maven.org/maven2/org/jruby/jruby-dist/{version}/jruby-dist-{version}-bin.tar.gz"
 _RUBY_BUILD_URL = "https://github.com/rbenv/ruby-build/archive/refs/tags/v{version}.tar.gz"
 _RUBY_INSTALLER_URL = "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-{version}-1/rubyinstaller-devkit-{version}-1-x64.exe"
+_RV_RUBY_URL = "https://github.com/spinel-coop/rv-ruby/releases/download/{release}/ruby-{version}.{platform}.tar.gz"
+
+# Map Bazel OS/arch to rv-ruby artifact naming
+_RV_RUBY_PLATFORMS = {
+    "linux-x86_64": "x86_64_linux",
+    "linux-arm64": "arm64_linux",
+    "macos-arm64": "arm64_sonoma",
+    "macos-x86_64": "ventura",
+}
 
 # Maintained JRuby versions integrity from https://repo1.maven.org/maven2/org/jruby/jruby-dist.
 # Run the following script to update the list:
@@ -95,7 +104,27 @@ def _rb_download_impl(repository_ctx):
     env = {}
     ruby_binary_name = "ruby"
     gem_binary_name = "gem"
-    if version.startswith("jruby"):
+
+    # Handle rv-ruby: only supported on Linux and macOS
+    use_rv_ruby = False
+    if repository_ctx.attr.rv_version:
+        if repository_ctx.os.name.startswith("windows"):
+            # buildifier: disable=print
+            print("""\
+WARNING: rv-ruby is not supported on Windows. Falling back to RubyInstaller \
+for Ruby %s.\
+""" % version)
+        else:
+            use_rv_ruby = True
+
+    if use_rv_ruby:
+        _install_rv_ruby(
+            repository_ctx,
+            repository_ctx.attr.rv_version,
+            version,
+            repository_ctx.attr.rv_checksums,
+        )
+    elif version.startswith("jruby"):
         _install_jruby(repository_ctx, version)
 
         engine = "jruby"
@@ -260,6 +289,79 @@ def _install_via_ruby_build(repository_ctx, version):
 
     repository_ctx.delete("ruby-build")
 
+def _install_rv_ruby(repository_ctx, rv_version, ruby_version, checksums):
+    """Install prebuilt Ruby from rv-ruby project.
+
+    Args:
+        repository_ctx: Repository context
+        rv_version: rv-ruby release version (e.g., "20251225")
+        ruby_version: Ruby version (e.g., "3.4.8")
+        checksums: Dict mapping platform keys to SHA256 checksums
+    """
+
+    # Detect platform
+    os_name = repository_ctx.os.name
+    if os_name.startswith("mac"):
+        os_key = "macos"
+    elif os_name.startswith("linux"):
+        os_key = "linux"
+    else:
+        os_key = os_name
+
+    # Detect architecture
+    arch = repository_ctx.os.arch
+    if arch == "amd64":
+        arch_key = "x86_64"
+    elif arch in ["arm64", "aarch64"]:
+        arch_key = "arm64"
+    else:
+        arch_key = arch
+
+    platform_key = os_key + "-" + arch_key
+
+    # Validate platform is supported by rv-ruby
+    if platform_key not in _RV_RUBY_PLATFORMS:
+        supported = ", ".join(sorted(_RV_RUBY_PLATFORMS.keys()))
+        fail("""
+rv-ruby does not support platform: {platform}
+Detected OS: {os} ({os_raw})
+Detected architecture: {arch} ({arch_raw})
+Supported platforms: {supported}
+""".format(
+            platform = platform_key,
+            os = os_key,
+            os_raw = os_name,
+            arch = arch_key,
+            arch_raw = arch,
+            supported = supported,
+        ))
+
+    rv_platform = _RV_RUBY_PLATFORMS[platform_key]
+
+    # Get checksum if provided (Bazel will warn if not provided)
+    kwargs = {}
+    if platform_key in checksums:
+        kwargs["sha256"] = checksums[platform_key]
+
+    repository_ctx.report_progress(
+        "Downloading rv-ruby %s for %s" % (ruby_version, platform_key),
+    )
+
+    # rv-ruby releases have a nested directory structure:
+    # rv-ruby@<version>/<version>/bin/ruby
+    # rv-ruby@<version>/<version>/lib/...
+    # Strip the outer directories to get the Ruby installation at dist/
+    repository_ctx.download_and_extract(
+        url = _RV_RUBY_URL.format(
+            release = rv_version,
+            version = ruby_version,
+            platform = rv_platform,
+        ),
+        output = "dist/",
+        stripPrefix = "rv-ruby@{v}/{v}".format(v = ruby_version),
+        **kwargs
+    )
+
 def _symlink_system_ruby(repository_ctx):
     _symlink_system_ruby_dir("bindir", repository_ctx)
     _symlink_system_ruby_dir("libdir", repository_ctx)
@@ -313,6 +415,24 @@ Version of [ruby-build](https://github.com/rbenv/ruby-build/releases)
 to install. You normally don't need to change this, unless `version` you pass is a new one
 which isn't available in this ruby-build yet.
             """,
+        ),
+        "rv_version": attr.string(
+            default = "",
+            doc = """
+rv-ruby release version (e.g., "20251225").
+
+When set, downloads prebuilt Ruby from rv-ruby instead of compiling via ruby-build.
+The Ruby version is still read from the `version` or `version_file` attribute.
+""",
+        ),
+        "rv_checksums": attr.string_dict(
+            default = {},
+            doc = """
+Platform checksums for rv-ruby downloads.
+
+Keys: linux-x86_64, linux-arm64, macos-arm64, macos-x86_64.
+Values: SHA256 checksums for the corresponding platform.
+""",
         ),
         "_build_tpl": attr.label(
             allow_single_file = True,

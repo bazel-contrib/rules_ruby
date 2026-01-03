@@ -30,7 +30,8 @@ Wraps `rb_bundle_rule()` providing default toolchain name.
 <pre>
 load("@rules_ruby//ruby:deps.bzl", "rb_register_toolchains")
 
-rb_register_toolchains(<a href="#rb_register_toolchains-name">name</a>, <a href="#rb_register_toolchains-version">version</a>, <a href="#rb_register_toolchains-version_file">version_file</a>, <a href="#rb_register_toolchains-msys2_packages">msys2_packages</a>, <a href="#rb_register_toolchains-register">register</a>, <a href="#rb_register_toolchains-kwargs">**kwargs</a>)
+rb_register_toolchains(<a href="#rb_register_toolchains-name">name</a>, <a href="#rb_register_toolchains-version">version</a>, <a href="#rb_register_toolchains-version_file">version_file</a>, <a href="#rb_register_toolchains-msys2_packages">msys2_packages</a>, <a href="#rb_register_toolchains-rv_version">rv_version</a>, <a href="#rb_register_toolchains-rv_checksums">rv_checksums</a>,
+                       <a href="#rb_register_toolchains-register">register</a>, <a href="#rb_register_toolchains-kwargs">**kwargs</a>)
 </pre>
 
 Register a Ruby toolchain and lazily download the Ruby Interpreter.
@@ -39,6 +40,7 @@ Register a Ruby toolchain and lazily download the Ruby Interpreter.
 * _(For MRI on Windows)_ Installed using [RubyInstaller](https://rubyinstaller.org).
 * _(For JRuby on any OS)_ Downloaded and installed directly from [official website](https://www.jruby.org).
 * _(For TruffleRuby on Linux and macOS)_ Installed using [ruby-build](https://github.com/rbenv/ruby-build).
+* _(For rv-ruby)_ Prebuilt Ruby downloaded from [rv-ruby](https://github.com/spinel-coop/rv-ruby).
 * _(For "system")_ Ruby found on the PATH is used. Please note that builds are not hermetic in this case.
 
 `WORKSPACE`:
@@ -84,6 +86,8 @@ rb_library(
 | <a id="rb_register_toolchains-version"></a>version |  a semver version of MRI, or a string like [interpreter type]-[version], or "system"   |  `None` |
 | <a id="rb_register_toolchains-version_file"></a>version_file |  .ruby-version or .tool-versions file to read version from   |  `None` |
 | <a id="rb_register_toolchains-msys2_packages"></a>msys2_packages |  extra MSYS2 packages to install   |  `["libyaml"]` |
+| <a id="rb_register_toolchains-rv_version"></a>rv_version |  rv-ruby release version (e.g., "20251225"). When set, downloads prebuilt Ruby from rv-ruby instead of compiling via ruby-build.   |  `""` |
+| <a id="rb_register_toolchains-rv_checksums"></a>rv_checksums |  platform checksums for rv-ruby downloads. Keys: linux-x86_64, linux-arm64, macos-arm64, macos-x86_64.   |  `{}` |
 | <a id="rb_register_toolchains-register"></a>register |  whether to register the resulting toolchains, should be False under bzlmod   |  `True` |
 | <a id="rb_register_toolchains-kwargs"></a>kwargs |  additional parameters to the downloader for this interpreter type   |  none |
 
@@ -95,8 +99,8 @@ rb_library(
 <pre>
 load("@rules_ruby//ruby:deps.bzl", "rb_bundle_fetch")
 
-rb_bundle_fetch(<a href="#rb_bundle_fetch-name">name</a>, <a href="#rb_bundle_fetch-srcs">srcs</a>, <a href="#rb_bundle_fetch-auth_patterns">auth_patterns</a>, <a href="#rb_bundle_fetch-bundler_checksums">bundler_checksums</a>, <a href="#rb_bundle_fetch-bundler_remote">bundler_remote</a>, <a href="#rb_bundle_fetch-env">env</a>, <a href="#rb_bundle_fetch-gem_checksums">gem_checksums</a>,
-                <a href="#rb_bundle_fetch-gemfile">gemfile</a>, <a href="#rb_bundle_fetch-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_fetch-netrc">netrc</a>, <a href="#rb_bundle_fetch-repo_mapping">repo_mapping</a>, <a href="#rb_bundle_fetch-ruby">ruby</a>)
+rb_bundle_fetch(<a href="#rb_bundle_fetch-name">name</a>, <a href="#rb_bundle_fetch-srcs">srcs</a>, <a href="#rb_bundle_fetch-auth_patterns">auth_patterns</a>, <a href="#rb_bundle_fetch-bundler_checksums">bundler_checksums</a>, <a href="#rb_bundle_fetch-bundler_remote">bundler_remote</a>, <a href="#rb_bundle_fetch-env">env</a>, <a href="#rb_bundle_fetch-excluded_gems">excluded_gems</a>,
+                <a href="#rb_bundle_fetch-gem_checksums">gem_checksums</a>, <a href="#rb_bundle_fetch-gemfile">gemfile</a>, <a href="#rb_bundle_fetch-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_fetch-netrc">netrc</a>, <a href="#rb_bundle_fetch-repo_mapping">repo_mapping</a>, <a href="#rb_bundle_fetch-ruby">ruby</a>)
 </pre>
 
 Fetches Bundler dependencies to be automatically installed by other targets.
@@ -162,6 +166,7 @@ rb_test(
 | <a id="rb_bundle_fetch-bundler_checksums"></a>bundler_checksums |  Custom map from Bundler version to its SHA-256 checksum.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="rb_bundle_fetch-bundler_remote"></a>bundler_remote |  Remote to fetch the bundler gem from.   | String | optional |  `"https://rubygems.org/"`  |
 | <a id="rb_bundle_fetch-env"></a>env |  Environment variables to use during installation.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
+| <a id="rb_bundle_fetch-excluded_gems"></a>excluded_gems |  List of gem names to exclude from downloading. Useful for default gems bundled with Ruby (e.g., psych, stringio).   | List of strings | optional |  `[]`  |
 | <a id="rb_bundle_fetch-gem_checksums"></a>gem_checksums |  SHA-256 checksums for remote gems. Keys are gem names (e.g. foobar-1.2.3), values are SHA-256 checksums.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="rb_bundle_fetch-gemfile"></a>gemfile |  Gemfile to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_bundle_fetch-gemfile_lock"></a>gemfile_lock |  Gemfile.lock to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
