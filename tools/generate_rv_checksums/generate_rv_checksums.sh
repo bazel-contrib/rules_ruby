@@ -173,7 +173,8 @@ fi
 # MARK - Update MODULE.bazel
 
 # Generate output for dry-run or display
-output="rv_checksums = {\n"
+output="rv_version = \"${rv_version}\",\n"
+output+="rv_checksums = {\n"
 for platform in "${expected_platforms[@]}"; do
   if [[ -n ${checksums[${platform}]:-} ]]; then
     output+="    \"${platform}\": \"${checksums[${platform}]}\",\n"
@@ -182,33 +183,28 @@ done
 output+="},"
 
 if [[ ${dry_run} == "true" ]]; then
-  # Dry-run: just output the checksums
+  # Dry-run: just output the version and checksums
   echo -e "${output}"
   exit 0
 fi
 
 # Construct dict string for buildozer
-dict_str="{"
-first=true
+dict_str=""
 for platform in "${expected_platforms[@]}"; do
   if [[ -n ${checksums[${platform}]:-} ]]; then
-    if [[ ${first} == true ]]; then
-      first=false
-    else
-      dict_str+=", "
-    fi
-    dict_str+="\"${platform}\": \"${checksums[${platform}]}\""
+    dict_str+=" ${platform}:${checksums[${platform}]}"
   fi
 done
-dict_str+="}"
-
-# Determine buildozer target
-# For MODULE.bazel, target extension calls with %function_name
-target="%ruby.toolchain"
 
 # Update MODULE.bazel using buildozer
+# Set both rv_version and rv_checksums
 buildozer_cmd=(
-  "${buildozer}" "set rv_checksums ${dict_str}" "${module_bazel}:${target}"
+  "${buildozer}"
+  -types ruby.toolchain
+  "set rv_version \"${rv_version}\""
+  "remove rv_checksums"
+  "dict_set rv_checksums ${dict_str}"
+  "${module_bazel}:${name}"
 )
 if ! "${buildozer_cmd[@]}" 2>/dev/null; then
   fail <<-EOT
@@ -216,7 +212,7 @@ Failed to update ${module_bazel}
 
 Buildozer command failed. This could mean:
 - The file doesn't exist at ${module_bazel}
-- No ruby.toolchain() call was found
+- No ruby.toolchain() call was found with name="${name}"
 - The file has syntax errors
 
 You can use --dry-run to see what would be updated:
@@ -224,4 +220,4 @@ $(echo -e "${output}")
 EOT
 fi
 
-echo "Successfully updated rv_checksums in ${module_bazel}"
+echo "Successfully updated rv_version and rv_checksums in ${module_bazel}"
