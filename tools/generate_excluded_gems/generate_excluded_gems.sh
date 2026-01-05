@@ -118,9 +118,9 @@ excluded_gems=$(echo "${response}" | jq -r --arg version "${minor_version}" \
 # Check if we found any gems
 if [[ -z ${excluded_gems} ]]; then
   fail <<-EOT
-		Error: No native gems found for Ruby ${ruby_version} (${minor_version})
-		This Ruby version may not be supported in stdgems data
-	EOT
+Error: No native gems found for Ruby ${ruby_version} (${minor_version})
+This Ruby version may not be supported in stdgems data
+EOT
 fi
 
 # MARK - Update MODULE.bazel
@@ -135,38 +135,36 @@ output+="],"
 if [[ ${dry_run} == "true" ]]; then
   # Dry-run: just output the excluded gems
   echo -e "${output}"
-else
-  # Construct list string for buildozer
-  list_str="["
-  first=true
-  while IFS= read -r gem; do
-    if [[ ${first} == true ]]; then
-      first=false
-    else
-      list_str+=", "
-    fi
-    list_str+="\"${gem}\""
-  done <<<"${excluded_gems}"
-  list_str+="]"
-
-  # Determine buildozer target
-  # For MODULE.bazel, target extension calls with %function_name
-  target="%ruby.bundle_fetch"
-
-  # Update MODULE.bazel using buildozer
-  if ! "${buildozer}" "set excluded_gems ${list_str}" "${module_bazel}:${target}" 2>/dev/null; then
-    fail <<-EOT
-			Failed to update ${module_bazel}
-
-			Buildozer command failed. This could mean:
-			- The file doesn't exist at ${module_bazel}
-			- No ruby.bundle_fetch() call was found
-			- The file has syntax errors
-
-			You can use --dry-run to see what would be updated:
-			  $(echo -e "${output}")
-		EOT
-  fi
-
-  echo "Successfully updated excluded_gems in ${module_bazel}"
+  exit 0
 fi
+
+# Construct list of gems for buildozer 'add' command
+# Convert newline-separated list to space-separated
+gem_list=""
+while IFS= read -r gem; do
+  gem_list+=" ${gem}"
+done <<<"${excluded_gems}"
+
+# Update MODULE.bazel using buildozer
+buildozer_cmd=(
+  "${buildozer}"
+  -types ruby.bundle_fetch
+  "remove excluded_gems"
+  "add excluded_gems${gem_list}"
+  "${module_bazel}:${name}"
+)
+if ! "${buildozer_cmd[@]}" 2>/dev/null; then
+  fail <<-EOT
+Failed to update ${module_bazel}
+
+Buildozer command failed. This could mean:
+- The file doesn't exist at ${module_bazel}
+- No ruby.bundle_fetch() call was found with name="${name}"
+- The file has syntax errors
+
+You can use --dry-run to see what would be updated:
+$(echo -e "${output}")
+EOT
+fi
+
+echo "Successfully updated excluded_gems in ${module_bazel}"
