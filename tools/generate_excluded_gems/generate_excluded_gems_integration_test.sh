@@ -148,7 +148,8 @@ EOF
   export STDGEMS_URL="file://${mock_response}"
 
   # Run the script for "bundle_alt"
-  "${generate_excluded_gems}" --ruby-version 3.4.8 --name bundle_alt --module-bazel MODULE.bazel
+  "${generate_excluded_gems}" --ruby-version 3.4.8 --name bundle_alt \
+    --module-bazel MODULE.bazel
 
   # Verify MODULE.bazel was updated
   local module_content
@@ -162,7 +163,8 @@ EOF
     'Should have exactly one excluded_gems list (only in bundle_alt)'
 
   # Verify the first bundle_fetch (bundle) was NOT updated
-  # Check that there's still a bundle_fetch without excluded_gems before bundle_alt
+  # Check that there's still a bundle_fetch without excluded_gems before
+  # bundle_alt
   if ! grep -B5 'name = "bundle_alt"' MODULE.bazel | grep -q 'name = "bundle"'; then
     fail "First bundle_fetch should still exist"
   fi

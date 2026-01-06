@@ -41,7 +41,7 @@ buildozer="$(rlocation "${buildozer_location}")" \
 # Default values
 dry_run=false
 name="ruby"
-module_bazel="./MODULE.bazel"
+module_bazel="${BUILD_WORKSPACE_DIRECTORY:-.}/MODULE.bazel"
 ruby_version=""
 rv_version=""
 
