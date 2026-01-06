@@ -2,8 +2,6 @@
 
 # Tests for generate_rv_checksums.sh
 
-set -o errexit -o nounset -o pipefail
-
 # --- begin runfiles.bash initialization v3 ---
 # Copy-pasted from the Bazel Bash runfiles library v3.
 set -uo pipefail

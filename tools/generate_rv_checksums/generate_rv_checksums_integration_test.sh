@@ -85,17 +85,9 @@ EOF
   # Mock the API response
   export RV_RUBY_API_URL="file://${mock_response%/*}"
 
-  # DEBUG BEGIN
-  echo >&2 "*** CHUCK $(basename "${BASH_SOURCE[0]}") BEFORE generate_rv_checksums"
-  # DEBUG END
-
   # Run the script WITHOUT --dry-run
   "${generate_rv_checksums}" 20251225 --ruby-version 3.4.8 \
     --module-bazel MODULE.bazel
-
-  # DEBUG BEGIN
-  echo >&2 "*** CHUCK $(basename "${BASH_SOURCE[0]}") AFTER generate_rv_checksums"
-  # DEBUG END
 
   # Verify MODULE.bazel was updated
   local module_content

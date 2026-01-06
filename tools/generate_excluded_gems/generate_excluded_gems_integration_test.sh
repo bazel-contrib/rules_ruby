@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-# Integration tests for generate_excluded_gems.sh that verify buildozer updates work
-
-set -o errexit -o nounset -o pipefail
+# Integration tests for generate_excluded_gems.sh that verify buildozer
+# updates work
 
 # --- begin runfiles.bash initialization v3 ---
 # Copy-pasted from the Bazel Bash runfiles library v3.
 set -uo pipefail
 set +e
 f=bazel_tools/tools/bash/runfiles/runfiles.bash
+# shellcheck disable=SC1090
 source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null \
   || source "$(grep -sm1 "^$f " "${RUNFILES_MANIFEST_FILE:-/dev/null}" | cut -f2- -d' ')" 2>/dev/null \
   || source "$0.runfiles/$f" 2>/dev/null \
@@ -165,7 +165,8 @@ EOF
   # Verify the first bundle_fetch (bundle) was NOT updated
   # Check that there's still a bundle_fetch without excluded_gems before
   # bundle_alt
-  if ! grep -B5 'name = "bundle_alt"' MODULE.bazel | grep -q 'name = "bundle"'; then
+  if ! grep -B5 'name = "bundle_alt"' MODULE.bazel \
+    | grep -q 'name = "bundle"'; then
     fail "First bundle_fetch should still exist"
   fi
 

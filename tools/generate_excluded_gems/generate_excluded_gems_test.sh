@@ -2,13 +2,12 @@
 
 # Tests for generate_excluded_gems.sh
 
-set -o errexit -o nounset -o pipefail
-
 # --- begin runfiles.bash initialization v3 ---
 # Copy-pasted from the Bazel Bash runfiles library v3.
 set -uo pipefail
 set +e
 f=bazel_tools/tools/bash/runfiles/runfiles.bash
+# shellcheck disable=SC1090
 source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null \
   || source "$(grep -sm1 "^$f " "${RUNFILES_MANIFEST_FILE:-/dev/null}" | cut -f2- -d' ')" 2>/dev/null \
   || source "$0.runfiles/$f" 2>/dev/null \
@@ -77,7 +76,8 @@ test_basic_dry_run() {
   local expected
   expected=$(cat "${expected_output}")
 
-  assert_equal "${expected}" "${output}" "Output should match expected excluded gems"
+  assert_equal "${expected}" "${output}" \
+    "Output should match expected excluded gems"
 
   echo "PASS: Basic dry-run with .ruby-version"
 }
@@ -151,7 +151,10 @@ test_unsupported_ruby_version() {
   export STDGEMS_URL="file://${mock_response}"
 
   # Run the script with unsupported version and expect failure
-  if "${generate_excluded_gems}" --ruby-version 1.0.0 --dry-run 2>/dev/null; then
+  generate_excluded_gems_cmd=(
+    "${generate_excluded_gems}" --ruby-version 1.0.0 --dry-run
+  )
+  if "${generate_excluded_gems_cmd[@]}" 2>/dev/null; then
     fail "Should have failed for unsupported Ruby version"
   fi
 
