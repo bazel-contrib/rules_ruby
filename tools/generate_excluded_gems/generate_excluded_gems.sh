@@ -53,7 +53,10 @@ read_ruby_version() {
   tr -d '[:space:]' <"${version_file}"
 }
 
-# Extract minor version (e.g., 3.4.8 -> 3.4)
+# Extract minor version from a Ruby version string (e.g., 3.4.8 -> 3.4)
+# Ruby uses MAJOR.MINOR.PATCH versioning, and stdgems data is organized by
+# minor version since default gems are typically consistent within a minor
+# release series.
 get_minor_version() {
   local version="$1"
   echo "${version}" | cut -d. -f1,2
@@ -101,7 +104,7 @@ minor_version=$(get_minor_version "${ruby_version}")
 
 # Fetch stdgems data
 stdgems_url="${STDGEMS_URL:-https://raw.githubusercontent.com/janlelis/stdgems/main/default_gems.json}"
-response=$(curl -sL "${stdgems_url}")
+response=$(curl -sL --max-time 30 "${stdgems_url}")
 
 # Filter for native gems that exist for this Ruby version
 # The jq query:

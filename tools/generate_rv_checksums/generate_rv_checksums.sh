@@ -119,7 +119,7 @@ fi
 
 # Fetch release data from GitHub API
 api_url="${RV_RUBY_API_URL:-https://api.github.com/repos/spinel-coop/rv-ruby/releases/tags}/${rv_version}"
-response=$(curl -sL "${api_url}")
+response=$(curl -sL --max-time 30 "${api_url}")
 
 # Check if release was found
 if echo "${response}" | jq -e '.message == "Not Found"' >/dev/null 2>&1; then
