@@ -53,7 +53,6 @@ trap cleanup_temp_dirs EXIT
 
 # Test 1: Basic dry-run with .ruby-version
 test_basic_dry_run() {
-  echo "TEST: Basic dry-run with .ruby-version"
 
   local temp_dir
   temp_dir="$(mktemp -d)"
@@ -78,12 +77,10 @@ test_basic_dry_run() {
 
   assert_equal "${expected}" "${output}" "Output should match expected checksums"
 
-  echo "PASS: Basic dry-run with .ruby-version"
 }
 
 # Test 2: Explicit Ruby version
 test_explicit_ruby_version() {
-  echo "TEST: Explicit Ruby version"
 
   local temp_dir
   temp_dir="$(mktemp -d)"
@@ -104,12 +101,10 @@ test_explicit_ruby_version() {
   assert_match "0c08c35a99f10817643d548f98012268c5433ae25a737ab4d6751336108a941d" "${output}" \
     "Output should contain correct checksum"
 
-  echo "PASS: Explicit Ruby version"
 }
 
 # Test 3: Missing .ruby-version without --ruby-version
 test_missing_ruby_version() {
-  echo "TEST: Missing .ruby-version without --ruby-version"
 
   local temp_dir
   temp_dir="$(mktemp -d)"
@@ -128,12 +123,10 @@ test_missing_ruby_version() {
     fail "Should have failed when .ruby-version is missing"
   fi
 
-  echo "PASS: Missing .ruby-version without --ruby-version"
 }
 
 # Test 4: Invalid rv_version
 test_invalid_rv_version() {
-  echo "TEST: Invalid rv_version"
 
   local temp_dir
   temp_dir="$(mktemp -d)"
@@ -150,7 +143,6 @@ test_invalid_rv_version() {
     fail "Should have failed for invalid rv_version"
   fi
 
-  echo "PASS: Invalid rv_version"
 }
 
 # Run all tests
@@ -159,5 +151,3 @@ test_explicit_ruby_version
 test_missing_ruby_version
 test_invalid_rv_version
 
-echo ""
-echo "All tests passed!"

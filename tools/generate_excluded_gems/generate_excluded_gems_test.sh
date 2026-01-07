@@ -53,7 +53,6 @@ trap cleanup_temp_dirs EXIT
 
 # Test 1: Basic dry-run with .ruby-version
 test_basic_dry_run() {
-  echo "TEST: Basic dry-run with .ruby-version"
 
   local temp_dir
   temp_dir="$(mktemp -d)"
@@ -79,12 +78,10 @@ test_basic_dry_run() {
   assert_equal "${expected}" "${output}" \
     "Output should match expected excluded gems"
 
-  echo "PASS: Basic dry-run with .ruby-version"
 }
 
 # Test 2: Explicit Ruby version
 test_explicit_ruby_version() {
-  echo "TEST: Explicit Ruby version"
 
   local temp_dir
   temp_dir="$(mktemp -d)"
@@ -109,12 +106,10 @@ test_explicit_ruby_version() {
     fail "Output should not contain csv (non-native gem)"
   fi
 
-  echo "PASS: Explicit Ruby version"
 }
 
 # Test 3: Missing .ruby-version without --ruby-version
 test_missing_ruby_version() {
-  echo "TEST: Missing .ruby-version without --ruby-version"
 
   local temp_dir
   temp_dir="$(mktemp -d)"
@@ -133,12 +128,10 @@ test_missing_ruby_version() {
     fail "Should have failed when .ruby-version is missing"
   fi
 
-  echo "PASS: Missing .ruby-version without --ruby-version"
 }
 
 # Test 4: Ruby version not in stdgems data
 test_unsupported_ruby_version() {
-  echo "TEST: Ruby version not in stdgems data"
 
   local temp_dir
   temp_dir="$(mktemp -d)"
@@ -158,12 +151,10 @@ test_unsupported_ruby_version() {
     fail "Should have failed for unsupported Ruby version"
   fi
 
-  echo "PASS: Ruby version not in stdgems data"
 }
 
 # Test 5: Ruby 3.3 version
 test_ruby_33_version() {
-  echo "TEST: Ruby 3.3 version"
 
   local temp_dir
   temp_dir="$(mktemp -d)"
@@ -183,7 +174,6 @@ test_ruby_33_version() {
   assert_match "psych" "${output}" "Output should contain psych"
   assert_match "json" "${output}" "Output should contain json"
 
-  echo "PASS: Ruby 3.3 version"
 }
 
 # Run all tests
@@ -193,5 +183,3 @@ test_missing_ruby_version
 test_unsupported_ruby_version
 test_ruby_33_version
 
-echo ""
-echo "All tests passed!"

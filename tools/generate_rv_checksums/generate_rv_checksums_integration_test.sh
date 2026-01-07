@@ -24,15 +24,11 @@ set -e
 
 # MARK - Locate Deps
 
-echo "DEBUG: Starting to locate dependencies"
-
 assertions_sh_location=cgrindel_bazel_starlib/shlib/lib/assertions.sh
 assertions_sh="$(rlocation "${assertions_sh_location}")" \
   || (echo >&2 "Failed to locate ${assertions_sh_location}" && exit 1)
-echo "DEBUG: Found assertions_sh at ${assertions_sh}"
 # shellcheck disable=SC1090
 source "${assertions_sh}"
-echo "DEBUG: Sourced assertions_sh"
 
 generate_rv_checksums_location=rules_ruby/tools/generate_rv_checksums/generate_rv_checksums.sh
 generate_rv_checksums="$(rlocation "${generate_rv_checksums_location}")"
@@ -55,8 +51,6 @@ trap cleanup_temp_dirs EXIT
 
 # Test: Buildozer updates MODULE.bazel correctly
 test_buildozer_updates() {
-  echo "TEST: Buildozer updates MODULE.bazel correctly"
-
   local temp_dir
   temp_dir="$(mktemp -d)"
   temp_dirs+=("${temp_dir}")
@@ -120,14 +114,10 @@ EOF
   # Verify ruby_version was NOT changed (we didn't update it)
   assert_match 'ruby_version = "3.3.0"' "${module_content}" \
     "MODULE.bazel should preserve existing ruby_version"
-
-  echo "PASS: Buildozer updates MODULE.bazel correctly"
 }
 
 # Test: Buildozer updates only target toolchain by name
 test_buildozer_name_filtering() {
-  echo "TEST: Buildozer updates only target toolchain by name"
-
   local temp_dir
   temp_dir="$(mktemp -d)"
   temp_dirs+=("${temp_dir}")
@@ -181,13 +171,8 @@ EOF
   if ! grep -B5 'name = "ruby_alt"' MODULE.bazel | grep -q 'name = "ruby"'; then
     fail "First toolchain should still exist"
   fi
-
-  echo "PASS: Buildozer updates only target toolchain by name"
 }
 
 # Run all tests
 test_buildozer_updates
 test_buildozer_name_filtering
-
-echo ""
-echo "All integration tests passed!"

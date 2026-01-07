@@ -51,7 +51,6 @@ trap cleanup_temp_dirs EXIT
 
 # Test: Buildozer updates MODULE.bazel correctly
 test_buildozer_updates() {
-  echo "TEST: Buildozer updates MODULE.bazel correctly"
 
   local temp_dir
   temp_dir="$(mktemp -d)"
@@ -105,12 +104,10 @@ EOF
   assert_match 'gemfile = "//:Gemfile"' "${module_content}" \
     "MODULE.bazel should preserve existing gemfile"
 
-  echo "PASS: Buildozer updates MODULE.bazel correctly"
 }
 
 # Test: Buildozer updates only target bundle by name
 test_buildozer_name_filtering() {
-  echo "TEST: Buildozer updates only target bundle by name"
 
   local temp_dir
   temp_dir="$(mktemp -d)"
@@ -170,12 +167,9 @@ EOF
     fail "First bundle_fetch should still exist"
   fi
 
-  echo "PASS: Buildozer updates only target bundle by name"
 }
 
 # Run all tests
 test_buildozer_updates
 test_buildozer_name_filtering
 
-echo ""
-echo "All integration tests passed!"
