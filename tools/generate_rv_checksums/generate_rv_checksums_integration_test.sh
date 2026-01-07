@@ -98,7 +98,7 @@ EOF
     "MODULE.bazel should contain rv_version"
 
   # Check rv_checksums was set with all platforms
-  assert_match "rv_checksums = {" "${module_content}" \
+  assert_match "rv_checksums = \{" "${module_content}" \
     "MODULE.bazel should contain rv_checksums"
   assert_match \
     '"linux-arm64": "0c08c35a99f10817643d548f98012268c5433ae25a737ab4d6751336108a941d"' \
