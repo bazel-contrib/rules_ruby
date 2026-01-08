@@ -24,7 +24,7 @@ jobs:
           bazelrc: common --announce_rc --color=yes
           repository-cache: true
       - run: bazel run :buildifier.check
-      - run: bazel test ...
+      - run: bazel test --verbose_failures --test_output=errors --test_summary=detailed ...
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
 
