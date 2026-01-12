@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: bazel-contrib/setup-bazel@0.16.0
+      - uses: bazel-contrib/setup-bazel@0.18.0
         with:
           bazelrc: common --announce_rc --color=yes
           repository-cache: true
@@ -65,7 +65,7 @@ jobs:
         working-directory: examples/gem
     steps:
       - uses: actions/checkout@v6
-      - uses: bazel-contrib/setup-bazel@0.16.0
+      - uses: bazel-contrib/setup-bazel@0.18.0
         with:
           # Move autoload_externally to .bazelrc once Bazel 6 support is dropped.
           bazelrc: common --announce_rc --color=yes --incompatible_autoload_externally= ${{ matrix.mode == 'WORKSPACE' && '--enable_workspace' || '' }}
@@ -105,7 +105,7 @@ jobs:
         working-directory: examples/jekyll
     steps:
       - uses: actions/checkout@v6
-      - uses: bazel-contrib/setup-bazel@0.16.0
+      - uses: bazel-contrib/setup-bazel@0.18.0
         with:
           bazelrc: common --announce_rc --color=yes
           module-root: examples/jekyll
@@ -132,7 +132,7 @@ jobs:
         working-directory: examples/native_ext
     steps:
       - uses: actions/checkout@v6
-      - uses: bazel-contrib/setup-bazel@0.16.0
+      - uses: bazel-contrib/setup-bazel@0.18.0
         with:
           bazelrc: common --announce_rc --color=yes
           module-root: examples/native_ext
@@ -164,7 +164,7 @@ jobs:
         working-directory: examples/deep_gem
     steps:
       - uses: actions/checkout@v6
-      - uses: bazel-contrib/setup-bazel@0.16.0
+      - uses: bazel-contrib/setup-bazel@0.18.0
         with:
           # Move autoload_externally to .bazelrc once Bazel 6 support is dropped.
           bazelrc: common --announce_rc --color=yes --incompatible_autoload_externally=
@@ -197,7 +197,7 @@ jobs:
         working-directory: examples/rails
     steps:
       - uses: actions/checkout@v6
-      - uses: bazel-contrib/setup-bazel@0.16.0
+      - uses: bazel-contrib/setup-bazel@0.18.0
         with:
           # Move autoload_externally to .bazelrc once Bazel 6 support is dropped.
           bazelrc: common --announce_rc --incompatible_autoload_externally=
