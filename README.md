@@ -101,12 +101,12 @@ The following toolchains are known to work and tested on CI.
 
 | Ruby             | Linux | macOS | Windows |
 | ---------------- | ----- | ----- | ------- |
-| MRI 3.5          | 🟩    | 🟩    | 🟥      |
+| MRI 4.0          | 🟩    | 🟩    | 🟩      |
 | MRI 3.4          | 🟩    | 🟩    | 🟩      |
 | MRI 3.3          | 🟩    | 🟩    | 🟩      |
 | MRI 3.2          | 🟩    | 🟩    | 🟩      |
 | JRuby 10.0       | 🟩    | 🟩    | 🟩      |
-| TruffleRuby 25.0 | 🟩    | 🟩    | 🟥      |
+| TruffleRuby 33.0 | 🟩    | 🟩    | 🟥      |
 
 The following toolchains were previously known to work but _no longer tested on CI_.
 
@@ -117,6 +117,7 @@ The following toolchains were previously known to work but _no longer tested on 
 | MRI 2.7          | 🟩    | 🟩    | 🟩      |
 | JRuby 9.4        | 🟩    | 🟩    | 🟩      |
 | JRuby 9.3        | 🟩    | 🟩    | 🟩      |
+| TruffleRuby 25.0 | 🟩    | 🟩    | 🟥      |
 | TruffleRuby 24.0 | 🟩    | 🟩    | 🟥      |
 | TruffleRuby 23.0 | 🟩    | 🟩    | 🟥      |
 | TruffleRuby 22.0 | 🟩    | 🟩    | 🟥      |
