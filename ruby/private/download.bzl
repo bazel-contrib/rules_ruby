@@ -1,6 +1,6 @@
 "Repository rule for fetching Ruby interpreters"
 
-RUBY_BUILD_VERSION = "20250925"
+RUBY_BUILD_VERSION = "20260114"
 
 _JRUBY_BINARY_URL = "https://repo1.maven.org/maven2/org/jruby/jruby-dist/{version}/jruby-dist-{version}-bin.tar.gz"
 _RUBY_BUILD_URL = "https://github.com/rbenv/ruby-build/archive/refs/tags/v{version}.tar.gz"
