@@ -1,11 +1,14 @@
 "Repository rule for fetching Ruby interpreters"
 
+load("//ruby/private:rv_ruby_checksums.bzl", "RV_RUBY_CHECKSUMS")
+
 RUBY_BUILD_VERSION = "20260114"
 
 _JRUBY_BINARY_URL = "https://repo1.maven.org/maven2/org/jruby/jruby-dist/{version}/jruby-dist-{version}-bin.tar.gz"
 _RUBY_BUILD_URL = "https://github.com/rbenv/ruby-build/archive/refs/tags/v{version}.tar.gz"
 _RUBY_INSTALLER_URL = "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-{version}-1/rubyinstaller-devkit-{version}-1-x64.exe"
-_RV_RUBY_URL = "https://github.com/spinel-coop/rv-ruby/releases/download/{release}/ruby-{version}.{platform}.tar.gz"
+_RV_RUBY_NAME = "ruby-{version}.{platform}.tar.gz"
+_RV_RUBY_URL = "https://github.com/spinel-coop/rv-ruby/releases/download/{release}/{name}"
 
 # Map Bazel OS/arch to rv-ruby artifact naming
 _RV_RUBY_PLATFORMS = {
@@ -330,11 +333,17 @@ Supported platforms: {supported}
         ))
 
     rv_platform = _RV_RUBY_PLATFORMS[platform_key]
+    rv_ruby_name = _RV_RUBY_NAME.format(
+        version = ruby_version,
+        platform = rv_platform,
+    )
 
     # Get checksum if provided (Bazel will warn if not provided)
     kwargs = {}
     if platform_key in checksums:
         kwargs["sha256"] = checksums[platform_key]
+    elif rv_ruby_name in RV_RUBY_CHECKSUMS:
+        kwargs["sha256"] = RV_RUBY_CHECKSUMS[rv_ruby_name]
 
     repository_ctx.report_progress(
         "Downloading rv-ruby %s for %s" % (ruby_version, platform_key),
@@ -347,8 +356,7 @@ Supported platforms: {supported}
     repository_ctx.download_and_extract(
         url = _RV_RUBY_URL.format(
             release = rv_version,
-            version = ruby_version,
-            platform = rv_platform,
+            name = rv_ruby_name,
         ),
         output = "dist/",
         stripPrefix = "rv-ruby@{v}/{v}".format(v = ruby_version),

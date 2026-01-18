@@ -132,6 +132,7 @@ bzl_library(
     name = "download",
     srcs = ["download.bzl"],
     visibility = ["//ruby:__subpackages__"],
+    deps = [":rv_ruby_checksums"],
 )
 
 bzl_library(
@@ -143,5 +144,11 @@ bzl_library(
 bzl_library(
     name = "utils",
     srcs = ["utils.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+)
+
+bzl_library(
+    name = "rv_ruby_checksums",
+    srcs = ["rv_ruby_checksums.bzl"],
     visibility = ["//ruby:__subpackages__"],
 )
