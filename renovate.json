@@ -13,6 +13,10 @@
     {
       "matchFiles": ["MODULE.bazel"],
       "enabled": false
+    },
+    {
+      "matchManagers": ["bundler"],
+      "enabled": false
     }
   ]
 }
