@@ -105,26 +105,7 @@ def _rb_download_impl(repository_ctx):
     ruby_binary_name = "ruby"
     gem_binary_name = "gem"
 
-    # Handle rv-ruby: only supported on Linux and macOS
-    use_rv_ruby = False
-    if repository_ctx.attr.rv_version:
-        if repository_ctx.os.name.startswith("windows"):
-            # buildifier: disable=print
-            print("""\
-WARNING: rv-ruby is not supported on Windows. Falling back to RubyInstaller \
-for Ruby %s.\
-""" % version)
-        else:
-            use_rv_ruby = True
-
-    if use_rv_ruby:
-        _install_rv_ruby(
-            repository_ctx,
-            repository_ctx.attr.rv_version,
-            version,
-            repository_ctx.attr.rv_checksums,
-        )
-    elif version.startswith("jruby"):
+    if version.startswith("jruby"):
         _install_jruby(repository_ctx, version)
 
         engine = "jruby"
@@ -152,11 +133,23 @@ for Ruby %s.\
         openssl_prefix = _execute_command(repository_ctx, ["dist/bin/ruby", "-rrbconfig", "-e", "puts ENV['OPENSSL_PREFIX']"])
         if openssl_prefix:
             env.update({"OPENSSL_PREFIX": openssl_prefix})
-
     elif version == "system":
         engine = _symlink_system_ruby(repository_ctx)
     elif repository_ctx.os.name.startswith("windows"):
+        if repository_ctx.attr.rv_version:
+            # buildifier: disable=print
+            print("""\
+WARNING: rv-ruby is not supported on Windows. Falling back to RubyInstaller \
+for Ruby %s.\
+""" % version)
         _install_via_rubyinstaller(repository_ctx, version)
+    elif repository_ctx.attr.rv_version:
+        _install_rv_ruby(
+            repository_ctx,
+            repository_ctx.attr.rv_version,
+            version,
+            repository_ctx.attr.rv_checksums,
+        )
     else:
         _install_via_ruby_build(repository_ctx, version)
 
