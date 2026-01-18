@@ -6,8 +6,11 @@
   "ignoreDeps": [
     "bazel_features",
     "bazel_skylib",
+    "buildifier_prebuilt",
+    "cgrindel_bazel_starlib",
     "platforms",
     "rules_cc",
-    "rules_java"
+    "rules_java",
+    "rules_shell"
   ]
 }
