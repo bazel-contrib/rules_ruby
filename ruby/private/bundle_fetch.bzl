@@ -174,24 +174,24 @@ def _rb_bundle_fetch_impl(repository_ctx):
     # Skip gems that are in the excluded_gems list (e.g., default gems bundled with Ruby).
     excluded_gems = {name: True for name in repository_ctx.attr.excluded_gems}
     for gem in gemfile_lock.remote_packages:
-        if gem.name in excluded_gems:
-            # Skip downloading this gem - it's bundled with Ruby
-            continue
         gem_checksums[gem.full_name] = _download_gem(
             repository_ctx,
             gem,
             cache_path,
             repository_ctx.attr.gem_checksums.get(gem.full_name, None),
         )
-        executables.extend(_get_gem_executables(repository_ctx, gem, cache_path))
-        gem_full_names.append(":%s" % gem.full_name)
-        gem_fragments.append(
-            _GEM_BUILD_FRAGMENT.format(
-                name = gem.full_name,
-                gem = gem.filename,
-                cache_path = cache_path,
-            ),
-        )
+
+        # Skip registering excluded gems.
+        if gem.name not in excluded_gems:
+            executables.extend(_get_gem_executables(repository_ctx, gem, cache_path))
+            gem_full_names.append(":%s" % gem.full_name)
+            gem_fragments.append(
+                _GEM_BUILD_FRAGMENT.format(
+                    name = gem.full_name,
+                    gem = gem.filename,
+                    cache_path = cache_path,
+                ),
+            )
 
     # Fetch Bundler and define an `rb_gem_install()` target for it.
     _download_gem(repository_ctx, gemfile_lock.bundler, cache_path, gemfile_lock.bundler.sha256)
