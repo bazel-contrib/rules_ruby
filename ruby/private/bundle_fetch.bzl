@@ -66,6 +66,13 @@ See https://github.com/rubygems/rubygems/issues/4620 for more details.
 
 """
 
+_OUTDATED_BUNDLER_FOR_GIT_GEMS_ERROR = """
+
+Installing gems from Git repositories requires Bundler 2.6.0 or later in Gemfile.lock.
+Please update Bundler version and regenerate Gemfile.lock.
+
+"""
+
 _EXECUTABLE_DIRNAMES = ["bin", "exe"]
 
 def _download_gem(repository_ctx, gem, cache_path, sha256 = None):
@@ -118,14 +125,41 @@ def _get_executables_from_dir(contents):
                 executables.append(executable.basename)
     return executables
 
-def _get_git_gem_executables(repository_ctx, extracted_path):
-    # type: (repository_ctx, list[Unknown], string) -> list[string]
+def _process_git_gem_directory(rctx, directory):
+    # type: (repository_ctx, string) -> list[string]
+    """Walk git gem directory to find executables and delete BUILD files.
+
+    This function iteratively traverses the directory tree to:
+    1. Delete BUILD and BUILD.bazel files (so glob can traverse the directory)
+    2. Find directories containing .gemspec files
+    3. Collect executables from bin/exe directories near gemspec files
+
+    Args:
+        rctx: repository context
+        directory: path to the extracted git gem directory
+
+    Returns:
+        A list of executable names found in the gem.
+    """
+    dirs_to_visit = [rctx.path(directory)]
+    gemspec_dirs = []
+
+    for i in range(10000):  # Bounded loop required by Starlark
+        if i >= len(dirs_to_visit):
+            break
+        current = dirs_to_visit[i]
+        for child in current.readdir():
+            if child.basename in ("BUILD", "BUILD.bazel"):
+                rctx.delete(child)
+            elif child.is_dir:
+                dirs_to_visit.append(child)
+            elif child.basename.endswith(".gemspec"):
+                gemspec_dirs.append(current)
+
+    # Get executables from each gemspec directory
     executables = []
-    result = repository_ctx.execute(["find", extracted_path, "-type", "f", "-name", "*.gemspec"])
-    gemspec_paths = [line for line in result.stdout.splitlines() if line]
-    for gemspec_path in gemspec_paths:
-        gemspec_dirname, _, _ = gemspec_path.rpartition("/")
-        executables.extend(_get_executables_from_dir(repository_ctx.path(gemspec_dirname)))
+    for gemspec_dir in gemspec_dirs:
+        executables.extend(_get_executables_from_dir(gemspec_dir))
     return executables
 
 def _get_gem_executables(repository_ctx, gem, cache_path):
@@ -212,6 +246,9 @@ def _rb_bundle_fetch_impl(repository_ctx):
     if not versions.is_at_least("2.2.19", gemfile_lock.bundler.version):
         fail(_OUTDATED_BUNDLER_ERROR)
 
+    if len(gemfile_lock.git_packages) > 0 and not versions.is_at_least("2.6.0", gemfile_lock.bundler.version):
+        fail(_OUTDATED_BUNDLER_FOR_GIT_GEMS_ERROR)
+
     executables = []
     gem_full_names = []
     git_gem_srcs = []
@@ -246,7 +283,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
 
     for git_package in gemfile_lock.git_packages:
         extracted_path = _fetch_git_repository(repository_ctx, git_package, cache_path)
-        executables.extend(_get_git_gem_executables(repository_ctx, extracted_path))
+        executables.extend(_process_git_gem_directory(repository_ctx, extracted_path))
         fragment = _GIT_GEM_BUILD_FRAGMENT if len(git_package.gems) == 1 else _GIT_GEM_SUBDIRECTORY_BUILD_FRAGMENT
         for gem in git_package.gems:
             git_gem_srcs.append(":%s" % gem.full_name)
@@ -405,8 +442,7 @@ with Ruby (e.g., psych, stringio).\
     doc = """
 Fetches Bundler dependencies to be automatically installed by other targets.
 
-Currently doesn't support installing gems from Git repositories,
-see https://github.com/bazel-contrib/rules_ruby/issues/62.
+Installing gems from Git repositories is supported for Bundler 2.6.0 or later.
 
 `WORKSPACE`:
 ```bazel

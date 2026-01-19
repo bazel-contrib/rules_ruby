@@ -27,5 +27,5 @@ def sync_dir(dir)
   end
 end
 
-Dir.mkdir($destdir)
+Dir.mkdir($destdir) unless Dir.exist?($destdir)
 sync_dir ''
