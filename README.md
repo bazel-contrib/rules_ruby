@@ -172,10 +172,9 @@ ruby.toolchain(
 
 When using `rv-ruby`, you must exclude _default_ gems with C extensions from
 `bundle_fetch` as these are pre-compiled in the `rv-ruby` binary. You may see
-compilation errors if you do not exclude these gems.
+compilation errors if you do not exclude these gems. Generally, as long as you pin the gem version to your Ruby version standard gem per https://stdgems.org, you should be good.
 
-We have provided the `generate_excluded_gems` utility to update the declaration
-for you.
+We have provided a default mapping of standard gems along with the `generate_excluded_gems` utility to update the declaration for you.
 
 ```bash
 bazel run @rules_ruby//tools/generate_excluded_gems

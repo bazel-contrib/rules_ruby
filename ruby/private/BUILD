@@ -85,6 +85,7 @@ bzl_library(
     deps = [
         ":bundler_checksums",
         ":utils",
+        "//ruby/private/bundle_fetch:default_gems",
         "//ruby/private/bundle_fetch:gemfile_lock_parser",
         "//ruby/private/bundle_fetch:jars_downloader",
         "@bazel_skylib//lib:paths",
