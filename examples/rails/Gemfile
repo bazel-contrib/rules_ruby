@@ -9,9 +9,6 @@ gem "rails", "~> 8.0"
 # binaries. The list can be found at https://stdgems.org/<ruby-version> (e.g,
 # https://stdgems.org/3.4.8 for Ruby 3.4.8).  These gems should NOT be
 # downloaded - they're pre-compiled in rv-ruby with portable dependencies.
-#
-# IMPORTANT: These gems must be listed in the excluded_gems list in the
-# bundle_fetch configured in your MODULE.bazel file.
 gem "date", "3.4.1"
 gem "digest", "3.2.0"
 gem "etc", "1.4.6"
