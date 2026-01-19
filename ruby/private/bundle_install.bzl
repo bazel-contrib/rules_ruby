@@ -57,13 +57,13 @@ def _rb_bundle_install_impl(ctx):
 
     # See https://bundler.io/v2.5/man/bundle-config.1.html for confiugration keys.
     env.update({
-        "BUNDLE_BIN": "/".join([relative_dir, binstubs.path]),
+        "BUNDLE_BIN": "".join([relative_dir, binstubs.path]),
         "BUNDLE_DEPLOYMENT": "1",
         "BUNDLE_DISABLE_SHARED_GEMS": "1",
         "BUNDLE_DISABLE_VERSION_CHECK": "1",
         "BUNDLE_GEMFILE": _normalize_path(ctx, ctx.file.gemfile.path),
         "BUNDLE_IGNORE_CONFIG": "1",
-        "BUNDLE_PATH": _normalize_path(ctx, "/".join([relative_dir, bundle_path.path])),
+        "BUNDLE_PATH": _normalize_path(ctx, "".join([relative_dir, bundle_path.path])),
         "BUNDLE_SHEBANG": _normalize_path(ctx, toolchain.ruby.short_path),
     })
 
