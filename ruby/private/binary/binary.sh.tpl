@@ -62,6 +62,9 @@ fi
 if [ -n "{bundler_command}" ]; then
   export BUNDLE_GEMFILE=$(rlocation $BUNDLE_GEMFILE)
   export BUNDLE_PATH=$(rlocation $BUNDLE_PATH)
+  if [ -n "${JARS_HOME:-}" ]; then
+    export JARS_HOME=$(rlocation $JARS_HOME)
+  fi
 fi
 
 if [ -n "{locate_binary_in_runfiles}" ]; then

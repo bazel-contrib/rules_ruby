@@ -9,6 +9,26 @@ load(
     _normalize_path = "normalize_path",
 )
 
+def _jars_home(jars, jars_path):
+    # Runtime environment includes JARS_HOME for JRuby to find pre-downloaded JARs.
+    # The jars_path needs to be an rlocation path that can be resolved at runtime.
+    jars_rlocation_path = ""
+    if jars_path and jars:
+        # Compute rlocation path from the first jar file's short_path.
+        # Short path is like "../repo_name/vendor/jars/org/yaml/snakeyaml/1.33/snakeyaml-1.33.jar"
+        # We need to extract the base path "repo_name/vendor/jars".
+        first_jar = jars[0]
+        jar_short_path = first_jar.short_path.removeprefix("../")
+
+        # Remove the Maven path portion to get the jars base directory.
+        # The jars_path attribute tells us where the jars root is.
+        jars_base_idx = jar_short_path.find(jars_path)
+        if jars_base_idx >= 0:
+            jars_rlocation_path = jar_short_path[:jars_base_idx + len(jars_path)]
+            return {"JARS_HOME": jars_rlocation_path}
+
+    return {}
+
 def _rb_bundle_install_impl(ctx):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
     if ctx.attr.ruby != None:
@@ -28,16 +48,25 @@ def _rb_bundle_install_impl(ctx):
     binstubs = ctx.actions.declare_directory(BINSTUBS_LOCATION)
     bundle_path = ctx.actions.declare_directory("vendor/bundle")
 
+    jar_files = ctx.files.jars if ctx.attr.jars else []
+
     env = {}
     env.update(toolchain.env)
     env.update(ctx.attr.env)
+
+    bundler_env = {}
+    bundler_env.update(ctx.attr.env)
+
     if toolchain.version.startswith("jruby"):
         java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
         tools.extend(java_toolchain.java_runtime.files.to_list())
         env.update({
-            "JARS_SKIP": "true",  # Avoid installing extra dependencies.
+            "JARS_SKIP": "true",  # Avoid installing extra dependencies during install.
             "JAVA_HOME": java_toolchain.java_runtime.java_home,
         })
+        jars_home = _jars_home(jar_files, ctx.attr.jars_path)
+        env.update(jars_home)
+        bundler_env.update(jars_home)
 
     if _is_windows(ctx):
         script = ctx.actions.declare_file("bundle_install_{}.cmd".format(ctx.label.name))
@@ -79,7 +108,7 @@ def _rb_bundle_install_impl(ctx):
 
     ctx.actions.run(
         executable = script,
-        inputs = depset([ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs + ctx.files.gems),
+        inputs = depset([ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs + ctx.files.gems + jar_files),
         outputs = [binstubs, bundle_path],
         mnemonic = "BundleInstall",
         progress_message = "Running bundle install (%{label})",
@@ -92,7 +121,7 @@ def _rb_bundle_install_impl(ctx):
         ctx.file.gemfile_lock,
         binstubs,
         bundle_path,
-    ] + ctx.files.srcs
+    ] + ctx.files.srcs + jar_files
 
     return [
         DefaultInfo(
@@ -108,7 +137,7 @@ def _rb_bundle_install_impl(ctx):
         ),
         BundlerInfo(
             bin = binstubs,
-            env = ctx.attr.env,
+            env = bundler_env,
             gemfile = ctx.file.gemfile,
             path = bundle_path,
         ),
@@ -131,6 +160,13 @@ rb_bundle_install = rule(
             allow_files = [".gem"],
             mandatory = True,
             doc = "List of gems in vendor/cache that are used to install dependencies from.",
+        ),
+        "jars": attr.label_list(
+            allow_files = [".jar"],
+            doc = "JAR dependencies for JRuby gems.",
+        ),
+        "jars_path": attr.string(
+            doc = "Path to the directory containing JAR dependencies (set as JARS_HOME).",
         ),
         "srcs": attr.label_list(
             allow_files = True,

@@ -16,6 +16,7 @@ load(
 )
 load("//ruby/private/bundle_fetch:default_gems.bzl", "DEFAULT_GEMS")
 load("//ruby/private/bundle_fetch:gemfile_lock_parser.bzl", "parse_gemfile_lock")
+load("//ruby/private/bundle_fetch:jars_downloader.bzl", "fetch_jars_for_gem")
 
 # Location of Bundler binstubs to generate shims and use during rb_bundle_install(...).
 BINSTUBS_LOCATION = "bin/private"
@@ -231,6 +232,10 @@ def _rb_bundle_fetch_impl(repository_ctx):
     # Skip gems that are in the excluded_gems list or are default gems for the Ruby version.
     excluded_gems = {name: True for name in repository_ctx.attr.excluded_gems}
     ruby_version = _read_ruby_version(repository_ctx)
+
+    # Define jars path relative to the location of Gemfile for JAR dependencies.
+    jars_path = paths.join(paths.dirname(gemfile_rel_path), "vendor/jars")
+
     for gem in gemfile_lock.remote_packages:
         gem_checksums[gem.full_name] = _download_gem(
             repository_ctx,
@@ -238,6 +243,9 @@ def _rb_bundle_fetch_impl(repository_ctx):
             cache_path,
             repository_ctx.attr.gem_checksums.get(gem.full_name, None),
         )
+
+        # Fetch JAR dependencies for Java-platform gems.
+        fetch_jars_for_gem(repository_ctx, gem, jars_path)
 
         # Skip registering excluded or default gems.
         is_excluded = gem.name in excluded_gems
@@ -298,6 +306,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
             "{srcs}": _join_and_indent(srcs),
             "{gemfile_path}": gemfile_rel_path,
             "{gemfile_lock_path}": gemfile_lock_rel_path,
+            "{jars_path}": jars_path,
             "{gems}": _join_and_indent(gem_full_names),
             "{gem_fragments}": "".join(gem_fragments),
             "{gem_install_fragments}": "".join(gem_install_fragments),
