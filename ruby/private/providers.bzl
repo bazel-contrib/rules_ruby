@@ -29,6 +29,13 @@ GemInfo = provider(
     },
 )
 
+GrpcPluginInfo = provider(
+    doc = "Provider for the gRPC plugin to use for proto services generation.",
+    fields = {
+        "grpc_plugin": "The gRPC plugin executable.",
+    },
+)
+
 # https://bazel.build/rules/depsets
 
 def get_transitive_srcs(srcs, deps):

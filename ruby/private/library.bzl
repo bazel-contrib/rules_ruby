@@ -1,5 +1,6 @@
 "Implementation details for rb_library"
 
+load("//ruby/private:proto.bzl", "ruby_proto_aspect")
 load(
     "//ruby/private:providers.bzl",
     "BundlerInfo",
@@ -18,6 +19,8 @@ ATTRS = {
     ),
     "deps": attr.label_list(
         doc = "List of other Ruby libraries the target depends on.",
+        # Convert proto_library deps to provide RubyFilesInfo
+        aspects = [ruby_proto_aspect],
     ),
     "data": attr.label_list(
         allow_files = True,
