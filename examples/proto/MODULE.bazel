@@ -22,4 +22,4 @@ ruby.bundle_fetch(
 )
 use_repo(ruby, "bundle")
 
-register_toolchains("//tools:grpc_protoc_plugin")
+register_toolchains("//tools/toolchains:all")

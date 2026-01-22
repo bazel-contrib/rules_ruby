@@ -5,23 +5,7 @@ This file is loaded by `rules_ruby` (see its `rb_library` implementation) using
 """
 
 load("@protobuf//bazel/common:proto_info.bzl", "ProtoInfo")
-load("//ruby/private:providers.bzl", "GrpcPluginInfo", "RubyFilesInfo")
-
-def _ruby_grpc_protoc_plugin_toolchain_impl(ctx):
-    return [platform_common.ToolchainInfo(
-        grpc = GrpcPluginInfo(grpc_plugin = ctx.attr.grpc_plugin.files_to_run),
-    )]
-
-ruby_grpc_protoc_plugin_toolchain = rule(
-    implementation = _ruby_grpc_protoc_plugin_toolchain_impl,
-    attrs = {
-        "grpc_plugin": attr.label(
-            mandatory = True,
-            executable = True,
-            cfg = "exec",
-        ),
-    },
-)
+load("//ruby/private:providers.bzl", "RubyFilesInfo")
 
 GRPC_PLUGIN_TOOLCHAIN = "@rules_ruby//ruby:ruby_grpc_protoc_plugin.toolchain_type"
 PROTO_TOOLCHAIN = "@protobuf//bazel/private:proto_toolchain_type"
@@ -32,20 +16,11 @@ def _ruby_proto_aspect_impl(target, ctx):
     if not ProtoInfo in target:
         return []
 
-    # Use Bazel 9 feature to have a dynamic dependency graph based on file contents
-    has_services = ctx.actions.declare_directory(target.label.name + ".has_services")
-    ctx.actions.run_shell(
-        # TODO: write a more robust parser maybe with tree-sitter
-        command = "mkdir -p {out_dir}; touch {out_dir}/has_messages; grep -q 'service' {proto_files} && touch {out_dir}/services".format(
-            out_dir = has_services.path,
-            proto_files = " ".join([p.path for p in target[ProtoInfo].direct_sources]),
-        ),
-        inputs = target[ProtoInfo].direct_sources,
-        outputs = [has_services],
-    )
-
+    # TODO: Use Bazel 9 feature to have a dynamic dependency graph based on file contents.
+    # We can peek into the .proto file and produce a directory that has some indicator of whether services were found.
+    # Then ctx.actions.map_directory lets us stamp out new actions during execution.
     proto_info = ctx.toolchains[PROTO_TOOLCHAIN].proto
-    grpc_info = ctx.toolchains[GRPC_PLUGIN_TOOLCHAIN].grpc
+    grpc_info = ctx.toolchains[GRPC_PLUGIN_TOOLCHAIN].proto
     proto_srcs = target[ProtoInfo].direct_sources
     proto_deps = target[ProtoInfo].transitive_sources
     outputs = []
@@ -59,11 +34,11 @@ def _ruby_proto_aspect_impl(target, ctx):
             command = "{protoc} --plugin=protoc-gen-grpc={grpc} --ruby_out={bindir} --grpc_out={bindir} {sources}".format(
                 protoc = proto_info.proto_compiler.executable.path,
                 sources = " ".join([p.path for p in proto_srcs]),
-                grpc = grpc_info.grpc_plugin.executable.path,
+                grpc = grpc_info.plugin.executable.path,
                 bindir = ctx.bin_dir.path,
             ),
-            tools = [grpc_info.grpc_plugin, proto_info.proto_compiler],
-            inputs = depset(proto_srcs + [has_services], transitive = [proto_deps]),
+            tools = [grpc_info.plugin, proto_info.proto_compiler],
+            inputs = depset(proto_srcs, transitive = [proto_deps]),
             outputs = [msg_output, service_output],
         )
         outputs.append(msg_output)
@@ -82,9 +57,11 @@ def _ruby_proto_aspect_impl(target, ctx):
         ),
     ]
 
+# Walk the graph of "deps" and find any that provide ProtoInfo. Augment those targets with RubyFilesInfo.
 ruby_proto_aspect = aspect(
     implementation = _ruby_proto_aspect_impl,
     attr_aspects = ["deps"],
     required_providers = [ProtoInfo],
+    provides = [RubyFilesInfo],
     toolchains = [PROTO_TOOLCHAIN, GRPC_PLUGIN_TOOLCHAIN],
 )
