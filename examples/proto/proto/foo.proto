@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package foo;
+import "google/protobuf/empty.proto";
+
+service FooService {
+  rpc GetFoo(GetFooRequest) returns (GetFooResponse);
+}
+
+message GetFooRequest {
+  google.protobuf.Empty empty = 1;
+}
+
+message GetFooResponse {
+  string name = 1;
+}

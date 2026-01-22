@@ -1,3 +1,5 @@
+"User-facing public API for registering Ruby gRPC protoc plugin toolchains."
+
 load("//ruby/private:proto.bzl", "GRPC_PLUGIN_TOOLCHAIN", "ruby_grpc_protoc_plugin_toolchain")
 
 def rb_grpc_protoc_plugin_toolchain(name, grpc_plugin):

@@ -46,8 +46,6 @@ def _ruby_proto_aspect_impl(target, ctx):
 
     proto_info = ctx.toolchains[PROTO_TOOLCHAIN].proto
     grpc_info = ctx.toolchains[GRPC_PLUGIN_TOOLCHAIN].grpc
-    print("grpc_info: %s" % grpc_info.grpc_plugin)
-    print("proto_info: %s" % proto_info.proto_compiler)
     proto_srcs = target[ProtoInfo].direct_sources
     proto_deps = target[ProtoInfo].transitive_sources
     outputs = []
