@@ -1,5 +1,10 @@
 bazel_dep(name = "rules_ruby")
 bazel_dep(name = "protobuf", version = "3.19.6")
+bazel_dep(
+    name = "aspect_bazel_lib",
+    version = "2.22.5",
+    # repo_name = None (we don't dep on this but need a newer version)
+)
 
 local_path_override(
     module_name = "rules_ruby",
