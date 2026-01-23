@@ -212,7 +212,13 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-          - windows-latest
+          # Fails with an error on the grpc gem:
+          # linking shared-object grpc/grpc_c.so
+          # D:/_bazel/external/rules_ruby++ruby+ruby/dist/msys64/ucrt64/bin/../lib/gcc/x86_64-w64-mingw32/15.1.0/../../../../x86_64-w64-mingw32/bin/ld.exe:
+          # cannot find -lx64-ucrt-ruby340: No such file or directory
+          # D:/_bazel/external/rules_ruby++ruby+ruby/dist/msys64/ucrt64/bin/../lib/gcc/x86_64-w64-mingw32/15.1.0/../../../../x86_64-w64-mingw32/bin/ld.exe:
+          # have you installed the static version of the x64-ucrt-ruby340 library ?
+          # - windows-latest
     defaults:
       run:
         working-directory: examples/proto
