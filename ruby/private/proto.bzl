@@ -51,11 +51,6 @@ def _ruby_proto_aspect_impl(target, ctx):
         outputs.append(msg_output)
         outputs.append(service_output)
     return [
-        DefaultInfo(
-            files = depset(
-                outputs,
-            ),
-        ),
         RubyFilesInfo(
             transitive_srcs = depset(outputs),
             transitive_deps = depset(),

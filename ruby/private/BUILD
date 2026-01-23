@@ -36,7 +36,20 @@ bzl_library(
     name = "library",
     srcs = ["library.bzl"],
     visibility = ["//ruby:__subpackages__"],
-    deps = [":providers"],
+    deps = [
+        ":proto",
+        ":providers",
+    ],
+)
+
+bzl_library(
+    name = "proto",
+    srcs = ["proto.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+    deps = [
+        ":providers",
+        "@protobuf//bazel/common:proto_info_bzl",
+    ],
 )
 
 bzl_library(
