@@ -50,6 +50,15 @@ bzl_library(
 )
 
 bzl_library(
+    name = "proto",
+    srcs = ["proto.bzl"],
+    deps = [
+        "//ruby/private:proto",
+        "@protobuf//bazel/toolchains:proto_lang_toolchain_bzl",
+    ],
+)
+
+bzl_library(
     name = "toolchain",
     srcs = ["toolchain.bzl"],
 )

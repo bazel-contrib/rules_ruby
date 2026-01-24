@@ -1,13 +1,18 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    ":dependencyDashboard",
+    ":enablePreCommit",
+    ":semanticPrefixFixDepsChoreOthers",
+    "group:monorepos",
+    "group:recommended",
+    "replacements:all",
+    "workarounds:all"
   ],
-  "ignoreDeps": [
-    "bazel_features",
-    "bazel_skylib",
-    "platforms",
-    "rules_cc",
-    "rules_java"
+  "packageRules": [
+    {
+      "matchFiles": ["MODULE.bazel"],
+      "enabled": false
+    }
   ]
 }
