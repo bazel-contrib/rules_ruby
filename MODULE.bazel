@@ -19,6 +19,9 @@ bazel_dep(name = "rules_java", version = "7.2.0")
 bazel_dep(name = "rules_shell", version = "0.4.1")
 bazel_dep(name = "buildifier_prebuilt", version = "8.2.1.1")
 
+# NB: LOWER BOUND on earliest BCR release of protobuf module, to avoid upgrading the root module by accident
+bazel_dep(name = "protobuf", version = "3.19.6")
+
 # Ruleset development dependencies.
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.5", dev_dependency = True)
 bazel_dep(name = "bazel_skylib_gazelle_plugin", version = "1.9.0", dev_dependency = True)

@@ -17,4 +17,9 @@ stardoc_with_diff_test(
     bzl_library_target = "//rails:rails_test_factory",
 )
 
+stardoc_with_diff_test(
+    name = "proto",
+    bzl_library_target = "//ruby:proto",
+)
+
 update_docs(name = "update")

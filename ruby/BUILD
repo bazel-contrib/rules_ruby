@@ -9,6 +9,11 @@ toolchain_type(
     visibility = ["//visibility:public"],
 )
 
+toolchain_type(
+    name = "ruby_grpc_protoc_plugin.toolchain_type",
+    visibility = ["//visibility:public"],
+)
+
 bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
@@ -53,6 +58,15 @@ bzl_library(
         ":deps",
         "//ruby/private:download",
         "//ruby/private:toolchain",
+    ],
+)
+
+bzl_library(
+    name = "proto",
+    srcs = ["proto.bzl"],
+    deps = [
+        "//ruby/private:proto",
+        "@protobuf//bazel/toolchains:proto_lang_toolchain_bzl",
     ],
 )
 

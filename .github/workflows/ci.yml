@@ -206,6 +206,38 @@ jobs:
       - run: echo ${{ matrix.ruby }} > .ruby-version
       - run: ./do_test
 
+  examples-proto:
+    name: Examples / Proto
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - 3.4.5
+        os:
+          - ubuntu-latest
+          - macos-latest
+          # Fails with an error on the grpc gem:
+          # linking shared-object grpc/grpc_c.so
+          # D:/_bazel/external/rules_ruby++ruby+ruby/dist/msys64/ucrt64/bin/../lib/gcc/x86_64-w64-mingw32/15.1.0/../../../../x86_64-w64-mingw32/bin/ld.exe:
+          # cannot find -lx64-ucrt-ruby340: No such file or directory
+          # D:/_bazel/external/rules_ruby++ruby+ruby/dist/msys64/ucrt64/bin/../lib/gcc/x86_64-w64-mingw32/15.1.0/../../../../x86_64-w64-mingw32/bin/ld.exe:
+          # have you installed the static version of the x64-ucrt-ruby340 library ?
+          # - windows-latest
+    defaults:
+      run:
+        working-directory: examples/proto
+    steps:
+      - uses: actions/checkout@v5
+      - uses: bazel-contrib/setup-bazel@0.15.0
+        with:
+          # Move autoload_externally to .bazelrc once Bazel 6 support is dropped.
+          bazelrc: common --announce_rc --incompatible_autoload_externally=
+          module-root: examples/proto
+          repository-cache: true
+      - run: echo ${{ matrix.ruby }} > .ruby-version
+      - run: bazel build app
+        
   release:
     name: Release
     if: startsWith(github.ref, 'refs/tags/v')

@@ -1,0 +1,2 @@
+common --@protobuf//bazel/toolchains:prefer_prebuilt_protoc
+common --repo_env="JAVA_HOME=../bazel_tools/jdk"
