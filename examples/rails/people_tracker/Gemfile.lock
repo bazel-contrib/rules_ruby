@@ -109,7 +109,7 @@ GEM
       railties (>= 4.1.0)
       responders
       warden (~> 1.2.3)
-    digest (3.2.0)
+    digest (3.2.1)
     dotenv (3.2.0)
     drb (2.2.3)
     ed25519 (1.4.0)
@@ -409,7 +409,7 @@ DEPENDENCIES
   date (= 3.4.1)
   debug
   devise (~> 4.9)
-  digest (= 3.2.0)
+  digest (= 3.2.1)
   etc (= 1.4.6)
   fcntl (= 1.2.0)
   fiddle (= 1.1.6)
