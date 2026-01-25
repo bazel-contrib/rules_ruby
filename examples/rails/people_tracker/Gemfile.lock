@@ -119,7 +119,7 @@ GEM
       tzinfo
     etc (1.4.6)
     fcntl (1.2.0)
-    fiddle (1.1.6)
+    fiddle (1.1.8)
     fugit (1.12.1)
       et-orbi (~> 1.4)
       raabro (~> 1.4)
@@ -412,7 +412,7 @@ DEPENDENCIES
   digest (= 3.2.0)
   etc (= 1.4.6)
   fcntl (= 1.2.0)
-  fiddle (= 1.1.6)
+  fiddle (= 1.1.8)
   importmap-rails
   io-console (= 0.8.1)
   io-nonblock (= 0.3.2)
