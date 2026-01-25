@@ -131,7 +131,7 @@ GEM
       actionpack (>= 6.0.0)
       activesupport (>= 6.0.0)
       railties (>= 6.0.0)
-    io-console (0.8.1)
+    io-console (0.8.2)
     io-nonblock (0.3.2)
     io-wait (0.3.2)
     irb (1.16.0)
@@ -414,7 +414,7 @@ DEPENDENCIES
   fcntl (= 1.2.0)
   fiddle (= 1.1.6)
   importmap-rails
-  io-console (= 0.8.1)
+  io-console (= 0.8.2)
   io-nonblock (= 0.3.2)
   io-wait (= 0.3.2)
   jbuilder
