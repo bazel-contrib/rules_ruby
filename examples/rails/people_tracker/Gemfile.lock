@@ -199,7 +199,7 @@ GEM
       racc (~> 1.4)
     nokogiri (1.19.0-x86_64-linux-musl)
       racc (~> 1.4)
-    openssl (3.3.1)
+    openssl (3.3.2)
     orm_adapter (0.5.0)
     ostruct (0.6.3)
     parallel (1.27.0)
@@ -421,7 +421,7 @@ DEPENDENCIES
   json (= 2.9.1)
   kamal
   minitest (~> 5.25)
-  openssl (= 3.3.1)
+  openssl (= 3.3.2)
   pathname (= 0.4.0)
   prism (= 1.5.2)
   propshaft
