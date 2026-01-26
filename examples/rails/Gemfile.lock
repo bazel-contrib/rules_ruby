@@ -198,7 +198,7 @@ GEM
       io-console (~> 0.5)
     securerandom (0.4.1)
     stringio (3.1.2)
-    strscan (3.1.2)
+    strscan (3.1.7)
     thor (1.4.0)
     timeout (0.6.0)
     tsort (0.2.0)
@@ -240,7 +240,7 @@ DEPENDENCIES
   psych (= 5.2.2)
   rails (~> 8.0)
   stringio (= 3.1.2)
-  strscan (= 3.1.2)
+  strscan (= 3.1.7)
   zlib (= 3.2.1)
 
 BUNDLED WITH
