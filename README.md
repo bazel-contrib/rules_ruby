@@ -12,6 +12,10 @@ The ruleset is known to work with:
 
 ## Getting Started
 
+### Starter repo
+
+The fastest way to try this in an empty project is to click the green "Use this template" button on https://github.com/bazel-starters/ruby.
+
 ### WORKSPACE
 
 1. Install the ruleset following WORKSPACE instructions on the [latest release][13].
