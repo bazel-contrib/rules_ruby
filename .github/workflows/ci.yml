@@ -229,7 +229,7 @@ jobs:
         working-directory: examples/proto
     steps:
       - uses: actions/checkout@v5
-      - uses: bazel-contrib/setup-bazel@0.15.0
+      - uses: bazel-contrib/setup-bazel@0.18.0
         with:
           # Move autoload_externally to .bazelrc once Bazel 6 support is dropped.
           bazelrc: common --announce_rc --incompatible_autoload_externally=
