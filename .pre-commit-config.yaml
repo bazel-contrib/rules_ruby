@@ -5,7 +5,7 @@
 repos:
   # Check formatting and lint for starlark code
   - repo: https://github.com/keith/pre-commit-buildifier
-    rev: 8.2.0
+    rev: 8.2.1
     hooks:
       - id: buildifier
       - id: buildifier-lint
