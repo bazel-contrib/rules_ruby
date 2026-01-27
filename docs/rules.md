@@ -146,7 +146,7 @@ rake, version 13.1.0
 <pre>
 load("@rules_ruby//ruby:defs.bzl", "rb_bundle_install")
 
-rb_bundle_install(<a href="#rb_bundle_install-name">name</a>, <a href="#rb_bundle_install-srcs">srcs</a>, <a href="#rb_bundle_install-env">env</a>, <a href="#rb_bundle_install-gemfile">gemfile</a>, <a href="#rb_bundle_install-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_install-gems">gems</a>, <a href="#rb_bundle_install-ruby">ruby</a>)
+rb_bundle_install(<a href="#rb_bundle_install-name">name</a>, <a href="#rb_bundle_install-srcs">srcs</a>, <a href="#rb_bundle_install-env">env</a>, <a href="#rb_bundle_install-gemfile">gemfile</a>, <a href="#rb_bundle_install-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_install-gems">gems</a>, <a href="#rb_bundle_install-git_gem_srcs">git_gem_srcs</a>, <a href="#rb_bundle_install-ruby">ruby</a>)
 </pre>
 
 Installs Bundler dependencies from cached gems.
@@ -165,6 +165,7 @@ used by `rb_bundle_fetch()`.
 | <a id="rb_bundle_install-gemfile"></a>gemfile |  Gemfile to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_bundle_install-gemfile_lock"></a>gemfile_lock |  Gemfile.lock to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_bundle_install-gems"></a>gems |  List of gems in vendor/cache that are used to install dependencies from.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | required |  |
+| <a id="rb_bundle_install-git_gem_srcs"></a>git_gem_srcs |  List of Git gem sources in vendor/cache that are used to install dependencies from.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="rb_bundle_install-ruby"></a>ruby |  Override Ruby toolchain to use when installing the gem.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 
 
@@ -433,6 +434,27 @@ Successfully registered gem: example (0.1.0)
 | <a id="rb_gem_push-env_inherit"></a>env_inherit |  List of environment variable names to be inherited by the test runner.   | List of strings | optional |  `[]`  |
 | <a id="rb_gem_push-gem"></a>gem |  Gem file to push to RubyGems. You would usually use an output of `rb_gem_build()` target here.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_gem_push-ruby"></a>ruby |  Override Ruby toolchain to use when running the script.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
+
+
+<a id="rb_git_gem"></a>
+
+## rb_git_gem
+
+<pre>
+load("@rules_ruby//ruby:defs.bzl", "rb_git_gem")
+
+rb_git_gem(<a href="#rb_git_gem-name">name</a>, <a href="#rb_git_gem-srcs">srcs</a>)
+</pre>
+
+
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="rb_git_gem-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="rb_git_gem-srcs"></a>srcs |  Repository files.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | required |  |
 
 
 <a id="rb_library"></a>

@@ -105,8 +105,7 @@ rb_bundle_fetch(<a href="#rb_bundle_fetch-name">name</a>, <a href="#rb_bundle_fe
 
 Fetches Bundler dependencies to be automatically installed by other targets.
 
-Currently doesn't support installing gems from Git repositories,
-see https://github.com/bazel-contrib/rules_ruby/issues/62.
+Installing gems from Git repositories is supported for Bundler 2.6.0 or later.
 
 `WORKSPACE`:
 ```bazel

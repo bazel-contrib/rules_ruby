@@ -1,0 +1,9 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+# Reference hello_world gem from the rules_ruby repository on GitHub
+gem "hello_world",
+    git: "https://github.com/bazel-contrib/rules_ruby.git",
+    glob: "examples/deep_gem/hello_world/*.gemspec",
+    ref: "2c98fcaf4d60007a351c6e9a15678d64e1cc4cda"

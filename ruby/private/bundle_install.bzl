@@ -74,12 +74,14 @@ def _rb_bundle_install_impl(ctx):
             "{env}": _convert_env_to_script(ctx, env),
             "{bundler_exe}": _normalize_path(ctx, bundler_exe),
             "{ruby_path}": _normalize_path(ctx, toolchain.ruby.path),
+            "{sync_bundle_cache_path}": _normalize_path(ctx, ctx.file._sync_bundle_cache_rb.path),
+            "{has_git_gem_srcs}": "1" if len(ctx.files.git_gem_srcs) > 0 else "0",
         },
     )
 
     ctx.actions.run(
         executable = script,
-        inputs = depset([ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs + ctx.files.gems),
+        inputs = depset([ctx.file.gemfile, ctx.file.gemfile_lock, ctx.file._sync_bundle_cache_rb] + ctx.files.srcs + ctx.files.gems + ctx.files.git_gem_srcs),
         outputs = [binstubs, bundle_path],
         mnemonic = "BundleInstall",
         progress_message = "Running bundle install (%{label})",
@@ -132,6 +134,10 @@ rb_bundle_install = rule(
             mandatory = True,
             doc = "List of gems in vendor/cache that are used to install dependencies from.",
         ),
+        "git_gem_srcs": attr.label_list(
+            default = [],
+            doc = "List of Git gem sources in vendor/cache that are used to install dependencies from.",
+        ),
         "srcs": attr.label_list(
             allow_files = True,
             doc = "List of Ruby source files used to build the library.",
@@ -150,6 +156,10 @@ rb_bundle_install = rule(
         "_bundle_install_cmd_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//ruby/private/bundle_install:bundle_install.cmd.tpl",
+        ),
+        "_sync_bundle_cache_rb": attr.label(
+            allow_single_file = True,
+            default = "@rules_ruby//ruby/private/bundle_install:sync_bundle_cache.rb",
         ),
         "_windows_constraint": attr.label(
             default = "@platforms//os:windows",

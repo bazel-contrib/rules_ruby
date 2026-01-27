@@ -99,17 +99,27 @@ def _parse_git_package(lines):
     """
     remote = None
     revision = None
+    gems = []
 
     for line in lines:
         if "remote: " in line:
             remote = line.split(":", 1)[1].strip()
         elif "revision: " in line:
             revision = line.split(":", 1)[1].strip()
+        elif remote:
+            info = _parse_package(line, remote)
+            if info != None:
+                gems.append(info)
+            pass
 
     if revision == None or remote == None:
         fail("Unable to parse git package from gemfile: {}. Found remote={}, revision={}.".format(lines, remote, revision))
 
-    return {"revision": revision, "remote": remote}
+    return struct(
+        remote = remote,
+        revision = revision,
+        gems = gems,
+    )
 
 def parse_gemfile_lock(content, bundler_remote, bundler_checksums):
     """Parses a Gemfile.lock.
