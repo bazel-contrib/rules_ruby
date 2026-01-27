@@ -73,6 +73,12 @@ Please update Bundler version and regenerate Gemfile.lock.
 
 """
 
+_WINDOWS_GIT_GEMS_ERROR = """
+
+Installing gems from Git repositories is not yet supported on Windows.
+
+"""
+
 _EXECUTABLE_DIRNAMES = ["bin", "exe"]
 
 def _download_gem(repository_ctx, gem, cache_path, sha256 = None):
@@ -174,9 +180,6 @@ def _get_gem_executables(repository_ctx, gem, cache_path):
     by looking into its `bin` and `exe` locations. This is accurate enough so far,
     so some exotic gems might not work correctly.
     """
-    if gem.name in repository_ctx.attr.skip_get_executables_gems:
-        return []
-
     gem_filepath = cache_path + "/" + gem.filename
 
     # Some gems are empty (e.g. date-4.2.1-java), so we should not try to unpack them.
@@ -246,8 +249,11 @@ def _rb_bundle_fetch_impl(repository_ctx):
     if not versions.is_at_least("2.2.19", gemfile_lock.bundler.version):
         fail(_OUTDATED_BUNDLER_ERROR)
 
-    if len(gemfile_lock.git_packages) > 0 and not versions.is_at_least("2.6.0", gemfile_lock.bundler.version):
-        fail(_OUTDATED_BUNDLER_FOR_GIT_GEMS_ERROR)
+    if len(gemfile_lock.git_packages) > 0:
+        if not versions.is_at_least("2.6.0", gemfile_lock.bundler.version):
+            fail(_OUTDATED_BUNDLER_FOR_GIT_GEMS_ERROR)
+        if repository_ctx.os.name.startswith("windows"):
+            fail(_WINDOWS_GIT_GEMS_ERROR)
 
     executables = []
     gem_full_names = []
@@ -433,10 +439,6 @@ with Ruby (e.g., psych, stringio).\
         ),
         "netrc": attr.string(
             doc = "Path to .netrc file to read credentials from",
-        ),
-        "skip_get_executables_gems": attr.string_list(
-            doc = "List of gems for which to skip finding executables.",
-            default = [],
         ),
     },
     doc = """

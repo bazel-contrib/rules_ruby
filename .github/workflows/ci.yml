@@ -248,7 +248,8 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-          - windows-latest
+          # Git gems are not yet supported on Windows.
+          # - windows-latest
     defaults:
       run:
         working-directory: examples/git_gem

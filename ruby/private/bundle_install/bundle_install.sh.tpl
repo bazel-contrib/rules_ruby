@@ -2,6 +2,9 @@
 
 {env}
 
+# This is required because Bundle tries to normalize the `.gemspec` files
+# during `bundle install`, which doesn't play well with sandboxing as the
+# `vendor/cache` folder will be read-only.
 if [[ "{has_git_gem_srcs}" == "1" ]]; then
     export BUNDLE_CACHE_PATH="$(mktemp -d)"
     trap 'rm -rf "$BUNDLE_CACHE_PATH"' EXIT
