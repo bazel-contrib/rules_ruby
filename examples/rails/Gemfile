@@ -12,7 +12,7 @@ gem "rails", "~> 8.0"
 #
 # IMPORTANT: These gems must be listed in the excluded_gems list in the
 # bundle_fetch configured in your MODULE.bazel file.
-gem "date", "3.4.1"
+gem "date", "3.5.1"
 gem "digest", "3.2.0"
 gem "etc", "1.4.6"
 gem "fcntl", "1.2.0"
