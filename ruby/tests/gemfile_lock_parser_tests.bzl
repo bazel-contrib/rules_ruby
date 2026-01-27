@@ -6,7 +6,6 @@ load(
     _parse_gemfile_lock = "parse_gemfile_lock",
 )
 
-# Sample Gemfile.lock content with a single Git gem
 _GEMFILE_LOCK_WITH_GIT_GEM = """
 GIT
   remote: https://github.com/example/my_gem.git
@@ -30,7 +29,6 @@ BUNDLED WITH
    2.3.0
 """
 
-# Sample Gemfile.lock content with multiple Git gems from same repo
 _GEMFILE_LOCK_WITH_MULTI_GEM_GIT_REPO = """
 GIT
   remote: https://github.com/example/monorepo.git
@@ -56,7 +54,6 @@ BUNDLED WITH
    2.3.0
 """
 
-# Sample Gemfile.lock content with multiple Git sources
 _GEMFILE_LOCK_WITH_MULTIPLE_GIT_SOURCES = """
 GIT
   remote: https://github.com/example/first_gem.git
@@ -87,7 +84,6 @@ BUNDLED WITH
    2.3.0
 """
 
-# Sample Gemfile.lock without Git gems (baseline test)
 _GEMFILE_LOCK_WITHOUT_GIT = """
 GEM
   remote: https://rubygems.org/
@@ -115,10 +111,8 @@ def _parse_gemfile_lock_with_single_git_gem_test_impl(ctx):
         {"2.3.0": "abc123"},
     )
 
-    # Test that we have one git package
     asserts.equals(env, 1, len(result.git_packages), "Expected 1 git package")
 
-    # Test git package properties
     git_pkg = result.git_packages[0]
     asserts.equals(
         env,
@@ -133,16 +127,12 @@ def _parse_gemfile_lock_with_single_git_gem_test_impl(ctx):
         "Git revision mismatch",
     )
 
-    # Test that git package has one gem
     asserts.equals(env, 1, len(git_pkg.gems), "Expected 1 gem in git package")
 
-    # Test gem properties
     gem = git_pkg.gems[0]
     asserts.equals(env, "my_gem", gem.name, "Gem name mismatch")
     asserts.equals(env, "1.0.0", gem.version, "Gem version mismatch")
     asserts.equals(env, "my_gem-1.0.0", gem.full_name, "Gem full_name mismatch")
-
-    # Test that remote packages are still parsed correctly
     asserts.equals(env, 1, len(result.remote_packages), "Expected 1 remote package")
     asserts.equals(env, "rake", result.remote_packages[0].name, "Remote package name mismatch")
 
@@ -159,7 +149,6 @@ def _parse_gemfile_lock_with_multi_gem_git_repo_test_impl(ctx):
         {"2.3.0": "abc123"},
     )
 
-    # Test that we have one git package with multiple gems
     asserts.equals(env, 1, len(result.git_packages), "Expected 1 git package")
 
     git_pkg = result.git_packages[0]
@@ -170,14 +159,9 @@ def _parse_gemfile_lock_with_multi_gem_git_repo_test_impl(ctx):
         "Git remote URL mismatch",
     )
 
-    # Test that git package has two gems
     asserts.equals(env, 2, len(git_pkg.gems), "Expected 2 gems in git package")
-
-    # Test first gem
     asserts.equals(env, "gem_one", git_pkg.gems[0].name, "First gem name mismatch")
     asserts.equals(env, "2.0.0", git_pkg.gems[0].version, "First gem version mismatch")
-
-    # Test second gem
     asserts.equals(env, "gem_two", git_pkg.gems[1].name, "Second gem name mismatch")
     asserts.equals(env, "2.1.0", git_pkg.gems[1].version, "Second gem version mismatch")
 
@@ -194,10 +178,8 @@ def _parse_gemfile_lock_with_multiple_git_sources_test_impl(ctx):
         {"2.3.0": "abc123"},
     )
 
-    # Test that we have two git packages
     asserts.equals(env, 2, len(result.git_packages), "Expected 2 git packages")
 
-    # Test first git package
     first_pkg = result.git_packages[0]
     asserts.equals(
         env,
@@ -214,7 +196,6 @@ def _parse_gemfile_lock_with_multiple_git_sources_test_impl(ctx):
     asserts.equals(env, 1, len(first_pkg.gems), "Expected 1 gem in first git package")
     asserts.equals(env, "first_gem", first_pkg.gems[0].name, "First git gem name mismatch")
 
-    # Test second git package
     second_pkg = result.git_packages[1]
     asserts.equals(
         env,
@@ -244,10 +225,7 @@ def _parse_gemfile_lock_without_git_test_impl(ctx):
         {"2.3.0": "abc123"},
     )
 
-    # Test that we have no git packages
     asserts.equals(env, 0, len(result.git_packages), "Expected 0 git packages")
-
-    # Test that remote packages are still parsed correctly
     asserts.equals(env, 2, len(result.remote_packages), "Expected 2 remote packages")
 
     return unittest.end(env)
@@ -267,7 +245,6 @@ def _parse_gemfile_lock_git_gem_remote_is_git_url_test_impl(ctx):
     git_pkg = result.git_packages[0]
     gem = git_pkg.gems[0]
 
-    # The gem's remote should be the git URL, not the rubygems URL
     asserts.equals(
         env,
         "https://github.com/example/my_gem.git",
