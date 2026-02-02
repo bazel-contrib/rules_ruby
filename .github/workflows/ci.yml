@@ -54,9 +54,6 @@ jobs:
           # TruffleRuby doesn't work on Windows.
           - os: windows-latest
             ruby: truffleruby-33.0.0
-          # GH282: System Ruby on Windows is no longer working.
-          - os: windows-latest
-            ruby: system
     defaults:
       run:
         working-directory: examples/gem
@@ -234,7 +231,7 @@ jobs:
           repository-cache: true
       - run: echo ${{ matrix.ruby }} > .ruby-version
       - run: bazel build app
-        
+
   release:
     name: Release
     if: startsWith(github.ref, 'refs/tags/v')
