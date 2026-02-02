@@ -10,7 +10,7 @@ bazel_dep(
 )
 bazel_dep(
     name = "buildifier_prebuilt",
-    version = "8.2.0.2",
+    version = "8.2.1.2",
 )
 bazel_dep(name = "rules_multitool", version = "1.7.0")
 bazel_dep(name = "rules_ruby", version = "0.0.0")
