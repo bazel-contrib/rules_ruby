@@ -21,7 +21,7 @@ local_path_override(
 
 bazel_dep(
     name = "bazel_env.bzl",
-    version = "0.5.0",
+    version = "0.7.1",
     dev_dependency = True,
 )
 
