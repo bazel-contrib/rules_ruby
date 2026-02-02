@@ -64,7 +64,7 @@ ruby.bundle_fetch(
         "ruby-progressbar-1.13.0": "80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33",
         "stringio-3.1.2": "204f1828f85cdb39d57cac4abc6dc44b04505a223f131587f2e20ae3729ba131",
         "unicode-display_width-3.1.4": "8caf2af1c0f2f07ec89ef9e18c7d88c2790e217c482bfc78aaa65eadd5415ac1",
-        "unicode-emoji-4.0.4": "2c2c4ef7f353e5809497126285a50b23056cc6e61b64433764a35eff6c36532a",
+        "unicode-emoji-4.2.0": "519e69150f75652e40bf736106cfbc8f0f73aa3fb6a65afe62fefa7f80b0f80f",
     },
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
