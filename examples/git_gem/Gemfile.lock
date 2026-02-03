@@ -1,7 +1,7 @@
 GIT
-  remote: https://github.com/bazel-contrib/rules_ruby.git
-  revision: 2c98fcaf4d60007a351c6e9a15678d64e1cc4cda
-  ref: 2c98fcaf4d60007a351c6e9a15678d64e1cc4cda
+  remote: https://github.com/withered-magic/rules_ruby.git
+  revision: f6762ba5610170f69f28cdd5523697c357ed95e2
+  ref: f6762ba5610170f69f28cdd5523697c357ed95e2
   glob: examples/deep_gem/hello_world/*.gemspec
   specs:
     hello_world (0.0.0)

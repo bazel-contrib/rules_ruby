@@ -4,6 +4,6 @@ source "https://rubygems.org"
 
 # Reference hello_world gem from the rules_ruby repository on GitHub
 gem "hello_world",
-    git: "https://github.com/bazel-contrib/rules_ruby.git",
+    git: "https://github.com/withered-magic/rules_ruby.git",
     glob: "examples/deep_gem/hello_world/*.gemspec",
-    ref: "2c98fcaf4d60007a351c6e9a15678d64e1cc4cda"
+    ref: "f6762ba5610170f69f28cdd5523697c357ed95e2"

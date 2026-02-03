@@ -127,10 +127,12 @@ def _get_executables_from_dir(contents):
 
 def _process_git_gem_directory(rctx, directory):
     # type: (repository_ctx, string) -> list[string]
-    """Walk git gem directory to find executables and delete BUILD files.
+    """Walk git gem directory to find executables and delete conflicting files.
 
     This function iteratively traverses the directory tree to:
-    1. Delete BUILD and BUILD.bazel files (so glob can traverse the directory)
+    1. Delete BUILD, BUILD.bazel, and workspace marker files that could
+       conflict with or confuse Bazel (e.g. .bazelversion, WORKSPACE,
+       WORKSPACE.bazel, MODULE.bazel)
     2. Find directories containing .gemspec files
     3. Collect executables from bin/exe directories near gemspec files
 
@@ -149,7 +151,7 @@ def _process_git_gem_directory(rctx, directory):
             break
         current = dirs_to_visit[i]
         for child in current.readdir():
-            if child.basename in ("BUILD", "BUILD.bazel"):
+            if child.basename in ("BUILD", "BUILD.bazel", ".bazelversion", "WORKSPACE", "WORKSPACE.bazel", "MODULE.bazel"):
                 rctx.delete(child)
             elif child.is_dir:
                 dirs_to_visit.append(child)
