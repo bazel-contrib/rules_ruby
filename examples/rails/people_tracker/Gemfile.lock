@@ -141,7 +141,7 @@ GEM
     jbuilder (2.14.1)
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
-    json (2.9.1)
+    json (2.18.1)
     kamal (2.10.1)
       activesupport (>= 7.0)
       base64 (~> 0.2)
@@ -418,7 +418,7 @@ DEPENDENCIES
   io-nonblock (= 0.3.2)
   io-wait (= 0.3.2)
   jbuilder
-  json (= 2.9.1)
+  json (= 2.18.1)
   kamal
   minitest (~> 5.25)
   openssl (= 3.3.1)
