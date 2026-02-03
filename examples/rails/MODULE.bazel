@@ -12,7 +12,7 @@ bazel_dep(
     name = "buildifier_prebuilt",
     version = "8.2.0.2",
 )
-bazel_dep(name = "rules_multitool", version = "1.7.0")
+bazel_dep(name = "rules_multitool", version = "1.11.1")
 bazel_dep(name = "rules_ruby", version = "0.0.0")
 local_path_override(
     module_name = "rules_ruby",
