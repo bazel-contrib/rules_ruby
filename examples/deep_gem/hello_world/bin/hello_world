@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "hello_world"
+
+name = ARGV[0] || "World"
+speaker = HelloWorld::Speaker.new(name)
+puts speaker.message

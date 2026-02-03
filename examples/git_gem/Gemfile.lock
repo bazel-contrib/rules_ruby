@@ -1,0 +1,58 @@
+GIT
+  remote: https://github.com/withered-magic/rules_ruby.git
+  revision: f6762ba5610170f69f28cdd5523697c357ed95e2
+  ref: f6762ba5610170f69f28cdd5523697c357ed95e2
+  glob: examples/deep_gem/hello_world/*.gemspec
+  specs:
+    hello_world (0.0.0)
+      irb
+      rspec (~> 3.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    date (3.5.1)
+    diff-lcs (1.6.2)
+    erb (6.0.1)
+    io-console (0.8.2)
+    irb (1.16.0)
+      pp (>= 0.6.0)
+      rdoc (>= 4.0.0)
+      reline (>= 0.4.2)
+    pp (0.6.3)
+      prettyprint
+    prettyprint (0.2.0)
+    psych (5.3.1)
+      date
+      stringio
+    rdoc (7.1.0)
+      erb
+      psych (>= 4.0.0)
+      tsort
+    reline (0.6.3)
+      io-console (~> 0.5)
+    rspec (3.13.2)
+      rspec-core (~> 3.13.0)
+      rspec-expectations (~> 3.13.0)
+      rspec-mocks (~> 3.13.0)
+    rspec-core (3.13.6)
+      rspec-support (~> 3.13.0)
+    rspec-expectations (3.13.5)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-mocks (3.13.7)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-support (3.13.6)
+    stringio (3.2.0)
+    tsort (0.2.0)
+
+PLATFORMS
+  arm64-darwin-25
+  ruby
+
+DEPENDENCIES
+  hello_world!
+
+BUNDLED WITH
+   2.7.2

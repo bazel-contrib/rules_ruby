@@ -2,7 +2,7 @@
 
 load("//ruby/private:binary.bzl", _rb_binary = "rb_binary")
 load("//ruby/private:bundle_install.bzl", _rb_bundle_install = "rb_bundle_install")
-load("//ruby/private:gem.bzl", _rb_gem = "rb_gem")
+load("//ruby/private:gem.bzl", _rb_gem = "rb_gem", _rb_git_gem = "rb_git_gem")
 load("//ruby/private:gem_build.bzl", _rb_gem_build = "rb_gem_build")
 load("//ruby/private:gem_install.bzl", _rb_gem_install = "rb_gem_install")
 load("//ruby/private:gem_push.bzl", _rb_gem_push = "rb_gem_push")
@@ -15,5 +15,6 @@ rb_gem = _rb_gem
 rb_gem_build = _rb_gem_build
 rb_gem_install = _rb_gem_install
 rb_gem_push = _rb_gem_push
+rb_git_gem = _rb_git_gem
 rb_library = _rb_library
 rb_test = _rb_test

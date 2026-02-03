@@ -1,0 +1,9 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+# Reference hello_world gem from the rules_ruby repository on GitHub
+gem "hello_world",
+    git: "https://github.com/withered-magic/rules_ruby.git",
+    glob: "examples/deep_gem/hello_world/*.gemspec",
+    ref: "f6762ba5610170f69f28cdd5523697c357ed95e2"
