@@ -133,7 +133,7 @@ GEM
       railties (>= 6.0.0)
     io-console (0.8.1)
     io-nonblock (0.3.2)
-    io-wait (0.3.2)
+    io-wait (0.4.0)
     irb (1.16.0)
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
@@ -416,7 +416,7 @@ DEPENDENCIES
   importmap-rails
   io-console (= 0.8.1)
   io-nonblock (= 0.3.2)
-  io-wait (= 0.3.2)
+  io-wait (= 0.4.0)
   jbuilder
   json (= 2.9.1)
   kamal
