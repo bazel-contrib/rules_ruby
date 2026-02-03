@@ -14,7 +14,8 @@ Gem::Specification.new do |s|
 
   s.summary = "Example"
   s.description = "Example gem"
-  s.files = Dir["lib/**/*"]
+  s.files = Dir["lib/**/*"] + Dir["bin/*"]
+  s.executables = ["hello_world"]
 
   s.require_paths = ["lib"]
   s.required_ruby_version = Gem::Requirement.new(">= 2.6")
