@@ -101,4 +101,4 @@ DEPENDENCIES
   rubocop (~> 1.64)
 
 BUNDLED WITH
-   2.3.3
+  4.0.3
