@@ -147,7 +147,7 @@ GEM
       prettyprint
     prettyprint (0.2.0)
     prism (1.5.2)
-    psych (5.2.2)
+    psych (5.3.1)
       date
       stringio
     racc (1.8.1)
@@ -237,7 +237,7 @@ DEPENDENCIES
   openssl (= 3.3.1)
   pathname (= 0.4.0)
   prism (= 1.5.2)
-  psych (= 5.2.2)
+  psych (= 5.3.1)
   rails (~> 8.0)
   stringio (= 3.1.2)
   strscan (= 3.1.2)

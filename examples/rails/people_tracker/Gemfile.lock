@@ -215,7 +215,7 @@ GEM
       actionpack (>= 7.0.0)
       activesupport (>= 7.0.0)
       rack
-    psych (5.2.2)
+    psych (5.3.1)
       date
       stringio
     public_suffix (7.0.0)
@@ -425,7 +425,7 @@ DEPENDENCIES
   pathname (= 0.4.0)
   prism (= 1.5.2)
   propshaft
-  psych (= 5.2.2)
+  psych (= 5.3.1)
   puma (>= 5.0)
   rails (~> 8.0.2, >= 8.0.2.1)
   rubocop-rails-omakase
