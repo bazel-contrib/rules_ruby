@@ -248,8 +248,7 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-          # Git gems are not yet supported on Windows.
-          # - windows-latest
+          - windows-latest
     defaults:
       run:
         working-directory: examples/git_gem
@@ -259,6 +258,8 @@ jobs:
         with:
           bazelrc: common --announce_rc --color=yes
           module-root: examples/git_gem
+          # Workaround for long path issues: https://github.com/jruby/jruby/issues/3995.
+          output-base: ${{ matrix.os == 'windows-latest' && 'D:/b' || '' }}
           repository-cache: true
       - run: bazel build ...
       - run: bazel test ...

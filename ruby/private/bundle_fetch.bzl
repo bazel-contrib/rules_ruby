@@ -73,12 +73,6 @@ Please update Bundler version and regenerate Gemfile.lock.
 
 """
 
-_WINDOWS_GIT_GEMS_ERROR = """
-
-Installing gems from Git repositories is not yet supported on Windows.
-
-"""
-
 _EXECUTABLE_DIRNAMES = ["bin", "exe"]
 
 def _download_gem(repository_ctx, gem, cache_path, sha256 = None):
@@ -252,8 +246,6 @@ def _rb_bundle_fetch_impl(repository_ctx):
     if len(gemfile_lock.git_packages) > 0:
         if not versions.is_at_least("2.6.0", gemfile_lock.bundler.version):
             fail(_OUTDATED_BUNDLER_FOR_GIT_GEMS_ERROR)
-        if repository_ctx.os.name.startswith("windows"):
-            fail(_WINDOWS_GIT_GEMS_ERROR)
 
     executables = []
     gem_full_names = []
