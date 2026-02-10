@@ -18,6 +18,7 @@ BundlerInfo = provider(
         "gemfile": "Gemfile path (BUNDLE_GEMFILE).",
         "path": "Bundle path (BUNDLE_PATH).",
         "env": "Bundle environment variables.",
+        "jars_home_strip_suffix": "Suffix to strip from JARS_HOME.",
     },
 )
 

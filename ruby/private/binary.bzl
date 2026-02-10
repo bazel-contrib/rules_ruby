@@ -64,7 +64,7 @@ Supports `$(location)` expansion for targets from `srcs`, `data` and `deps`.
 }
 
 # buildifier: disable=function-docstring
-def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {}, java_bin = ""):
+def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {}, java_bin = "", jars_home_strip_suffix = ""):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
     if ctx.attr.ruby != None:
         toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
@@ -115,6 +115,7 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
             "{binary}": binary_path,
             "{env}": _convert_env_to_script(ctx, environment),
             "{bundler_command}": bundler_command,
+            "{jars_home_strip_suffix}": jars_home_strip_suffix,
             "{ruby}": _to_rlocation_path(toolchain.ruby),
             "{ruby_binary_name}": toolchain.ruby.basename,
             "{java_bin}": java_bin,
@@ -131,6 +132,7 @@ def rb_binary_impl(ctx):
     bundler_srcs = []
     env = {}
     java_bin = ""
+    jars_home_strip_suffix = ""
 
     # TODO: avoid expanding the depset to a list, it may be expensive in a large graph
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps)
@@ -156,6 +158,8 @@ def rb_binary_impl(ctx):
             info = dep[BundlerInfo]
             bundler_srcs.extend([info.gemfile, info.bin, info.path])
             bundler = True
+            if info.jars_home_strip_suffix:
+                jars_home_strip_suffix = info.jars_home_strip_suffix
 
             # See https://bundler.io/v2.5/man/bundle-config.1.html for confiugration keys.
             env.update({
@@ -185,6 +189,7 @@ def rb_binary_impl(ctx):
         bundler = bundler,
         env = env,
         java_bin = java_bin,
+        jars_home_strip_suffix = jars_home_strip_suffix,
     )
 
     return [

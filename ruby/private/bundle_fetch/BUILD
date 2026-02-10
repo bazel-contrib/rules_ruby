@@ -5,3 +5,9 @@ bzl_library(
     srcs = ["gemfile_lock_parser.bzl"],
     visibility = ["//ruby:__subpackages__"],
 )
+
+bzl_library(
+    name = "jars_downloader",
+    srcs = ["jars_downloader.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+)

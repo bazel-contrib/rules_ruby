@@ -15,6 +15,7 @@ load(
     _normalize_bzlmod_repository_name = "normalize_bzlmod_repository_name",
 )
 load("//ruby/private/bundle_fetch:gemfile_lock_parser.bzl", "parse_gemfile_lock")
+load("//ruby/private/bundle_fetch:jars_downloader.bzl", "fetch_jars_for_gem")
 
 # Location of Bundler binstubs to generate shims and use during rb_bundle_install(...).
 BINSTUBS_LOCATION = "bin/private"
@@ -136,6 +137,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
     # Define vendor/cache relative to the location of Gemfile.
     # This is expected by Bundler to operate correctly.
     cache_path = paths.join(paths.dirname(gemfile_rel_path), "vendor/cache")
+    jars_path = paths.join(paths.dirname(gemfile_rel_path), "vendor/jars")
 
     srcs = []
     for src in repository_ctx.attr.srcs:
@@ -173,6 +175,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
     # Fetch gems and expose them as `rb_gem()` targets.
     # Skip gems that are in the excluded_gems list (e.g., default gems bundled with Ruby).
     excluded_gems = {name: True for name in repository_ctx.attr.excluded_gems}
+
     for gem in gemfile_lock.remote_packages:
         if gem.name in excluded_gems:
             # Skip downloading this gem - it's bundled with Ruby
@@ -192,6 +195,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
                 cache_path = cache_path,
             ),
         )
+        fetch_jars_for_gem(repository_ctx, gem, jars_path)
 
     # Fetch Bundler and define an `rb_gem_install()` target for it.
     _download_gem(repository_ctx, gemfile_lock.bundler, cache_path, gemfile_lock.bundler.sha256)
@@ -238,6 +242,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
             "{srcs}": _join_and_indent(srcs),
             "{gemfile_path}": gemfile_rel_path,
             "{gemfile_lock_path}": gemfile_lock_rel_path,
+            "{jars_path}": jars_path,
             "{gems}": _join_and_indent(gem_full_names),
             "{gem_fragments}": "".join(gem_fragments),
             "{gem_install_fragments}": "".join(gem_install_fragments),
