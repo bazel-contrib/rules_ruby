@@ -76,24 +76,24 @@ ruby.toolchain(
 use_repo(ruby, "ruby_toolchains")
 EOF
 
-  # Mock the API response
+  # Mock the API response (the release tag is the Ruby version)
   export RV_RUBY_API_URL="file://${mock_response%/*}"
 
   # Run the script WITHOUT --dry-run
-  "${generate_rv_checksums}" 20251225 --ruby-version 3.4.8 \
+  "${generate_rv_checksums}" --ruby-version 3.4.8 \
     --module-bazel MODULE.bazel
 
   # Verify MODULE.bazel was updated
   local module_content
   module_content=$(cat MODULE.bazel)
 
-  # Check rv_version was set
-  assert_match 'rv_version = "20251225"' "${module_content}" \
-    "MODULE.bazel should contain rv_version"
+  # Check prebuilt_ruby was set
+  assert_match 'prebuilt_ruby = True' "${module_content}" \
+    "MODULE.bazel should contain prebuilt_ruby"
 
-  # Check rv_checksums was set with all platforms
-  assert_match "rv_checksums = \{" "${module_content}" \
-    "MODULE.bazel should contain rv_checksums"
+  # Check prebuilt_ruby_checksums was set with all platforms
+  assert_match "prebuilt_ruby_checksums = \{" "${module_content}" \
+    "MODULE.bazel should contain prebuilt_ruby_checksums"
   assert_match \
     '"linux-arm64": "0c08c35a99f10817643d548f98012268c5433ae25a737ab4d6751336108a941d"' \
     "${module_content}" \
@@ -152,22 +152,22 @@ EOF
   export RV_RUBY_API_URL="file://${mock_response%/*}"
 
   # Run the script for "ruby_alt" toolchain
-  "${generate_rv_checksums}" 20251225 --ruby-version 3.4.8 --name ruby_alt \
+  "${generate_rv_checksums}" --ruby-version 3.4.8 --name ruby_alt \
     --module-bazel MODULE.bazel
 
   # Verify MODULE.bazel was updated
   local module_content
   module_content=$(cat MODULE.bazel)
 
-  # Count how many rv_version assignments there are
-  local rv_version_count
-  rv_version_count=$(grep -c 'rv_version = "20251225"' MODULE.bazel || true)
+  # Count how many prebuilt_ruby assignments there are
+  local prebuilt_ruby_count
+  prebuilt_ruby_count=$(grep -c 'prebuilt_ruby = True' MODULE.bazel || true)
 
-  assert_equal "1" "${rv_version_count}" \
-    'Should have exactly one rv_version = "20251225" (only in ruby_alt)'
+  assert_equal "1" "${prebuilt_ruby_count}" \
+    'Should have exactly one prebuilt_ruby = True (only in ruby_alt)'
 
   # Verify the first toolchain (ruby) was NOT updated
-  # Check that there's still a toolchain without rv_version before ruby_alt
+  # Check that there's still a toolchain without prebuilt_ruby before ruby_alt
   if ! grep -B5 'name = "ruby_alt"' MODULE.bazel | grep -q 'name = "ruby"'; then
     fail "First toolchain should still exist"
   fi

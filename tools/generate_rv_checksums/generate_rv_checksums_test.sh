@@ -64,12 +64,12 @@ test_basic_dry_run() {
   # Setup .ruby-version
   echo "3.4.8" >.ruby-version
 
-  # Mock the API response
+  # Mock the API response (the release tag is the Ruby version)
   export RV_RUBY_API_URL="file://${mock_response%/*}"
 
   # Run the script
   local output
-  output=$("${generate_rv_checksums}" 20251225 --dry-run)
+  output=$("${generate_rv_checksums}" --dry-run)
 
   # Verify output matches expected
   local expected
@@ -94,7 +94,7 @@ test_explicit_ruby_version() {
 
   # Run the script with explicit version
   local output
-  output=$("${generate_rv_checksums}" 20251225 --ruby-version 3.4.8 --dry-run)
+  output=$("${generate_rv_checksums}" --ruby-version 3.4.8 --dry-run)
 
   # Verify output contains expected checksums
   assert_match "linux-arm64" "${output}" "Output should contain linux-arm64"
@@ -119,14 +119,14 @@ test_missing_ruby_version() {
   export RV_RUBY_API_URL="file://${mock_response%/*}"
 
   # Run the script and expect failure
-  if "${generate_rv_checksums}" 20251225 --dry-run 2>/dev/null; then
+  if "${generate_rv_checksums}" --dry-run 2>/dev/null; then
     fail "Should have failed when .ruby-version is missing"
   fi
 
 }
 
-# Test 4: Invalid rv_version
-test_invalid_rv_version() {
+# Test 4: Invalid Ruby version (release not found)
+test_invalid_ruby_version() {
 
   local temp_dir
   temp_dir="$(mktemp -d)"
@@ -139,8 +139,8 @@ test_invalid_rv_version() {
   export RV_RUBY_API_URL="file:///nonexistent"
 
   # Run the script and expect failure
-  if "${generate_rv_checksums}" 99999999 --ruby-version 3.4.8 --dry-run 2>/dev/null; then
-    fail "Should have failed for invalid rv_version"
+  if "${generate_rv_checksums}" --ruby-version 99.99.99 --dry-run 2>/dev/null; then
+    fail "Should have failed for invalid Ruby version"
   fi
 
 }
@@ -149,5 +149,4 @@ test_invalid_rv_version() {
 test_basic_dry_run
 test_explicit_ruby_version
 test_missing_ruby_version
-test_invalid_rv_version
-
+test_invalid_ruby_version

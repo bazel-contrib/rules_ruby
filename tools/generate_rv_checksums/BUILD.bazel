@@ -18,7 +18,7 @@ sh_test(
     name = "generate_rv_checksums_test",
     srcs = ["generate_rv_checksums_test.sh"],
     data = [
-        "testdata/20251225",
+        "testdata/3.4.8",
         "testdata/expected_checksums_output.txt",
         "testdata/rv_ruby_release_response.json",
         ":generate_rv_checksums",
@@ -33,7 +33,7 @@ sh_test(
     name = "generate_rv_checksums_integration_test",
     srcs = ["generate_rv_checksums_integration_test.sh"],
     data = [
-        "testdata/20251225",
+        "testdata/3.4.8",
         "testdata/rv_ruby_release_response.json",
         ":generate_rv_checksums",
     ],

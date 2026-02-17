@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Generates rv_checksums for ruby.toolchain() and updates MODULE.bazel.
+# Generates prebuilt_ruby_checksums for ruby.toolchain() and updates MODULE.bazel.
 
 # --- begin runfiles.bash initialization v3 ---
 # Copy-pasted from the Bazel Bash runfiles library v3.
@@ -41,9 +41,8 @@ dry_run=false
 name="ruby"
 module_bazel="${BUILD_WORKSPACE_DIRECTORY:-.}/MODULE.bazel"
 ruby_version=""
-rv_version=""
 
-# Map rv-ruby platform names to rules_ruby platform keys
+# Map jdx/ruby platform names to rules_ruby platform keys
 declare -A PLATFORM_MAP=(
   ["arm64_linux"]="linux-arm64"
   ["x86_64_linux"]="linux-x86_64"
@@ -94,36 +93,20 @@ while (("$#")); do
   esac
 done
 
-# Check for required positional argument
-if [[ ${#args[@]} -eq 0 ]]; then
-  fail <<-EOT
-Error: rv_version is required
-Usage: ${0} <rv_version> [OPTIONS]
-
-Options:
-  --ruby-version VERSION
-  --name NAME
-  --module-bazel PATH
-  --dry-run
-EOT
-fi
-
-rv_version="${args[0]}"
-
 # Get Ruby version
 if [[ -z ${ruby_version} ]]; then
   ruby_version="$(read_ruby_version)"
 fi
 
-# MARK - Retrieve rv-ruby release info
+# MARK - Retrieve jdx/ruby release info
 
 # Fetch release data from GitHub API
-api_url="${RV_RUBY_API_URL:-https://api.github.com/repos/spinel-coop/rv-ruby/releases/tags}/${rv_version}"
+api_url="${RV_RUBY_API_URL:-https://api.github.com/repos/jdx/ruby/releases/tags}/${ruby_version}"
 response=$(curl -sL --max-time 30 "${api_url}")
 
 # Check if release was found
 if echo "${response}" | jq -e '.message == "Not Found"' >/dev/null 2>&1; then
-  fail "Error: rv-ruby release ${rv_version} not found"
+  fail "Error: jdx/ruby release for Ruby ${ruby_version} not found"
 fi
 
 # MARK - Extract checksums
@@ -151,7 +134,7 @@ done
 # Check if we found any assets for this Ruby version
 if [[ ${found_ruby_version} != "true" ]]; then
   fail <<-EOT
-Error: Ruby version ${ruby_version} not found in rv-ruby release ${rv_version}
+Error: Ruby version ${ruby_version} not found in jdx/ruby releases
 EOT
 fi
 
@@ -171,8 +154,7 @@ fi
 # MARK - Update MODULE.bazel
 
 # Generate output for dry-run or display
-output="rv_version = \"${rv_version}\",\n"
-output+="rv_checksums = {\n"
+output="prebuilt_ruby_checksums = {\n"
 for platform in "${expected_platforms[@]}"; do
   if [[ -n ${checksums[${platform}]:-} ]]; then
     output+="    \"${platform}\": \"${checksums[${platform}]}\",\n"
@@ -181,7 +163,7 @@ done
 output+="},"
 
 if [[ ${dry_run} == "true" ]]; then
-  # Dry-run: just output the version and checksums
+  # Dry-run: just output the checksums
   echo -e "${output}"
   exit 0
 fi
@@ -195,13 +177,13 @@ for platform in "${expected_platforms[@]}"; do
 done
 
 # Update MODULE.bazel using buildozer
-# Set both rv_version and rv_checksums
+# Set prebuilt_ruby and prebuilt_ruby_checksums
 buildozer_cmd=(
   "${buildozer}"
   -types ruby.toolchain
-  "set rv_version \"${rv_version}\""
-  "remove rv_checksums"
-  "dict_set rv_checksums ${dict_str}"
+  "set prebuilt_ruby True"
+  "remove prebuilt_ruby_checksums"
+  "dict_set prebuilt_ruby_checksums ${dict_str}"
   "${module_bazel}:${name}"
 )
 if ! "${buildozer_cmd[@]}" 2>/dev/null; then
@@ -218,4 +200,4 @@ $(echo -e "${output}")
 EOT
 fi
 
-echo "Successfully updated rv_version and rv_checksums in ${module_bazel}"
+echo "Successfully updated prebuilt_ruby and prebuilt_ruby_checksums in ${module_bazel}"

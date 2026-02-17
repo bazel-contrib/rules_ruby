@@ -129,49 +129,29 @@ Keep in mind, that it takes some time for compilation to complete.
 
 On Windows, [RubyInstaller][6] is used to install MRI.
 
-#### Fast Installation with rv-ruby
+#### Fast Installation with Prebuilt Ruby
 
 For faster MRI installation on Linux and macOS, you can use prebuilt Ruby
-binaries from [rv-ruby][19] instead of compiling from source. This significantly
+binaries from [jdx/ruby][19] instead of compiling from source. This significantly
 reduces installation time and ensures consistent, portable Ruby environments.
 
-**Configure rv-ruby Downloads**
-
-To securely download and properly cache the Ruby binaries, the `ruby.toolchain`
-declaration must be updated with the `rv_version` and `rv_checksums` attributes.
-
-We have provided the `generate_rv_checksums` utility to add/update these
-attributes for you. The utility needs to know the `rv-ruby` version to use
-(https://github.com/spinel-coop/rv-ruby/releases) and the version of Ruby to
-download. By default, it will use the Ruby version specified in the
-`.ruby-version` file.
-
-```bash
-bazel run @rules_ruby//tools/generate_rv_checksums -- 20251225
-```
-
-After running the utility, the toolchain declaration in your `MODULE.bazel`
-should look something like the following:
+To enable prebuilt Ruby, set `prebuilt_ruby = True` in your toolchain declaration:
 
 ```bazel
 ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
 ruby.toolchain(
     name = "ruby",
     version_file = "//:.ruby-version",
-    rv_version = "20251225",
-    rv_checksums = {
-        "linux-arm64": "0c08c35a99f10817643d548f98012268c5433ae25a737ab4d6751336108a941d",
-        "linux-x86_64": "f36cef10365d370e0867f0c3ac36e457a26ab04f3cfbbd7edb227a18e6e9b3c3",
-        "macos-arm64": "cd9d7a1428076bfcc6c2ca3c0eb69b8e671e9b48afb4c351fa4a84927841ffef",
-        "macos-x86_64": "e9da39082d1dd8502d322c850924d929bc45b7a1e35da593a5606c00673218d4",
-    },
+    prebuilt_ruby = True,
 )
 ```
 
+Setting `prebuilt_ruby = True` has no effect on JRuby, TruffleRuby, or Windows.
+
 **Configure Excluded Gems**
 
-When using `rv-ruby`, you must exclude _default_ gems with C extensions from
-`bundle_fetch` as these are pre-compiled in the `rv-ruby` binary. You may see
+When using prebuilt Ruby, you must exclude _default_ gems with C extensions from
+`bundle_fetch` as these are pre-compiled in the prebuilt Ruby binary. You may see
 compilation errors if you do not exclude these gems. Generally, as long as you pin the gem version to your Ruby version standard gem per https://stdgems.org, you should be good.
 
 We have provided a default mapping of standard gems along with the `generate_excluded_gems` utility to update the declaration for you.
@@ -207,10 +187,9 @@ ruby.bundle_fetch(
 
 **Notes:**
 
-- `rv-ruby` is only supported on Linux and macOS (x86_64 and arm64).
+- Prebuilt Ruby is only supported on Linux and macOS (x86_64 and arm64).
 - On Windows, the toolchain automatically falls back to RubyInstaller.
-- Find available `rv-ruby` releases at
-  https://github.com/spinel-coop/rv-ruby/releases
+- Find available prebuilt Ruby releases at https://github.com/jdx/ruby/releases
 - The utilities support `--name` to target specific toolchains/bundles and
   `--module-bazel` to specify a custom MODULE.bazel path.
 - Run utilities with `--dry-run` to preview changes without modifying files.
@@ -266,4 +245,4 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
 [16]: https://bazel.build/reference/command-line-reference#flag--experimental_inprocess_symlink_creation
 [17]: https://github.com/bazelbuild/bazel/issues/4327
 [18]: docs/rails.md
-[19]: https://github.com/spinel-coop/rv-ruby
+[19]: https://github.com/jdx/ruby
