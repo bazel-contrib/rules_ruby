@@ -66,12 +66,6 @@ rb_bundle_fetch(
         "unicode-display_width-3.1.4": "8caf2af1c0f2f07ec89ef9e18c7d88c2790e217c482bfc78aaa65eadd5415ac1",
         "unicode-emoji-4.2.0": "519e69150f75652e40bf736106cfbc8f0f73aa3fb6a65afe62fefa7f80b0f80f",
     },
-    gem_info_checksums = {
-        "io-console-0.8.0-java": "f580cbd6045f580537eb08db6c19f4702c0ed009d5ea575edb32991225ad5871",
-        "json-2.9.1-java": "8ae87e437350988c55da46113812ed1387605b55775254425eb4e1ae677edf8b",
-        "psych-5.0.1-java": "83624d872dae42fb8bc1c92140a8594436adf2986e2e1a44a6af273561c9bc1b",
-        "racc-1.8.1-java": "53c74855b3801718a1405067fb0055690c9cc6e3f9629caf241a27ded06f3439",
-    },
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
     jar_checksums = {

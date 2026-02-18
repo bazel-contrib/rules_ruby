@@ -3,7 +3,7 @@
 _MAVEN_CENTRAL_URL = "https://repo1.maven.org/maven2"
 _RUBYGEMS_API_URL = "https://rubygems.org/api/v2/rubygems/{gem}/versions/{version}.json"
 
-def fetch_jars_for_gem(repository_ctx, gem, jars_path, jar_checksums = {}, gem_info_checksums = {}):
+def fetch_jars_for_gem(repository_ctx, gem, jars_path, jar_checksums = {}):
     """Fetches all JAR dependencies for a Java gem.
 
     Args:
@@ -11,19 +11,14 @@ def fetch_jars_for_gem(repository_ctx, gem, jars_path, jar_checksums = {}, gem_i
         gem: Gem struct with name and version fields.
         jars_path: Base path for storing JARs.
         jar_checksums: Dict mapping Maven coordinates to SHA-256 checksums.
-        gem_info_checksums: Dict mapping gem full names to SHA-256 checksums of gem info JSON.
 
     Returns:
-        struct with jar_checksums and gem_info_checksums dicts.
+        Dict mapping Maven coordinates to SHA-256 checksums for downloaded JARs.
     """
     if not _is_java_gem(gem):
-        return struct(jar_checksums = {}, gem_info_checksums = {})
+        return {}
 
-    requirements, gem_info_sha256 = _fetch_gem_requirements(
-        repository_ctx,
-        gem,
-        gem_info_checksums.get(gem.full_name, None),
-    )
+    requirements = _fetch_gem_requirements(repository_ctx, gem)
     checksums = {}
 
     for req in requirements:
@@ -33,10 +28,7 @@ def fetch_jars_for_gem(repository_ctx, gem, jars_path, jar_checksums = {}, gem_i
             sha256 = _download_jar(repository_ctx, jar, jars_path, jar_checksums.get(coord, None))
             checksums[coord] = sha256
 
-    return struct(
-        jar_checksums = checksums,
-        gem_info_checksums = {gem.full_name: gem_info_sha256} if gem_info_sha256 else {},
-    )
+    return checksums
 
 def _jar_coordinate(jar):
     """Returns a Maven coordinate string for use as a checksum key.
@@ -66,7 +58,7 @@ def _is_java_gem(gem):
     """
     return gem.version.endswith("-java") or "-java-" in gem.version
 
-def _fetch_gem_requirements(repository_ctx, gem, sha256 = None):
+def _fetch_gem_requirements(repository_ctx, gem):
     """Fetches JAR requirements for a gem from RubyGems API.
 
     Queries the RubyGems API to get the gem's metadata and extracts
@@ -75,10 +67,9 @@ def _fetch_gem_requirements(repository_ctx, gem, sha256 = None):
     Args:
         repository_ctx: Repository context.
         gem: Gem struct with name and version fields.
-        sha256: Optional SHA-256 checksum for the gem info JSON.
 
     Returns:
-        Tuple of (requirements list, sha256 string).
+        List of JAR requirement strings (e.g., ["jar org.yaml:snakeyaml, 1.33"]).
     """
 
     # Extract base version without platform suffix
@@ -92,24 +83,20 @@ def _fetch_gem_requirements(repository_ctx, gem, sha256 = None):
 
     # Download gem version info from RubyGems API
     file_name = "_gem_info_{}-{}.json".format(gem.name, gem.version)
-    kwargs = {}
-    if sha256:
-        kwargs["sha256"] = sha256
     result = repository_ctx.download(
         url = url,
         output = file_name,
-        **kwargs
     )
 
     if not result.success:
         # buildifier: disable=print
         print("Warning: Failed to fetch gem info for {}".format(gem.name))
-        return [], None
+        return []
 
     gem_info = json.decode(repository_ctx.read(file_name))
     repository_ctx.delete(file_name)
 
-    return gem_info.get("requirements", []), result.sha256
+    return gem_info.get("requirements", [])
 
 def _parse_jar_requirement(requirement):
     """Parses a JAR requirement string into Maven coordinates.
