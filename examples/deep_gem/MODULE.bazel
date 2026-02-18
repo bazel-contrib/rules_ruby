@@ -36,6 +36,12 @@ ruby.bundle_fetch(
         "rspec-mocks-3.13.5": "e4338a6f285ada9fe56f5893f5457783af8194f5d08884d17a87321d5195ea81",
         "rspec-support-3.13.4": "184b1814f6a968102b57df631892c7f1990a91c9a3b9e80ef892a0fc2a71a3f7",
     },
+    gem_info_checksums = {
+        "date-3.4.1-java": "f3bc803065e9b70ff1ffa6515b293e50b07145a6b748d2282c63655b7d75245d",
+        "erb-5.0.2-java": "e33bb698367b4aa94208a3555f8a46870632c487eea51a84fc3a42e05bb8256e",
+        "io-console-0.8.1-java": "5bff9ef595c6620ebe185a0049f8d01e88973a5fd37317ea8fbe33c142ff15dc",
+        "psych-5.2.6-java": "0183d3707cf11cda4630f01d474465006f87175515d8c45745301e3fedc2c16f",
+    },
     gemfile = "//hello_world:Gemfile",
     gemfile_lock = "//hello_world:Gemfile.lock",
     jar_checksums = {"org.snakeyaml:snakeyaml-engine:2.9": "2f7a957461b6d70c0005e2c35b78a1c97bef6c446704c0ee9393ce98e4958ba8"},

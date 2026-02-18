@@ -170,6 +170,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
     gem_install_fragments = []
     gem_checksums = {}
     jar_checksums = {}
+    gem_info_checksums = {}
     ruby_toolchain_attr = "None" if repository_ctx.attr.ruby == None else '"{}"'.format(repository_ctx.attr.ruby)
     repository_name = _normalize_bzlmod_repository_name(repository_ctx.name)
 
@@ -196,7 +197,9 @@ def _rb_bundle_fetch_impl(repository_ctx):
                 cache_path = cache_path,
             ),
         )
-        jar_checksums.update(fetch_jars_for_gem(repository_ctx, gem, jars_path, repository_ctx.attr.jar_checksums))
+        jars_result = fetch_jars_for_gem(repository_ctx, gem, jars_path, repository_ctx.attr.jar_checksums, repository_ctx.attr.gem_info_checksums)
+        jar_checksums.update(jars_result.jar_checksums)
+        gem_info_checksums.update(jars_result.gem_info_checksums)
 
     # Fetch Bundler and define an `rb_gem_install()` target for it.
     _download_gem(repository_ctx, gemfile_lock.bundler, cache_path, gemfile_lock.bundler.sha256)
@@ -252,7 +255,12 @@ def _rb_bundle_fetch_impl(repository_ctx):
         },
     )
 
-    if len(repository_ctx.attr.gem_checksums) != len(gem_checksums) or len(repository_ctx.attr.jar_checksums) != len(jar_checksums):
+    checksums_mismatch = (
+        len(repository_ctx.attr.gem_checksums) != len(gem_checksums) or
+        len(repository_ctx.attr.jar_checksums) != len(jar_checksums) or
+        len(repository_ctx.attr.gem_info_checksums) != len(gem_info_checksums)
+    )
+    if checksums_mismatch:
         return {
             "name": repository_ctx.name,
             "gemfile": repository_ctx.attr.gemfile,
@@ -263,6 +271,8 @@ def _rb_bundle_fetch_impl(repository_ctx):
             "bundler_checksums": repository_ctx.attr.bundler_checksums,
             "gem_checksums": gem_checksums,
             "jar_checksums": jar_checksums,
+            "gem_info_checksums": gem_info_checksums,
+            "excluded_gems": repository_ctx.attr.excluded_gems,
         }
     return None
 
@@ -316,6 +326,10 @@ rb_bundle_fetch = repository_rule(
         "jar_checksums": attr.string_dict(
             default = {},
             doc = "SHA-256 checksums for JAR dependencies. Keys are Maven coordinates (e.g. org.yaml:snakeyaml:1.33), values are SHA-256 checksums.",
+        ),
+        "gem_info_checksums": attr.string_dict(
+            default = {},
+            doc = "SHA-256 checksums for gem info JSON files fetched from RubyGems API. Keys are gem full names (e.g. psych-5.0.1-java), values are SHA-256 checksums.",
         ),
         "excluded_gems": attr.string_list(
             default = [],

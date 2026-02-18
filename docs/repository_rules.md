@@ -100,7 +100,8 @@ rb_library(
 load("@rules_ruby//ruby:deps.bzl", "rb_bundle_fetch")
 
 rb_bundle_fetch(<a href="#rb_bundle_fetch-name">name</a>, <a href="#rb_bundle_fetch-srcs">srcs</a>, <a href="#rb_bundle_fetch-auth_patterns">auth_patterns</a>, <a href="#rb_bundle_fetch-bundler_checksums">bundler_checksums</a>, <a href="#rb_bundle_fetch-bundler_remote">bundler_remote</a>, <a href="#rb_bundle_fetch-env">env</a>, <a href="#rb_bundle_fetch-excluded_gems">excluded_gems</a>,
-                <a href="#rb_bundle_fetch-gem_checksums">gem_checksums</a>, <a href="#rb_bundle_fetch-gemfile">gemfile</a>, <a href="#rb_bundle_fetch-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_fetch-jar_checksums">jar_checksums</a>, <a href="#rb_bundle_fetch-netrc">netrc</a>, <a href="#rb_bundle_fetch-repo_mapping">repo_mapping</a>, <a href="#rb_bundle_fetch-ruby">ruby</a>)
+                <a href="#rb_bundle_fetch-gem_checksums">gem_checksums</a>, <a href="#rb_bundle_fetch-gem_info_checksums">gem_info_checksums</a>, <a href="#rb_bundle_fetch-gemfile">gemfile</a>, <a href="#rb_bundle_fetch-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_fetch-jar_checksums">jar_checksums</a>, <a href="#rb_bundle_fetch-netrc">netrc</a>,
+                <a href="#rb_bundle_fetch-repo_mapping">repo_mapping</a>, <a href="#rb_bundle_fetch-ruby">ruby</a>)
 </pre>
 
 Fetches Bundler dependencies to be automatically installed by other targets.
@@ -168,6 +169,7 @@ rb_test(
 | <a id="rb_bundle_fetch-env"></a>env |  Environment variables to use during installation.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="rb_bundle_fetch-excluded_gems"></a>excluded_gems |  List of gem names to exclude from downloading. Useful for default gems bundled with Ruby (e.g., psych, stringio).   | List of strings | optional |  `[]`  |
 | <a id="rb_bundle_fetch-gem_checksums"></a>gem_checksums |  SHA-256 checksums for remote gems. Keys are gem names (e.g. foobar-1.2.3), values are SHA-256 checksums.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
+| <a id="rb_bundle_fetch-gem_info_checksums"></a>gem_info_checksums |  SHA-256 checksums for gem info JSON files fetched from RubyGems API. Keys are gem full names (e.g. psych-5.0.1-java), values are SHA-256 checksums.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="rb_bundle_fetch-gemfile"></a>gemfile |  Gemfile to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_bundle_fetch-gemfile_lock"></a>gemfile_lock |  Gemfile.lock to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_bundle_fetch-jar_checksums"></a>jar_checksums |  SHA-256 checksums for JAR dependencies. Keys are Maven coordinates (e.g. org.yaml:snakeyaml:1.33), values are SHA-256 checksums.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
