@@ -66,6 +66,9 @@ ruby.bundle_fetch(
     },
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
+    jar_checksums = {
+        "org.yaml:snakeyaml:1.33": "11ff459788f0a2d781f56a4a86d7e69202cebacd0273d5269c4ae9f02f3fd8f0",
+    },
 )
 use_repo(ruby, "bundle", "ruby_toolchains")
 

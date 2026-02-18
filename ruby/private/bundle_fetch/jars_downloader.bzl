@@ -3,30 +3,47 @@
 _MAVEN_CENTRAL_URL = "https://repo1.maven.org/maven2"
 _RUBYGEMS_API_URL = "https://rubygems.org/api/v2/rubygems/{gem}/versions/{version}.json"
 
-def fetch_jars_for_gem(repository_ctx, gem, jars_path):
+def fetch_jars_for_gem(repository_ctx, gem, jars_path, jar_checksums = {}):
     """Fetches all JAR dependencies for a Java gem.
 
     Args:
         repository_ctx: Repository context.
         gem: Gem struct with name and version fields.
         jars_path: Base path for storing JARs.
+        jar_checksums: Dict mapping Maven coordinates to SHA-256 checksums.
 
     Returns:
-        List of downloaded JAR paths.
+        Dict mapping Maven coordinates to SHA-256 checksums for downloaded JARs.
     """
     if not _is_java_gem(gem):
-        return []
+        return {}
 
     requirements = _fetch_gem_requirements(repository_ctx, gem)
-    jar_paths = []
+    checksums = {}
 
     for req in requirements:
         jar = _parse_jar_requirement(req)
         if jar:
-            jar_path = _download_jar(repository_ctx, jar, jars_path)
-            jar_paths.append(jar_path)
+            coord = _jar_coordinate(jar)
+            sha256 = _download_jar(repository_ctx, jar, jars_path, jar_checksums.get(coord, None))
+            checksums[coord] = sha256
 
-    return jar_paths
+    return checksums
+
+def _jar_coordinate(jar):
+    """Returns a Maven coordinate string for use as a checksum key.
+
+    Args:
+        jar: struct with group_id, artifact_id, version fields.
+
+    Returns:
+        Maven coordinate string (e.g., "org.yaml:snakeyaml:1.33").
+    """
+    return "{group}:{artifact}:{version}".format(
+        group = jar.group_id,
+        artifact = jar.artifact_id,
+        version = jar.version,
+    )
 
 def _is_java_gem(gem):
     """Checks if a gem is a Java-platform gem.
@@ -139,16 +156,17 @@ def _jar_to_maven_path(jar):
         filename = filename,
     )
 
-def _download_jar(repository_ctx, jar, jars_path):
+def _download_jar(repository_ctx, jar, jars_path, sha256 = None):
     """Downloads a JAR from Maven Central.
 
     Args:
         repository_ctx: Repository context.
         jar: struct with group_id, artifact_id, version fields.
         jars_path: Base path for storing JARs.
+        sha256: Optional SHA-256 checksum for verification.
 
     Returns:
-        Path to the downloaded JAR relative to jars_path.
+        SHA-256 hash of the downloaded JAR.
     """
     maven_path = _jar_to_maven_path(jar)
     url = "{maven}/{path}".format(
@@ -161,12 +179,16 @@ def _download_jar(repository_ctx, jar, jars_path):
         path = maven_path,
     )
 
+    kwargs = {}
+    if sha256:
+        kwargs["sha256"] = sha256
     result = repository_ctx.download(
         url = url,
         output = output_path,
+        **kwargs
     )
 
     if not result.success:
         fail("Failed to download JAR from {}: {}".format(url, result))
 
-    return maven_path
+    return result.sha256

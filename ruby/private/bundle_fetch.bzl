@@ -169,6 +169,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
     gem_fragments = []
     gem_install_fragments = []
     gem_checksums = {}
+    jar_checksums = {}
     ruby_toolchain_attr = "None" if repository_ctx.attr.ruby == None else '"{}"'.format(repository_ctx.attr.ruby)
     repository_name = _normalize_bzlmod_repository_name(repository_ctx.name)
 
@@ -195,7 +196,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
                 cache_path = cache_path,
             ),
         )
-        fetch_jars_for_gem(repository_ctx, gem, jars_path)
+        jar_checksums.update(fetch_jars_for_gem(repository_ctx, gem, jars_path, repository_ctx.attr.jar_checksums))
 
     # Fetch Bundler and define an `rb_gem_install()` target for it.
     _download_gem(repository_ctx, gemfile_lock.bundler, cache_path, gemfile_lock.bundler.sha256)
@@ -251,7 +252,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
         },
     )
 
-    if len(repository_ctx.attr.gem_checksums) != len(gem_checksums):
+    if len(repository_ctx.attr.gem_checksums) != len(gem_checksums) or len(repository_ctx.attr.jar_checksums) != len(jar_checksums):
         return {
             "name": repository_ctx.name,
             "gemfile": repository_ctx.attr.gemfile,
@@ -261,6 +262,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
             "bundler_remote": repository_ctx.attr.bundler_remote,
             "bundler_checksums": repository_ctx.attr.bundler_checksums,
             "gem_checksums": gem_checksums,
+            "jar_checksums": jar_checksums,
         }
     return None
 
@@ -310,6 +312,10 @@ rb_bundle_fetch = repository_rule(
         "gem_checksums": attr.string_dict(
             default = {},
             doc = "SHA-256 checksums for remote gems. Keys are gem names (e.g. foobar-1.2.3), values are SHA-256 checksums.",
+        ),
+        "jar_checksums": attr.string_dict(
+            default = {},
+            doc = "SHA-256 checksums for JAR dependencies. Keys are Maven coordinates (e.g. org.yaml:snakeyaml:1.33), values are SHA-256 checksums.",
         ),
         "excluded_gems": attr.string_list(
             default = [],
