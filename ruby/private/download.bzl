@@ -138,6 +138,15 @@ def _rb_download_impl(repository_ctx):
             version,
             repository_ctx.attr.prebuilt_ruby_checksums,
         )
+
+        # Prebuilt Ruby may ship with libyaml and openssl which are needed to compile the
+        # psych and openssl gems respectively when built with --incompatible_strict_action_env).
+        # TODO: This won't work on RBE.
+        dist_dir = str(repository_ctx.path("dist"))
+        if repository_ctx.path("dist/include/yaml.h").exists:
+            env.update({"BUNDLE_BUILD__PSYCH": "--with-libyaml-dir=" + dist_dir})
+        if repository_ctx.path("dist/include/openssl").exists:
+            env.update({"BUNDLE_BUILD__OPENSSL": "--with-openssl-dir=" + dist_dir})
     else:
         _install_via_ruby_build(repository_ctx, version)
 
