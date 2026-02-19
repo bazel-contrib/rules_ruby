@@ -146,7 +146,7 @@ rake, version 13.1.0
 <pre>
 load("@rules_ruby//ruby:defs.bzl", "rb_bundle_install")
 
-rb_bundle_install(<a href="#rb_bundle_install-name">name</a>, <a href="#rb_bundle_install-srcs">srcs</a>, <a href="#rb_bundle_install-env">env</a>, <a href="#rb_bundle_install-gemfile">gemfile</a>, <a href="#rb_bundle_install-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_install-gems">gems</a>, <a href="#rb_bundle_install-ruby">ruby</a>)
+rb_bundle_install(<a href="#rb_bundle_install-name">name</a>, <a href="#rb_bundle_install-srcs">srcs</a>, <a href="#rb_bundle_install-env">env</a>, <a href="#rb_bundle_install-gemfile">gemfile</a>, <a href="#rb_bundle_install-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_install-gems">gems</a>, <a href="#rb_bundle_install-jars">jars</a>, <a href="#rb_bundle_install-jars_path">jars_path</a>, <a href="#rb_bundle_install-ruby">ruby</a>)
 </pre>
 
 Installs Bundler dependencies from cached gems.
@@ -165,6 +165,8 @@ used by `rb_bundle_fetch()`.
 | <a id="rb_bundle_install-gemfile"></a>gemfile |  Gemfile to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_bundle_install-gemfile_lock"></a>gemfile_lock |  Gemfile.lock to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_bundle_install-gems"></a>gems |  List of gems in vendor/cache that are used to install dependencies from.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | required |  |
+| <a id="rb_bundle_install-jars"></a>jars |  JAR dependencies for JRuby gems.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="rb_bundle_install-jars_path"></a>jars_path |  Path to the directory containing JAR dependencies (set as JARS_HOME).   | String | optional |  `""`  |
 | <a id="rb_bundle_install-ruby"></a>ruby |  Override Ruby toolchain to use when installing the gem.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 
 

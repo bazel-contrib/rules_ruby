@@ -32,6 +32,12 @@ if defined TEST_TMPDIR (
 if "{bundler_command}" neq "" (
   call :rlocation "!BUNDLE_GEMFILE!" BUNDLE_GEMFILE
   call :rlocation "!BUNDLE_PATH!" BUNDLE_PATH
+  if defined JARS_HOME (
+    call :rlocation "!JARS_HOME!" JARS_HOME
+    if "{jars_home_strip_suffix}" neq "" (
+      set "JARS_HOME=!JARS_HOME:{jars_home_strip_suffix}=!"
+    )
+  )
 )
 
 {bundler_command} {ruby_binary_name} {binary} {args} %*
