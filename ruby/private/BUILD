@@ -73,12 +73,6 @@ bzl_library(
 )
 
 bzl_library(
-    name = "bundler_checksums",
-    srcs = ["bundler_checksums.bzl"],
-    visibility = ["//ruby:__subpackages__"],
-)
-
-bzl_library(
     name = "bundle_fetch",
     srcs = ["bundle_fetch.bzl"],
     visibility = ["//ruby:__subpackages__"],
@@ -124,16 +118,28 @@ bzl_library(
 )
 
 bzl_library(
+    name = "download",
+    srcs = ["download.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+    deps = [":rv_ruby_checksums"],
+)
+
+bzl_library(
     name = "bundle",
     srcs = ["bundle.bzl"],
     visibility = ["//ruby:__subpackages__"],
 )
 
 bzl_library(
-    name = "download",
-    srcs = ["download.bzl"],
+    name = "bundler_checksums",
+    srcs = ["bundler_checksums.bzl"],
     visibility = ["//ruby:__subpackages__"],
-    deps = [":rv_ruby_checksums"],
+)
+
+bzl_library(
+    name = "prebuilt_ruby_checksums",
+    srcs = ["prebuilt_ruby_checksums.bzl"],
+    visibility = ["//ruby:__subpackages__"],
 )
 
 bzl_library(
@@ -145,11 +151,5 @@ bzl_library(
 bzl_library(
     name = "utils",
     srcs = ["utils.bzl"],
-    visibility = ["//ruby:__subpackages__"],
-)
-
-bzl_library(
-    name = "rv_ruby_checksums",
-    srcs = ["rv_ruby_checksums.bzl"],
     visibility = ["//ruby:__subpackages__"],
 )

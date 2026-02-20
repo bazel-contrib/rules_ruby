@@ -42,13 +42,8 @@ name="ruby"
 module_bazel="${BUILD_WORKSPACE_DIRECTORY:-.}/MODULE.bazel"
 ruby_version=""
 
-# Map jdx/ruby platform names to rules_ruby platform keys
-declare -A PLATFORM_MAP=(
-  ["arm64_linux"]="linux-arm64"
-  ["x86_64_linux"]="linux-x86_64"
-  ["arm64_sonoma"]="macos-arm64"
-  ["ventura"]="macos-x86_64"
-)
+# jdx/ruby platform names (order matches prebuilt_ruby_checksums.bzl)
+PLATFORMS=("x86_64_linux" "macos" "arm64_linux")
 
 # MARK - Functions
 
@@ -115,11 +110,9 @@ fi
 declare -A checksums
 found_ruby_version=false
 
-for rv_platform in "${!PLATFORM_MAP[@]}"; do
-  platform_key="${PLATFORM_MAP[${rv_platform}]}"
-
+for platform in "${PLATFORMS[@]}"; do
   # Find asset for this Ruby version and platform
-  asset_name="ruby-${ruby_version}.${rv_platform}.tar.gz"
+  asset_name="ruby-${ruby_version}.${platform}.tar.gz"
   digest=$(echo "${response}" | jq -r --arg name "${asset_name}" \
     '.assets[] | select(.name == $name) | .digest // ""')
 
@@ -127,7 +120,7 @@ for rv_platform in "${!PLATFORM_MAP[@]}"; do
     found_ruby_version=true
     # Strip "sha256:" prefix if present
     checksum="${digest#sha256:}"
-    checksums["${platform_key}"]="${checksum}"
+    checksums["${platform}"]="${checksum}"
   fi
 done
 
@@ -139,9 +132,8 @@ EOT
 fi
 
 # Check if we have all expected platforms
-expected_platforms=("linux-arm64" "linux-x86_64" "macos-arm64" "macos-x86_64")
 missing_platforms=()
-for platform in "${expected_platforms[@]}"; do
+for platform in "${PLATFORMS[@]}"; do
   if [[ -z ${checksums[${platform}]:-} ]]; then
     missing_platforms+=("${platform}")
   fi
@@ -155,9 +147,9 @@ fi
 
 # Generate output for dry-run or display
 output="prebuilt_ruby_checksums = {\n"
-for platform in "${expected_platforms[@]}"; do
+for platform in "${PLATFORMS[@]}"; do
   if [[ -n ${checksums[${platform}]:-} ]]; then
-    output+="    \"${platform}\": \"${checksums[${platform}]}\",\n"
+    output+="    \"ruby-${ruby_version}.${platform}.tar.gz\": \"${checksums[${platform}]}\",\n"
   fi
 done
 output+="},"
@@ -170,9 +162,9 @@ fi
 
 # Construct dict string for buildozer
 dict_str=""
-for platform in "${expected_platforms[@]}"; do
+for platform in "${PLATFORMS[@]}"; do
   if [[ -n ${checksums[${platform}]:-} ]]; then
-    dict_str+=" ${platform}:${checksums[${platform}]}"
+    dict_str+=" ruby-${ruby_version}.${platform}.tar.gz:${checksums[${platform}]}"
   fi
 done
 
