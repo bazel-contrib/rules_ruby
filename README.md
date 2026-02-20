@@ -146,11 +146,39 @@ ruby.toolchain(
 )
 ```
 
-Setting `portable_ruby = True` has no effect on JRuby, TruffleRuby, or Windows.
+This ruleset ships with [default checksums][20] to securely download and properly cache
+the Ruby binaries. If you want to use Ruby version not available with ruleset release,
+you should use `portable_ruby_checksums` attribute.
+
+We have provided the `generate_portable_ruby_checksums` utility to add/update these
+attributes for you. The utility needs to know the version of Ruby to download.
+By default, it will use the Ruby version specified in the `.ruby-version` file.
+
+```bash
+bazel run @rules_ruby//tools/generate_portable_ruby_checksums -- 3.4.8
+```
+
+After running the utility, the toolchain declaration in your `MODULE.bazel`
+should look something like the following:
+
+```bazel
+ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
+ruby.toolchain(
+    name = "ruby",
+    version_file = "//:.ruby-version",
+    portable_ruby = True,
+    portable_ruby_checksums = {
+        "ruby-3.4.8.x86_64_linux.tar.gz": "e1c5ed91dc8b05e516cb5386a695e5ffed7b585fd577b93880b7eb61d20092e7",
+        "ruby-3.4.8.macos.tar.gz": "46c48fceb34d11b848f1fd7456ac77df49406f355de4f7d5667f254ea9da2f84",
+        "ruby-3.4.8.arm64_linux.tar.gz": "fdf6833e7ebe0b9c26a151a6f7481d81e178372046ad2b3f54ae56d159da8b1e",
+    },
+)
+```
 
 **Notes:**
 
 - Portable Ruby is only supported on Linux (x86_64) and macOS (arm64).
+- Setting `portable_ruby = True` has no effect on JRuby, TruffleRuby, or Windows.
 - On Windows, the toolchain automatically falls back to RubyInstaller.
 - Find available portable Ruby releases at https://github.com/jdx/ruby/releases
 
@@ -206,3 +234,4 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
 [17]: https://github.com/bazelbuild/bazel/issues/4327
 [18]: docs/rails.md
 [19]: https://github.com/jdx/ruby
+[20]: ruby/private/portable_ruby_checksums.bzl
