@@ -11,7 +11,7 @@ repos:
       - id: buildifier-lint
   # Check that commit messages follow https://www.conventionalcommits.org
   - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v4.3.0
+    rev: v4.4.0
     hooks:
       - id: conventional-pre-commit
         stages:
