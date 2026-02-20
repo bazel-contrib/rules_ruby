@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Generates prebuilt_ruby_checksums for ruby.toolchain() and updates MODULE.bazel.
+# Generates portable_ruby_checksums for ruby.toolchain() and updates MODULE.bazel.
 
 # --- begin runfiles.bash initialization v3 ---
 # Copy-pasted from the Bazel Bash runfiles library v3.
@@ -42,7 +42,7 @@ name="ruby"
 module_bazel="${BUILD_WORKSPACE_DIRECTORY:-.}/MODULE.bazel"
 ruby_version=""
 
-# jdx/ruby platform names (order matches prebuilt_ruby_checksums.bzl)
+# jdx/ruby platform names (order matches portable_ruby_checksums.bzl)
 PLATFORMS=("x86_64_linux" "macos" "arm64_linux")
 
 # MARK - Functions
@@ -146,7 +146,7 @@ fi
 # MARK - Update MODULE.bazel
 
 # Generate output for dry-run or display
-output="prebuilt_ruby_checksums = {\n"
+output="portable_ruby_checksums = {\n"
 for platform in "${PLATFORMS[@]}"; do
   if [[ -n ${checksums[${platform}]:-} ]]; then
     output+="    \"ruby-${ruby_version}.${platform}.tar.gz\": \"${checksums[${platform}]}\",\n"
@@ -169,13 +169,13 @@ for platform in "${PLATFORMS[@]}"; do
 done
 
 # Update MODULE.bazel using buildozer
-# Set prebuilt_ruby and prebuilt_ruby_checksums
+# Set portable_ruby and portable_ruby_checksums
 buildozer_cmd=(
   "${buildozer}"
   -types ruby.toolchain
-  "set prebuilt_ruby True"
-  "remove prebuilt_ruby_checksums"
-  "dict_set prebuilt_ruby_checksums ${dict_str}"
+  "set portable_ruby True"
+  "remove portable_ruby_checksums"
+  "dict_set portable_ruby_checksums ${dict_str}"
   "${module_bazel}:${name}"
 )
 if ! "${buildozer_cmd[@]}" 2>/dev/null; then
@@ -192,4 +192,4 @@ $(echo -e "${output}")
 EOT
 fi
 
-echo "Successfully updated prebuilt_ruby and prebuilt_ruby_checksums in ${module_bazel}"
+echo "Successfully updated portable_ruby and portable_ruby_checksums in ${module_bazel}"

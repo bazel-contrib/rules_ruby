@@ -1,6 +1,6 @@
 {
-  "tag_name": "20251225",
-  "name": "20251225",
+  "tag_name": "3.4.8",
+  "name": "3.4.8",
   "assets": [
     {
       "name": "ruby-3.4.8.arm64_linux.tar.gz",
@@ -11,12 +11,8 @@
       "digest": "sha256:f36cef10365d370e0867f0c3ac36e457a26ab04f3cfbbd7edb227a18e6e9b3c3"
     },
     {
-      "name": "ruby-3.4.8.arm64_sonoma.tar.gz",
+      "name": "ruby-3.4.8.macos.tar.gz",
       "digest": "sha256:cd9d7a1428076bfcc6c2ca3c0eb69b8e671e9b48afb4c351fa4a84927841ffef"
-    },
-    {
-      "name": "ruby-3.4.8.ventura.tar.gz",
-      "digest": "sha256:e9da39082d1dd8502d322c850924d929bc45b7a1e35da593a5606c00673218d4"
     }
   ]
 }

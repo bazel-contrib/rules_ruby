@@ -79,7 +79,6 @@ bzl_library(
     deps = [
         ":bundler_checksums",
         ":utils",
-        "//ruby/private/bundle_fetch:default_gems",
         "//ruby/private/bundle_fetch:gemfile_lock_parser",
         "//ruby/private/bundle_fetch:jars_downloader",
         "@bazel_skylib//lib:paths",
@@ -121,7 +120,7 @@ bzl_library(
     name = "download",
     srcs = ["download.bzl"],
     visibility = ["//ruby:__subpackages__"],
-    deps = [":rv_ruby_checksums"],
+    deps = [":portable_ruby_checksums"],
 )
 
 bzl_library(
@@ -137,8 +136,8 @@ bzl_library(
 )
 
 bzl_library(
-    name = "prebuilt_ruby_checksums",
-    srcs = ["prebuilt_ruby_checksums.bzl"],
+    name = "portable_ruby_checksums",
+    srcs = ["portable_ruby_checksums.bzl"],
     visibility = ["//ruby:__subpackages__"],
 )
 

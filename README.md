@@ -129,30 +129,30 @@ Keep in mind, that it takes some time for compilation to complete.
 
 On Windows, [RubyInstaller][6] is used to install MRI.
 
-#### Fast Installation with Prebuilt Ruby
+#### Fast Installation with Portable Ruby
 
-For faster MRI installation on Linux and macOS, you can use prebuilt Ruby
+For faster MRI installation on Linux and macOS, you can use portable Ruby
 binaries from [jdx/ruby][19] instead of compiling from source. This significantly
 reduces installation time and ensures consistent, portable Ruby environments.
 
-To enable prebuilt Ruby, set `prebuilt_ruby = True` in your toolchain declaration:
+To enable portable Ruby, set `portable_ruby = True` in your toolchain declaration:
 
 ```bazel
 ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
 ruby.toolchain(
     name = "ruby",
-    prebuilt_ruby = True,
+    portable_ruby = True,
     version_file = "//:.ruby-version",
 )
 ```
 
-Setting `prebuilt_ruby = True` has no effect on JRuby, TruffleRuby, or Windows.
+Setting `portable_ruby = True` has no effect on JRuby, TruffleRuby, or Windows.
 
 **Notes:**
 
-- Prebuilt Ruby is only supported on Linux (x86_64) and macOS (arm64).
+- Portable Ruby is only supported on Linux (x86_64) and macOS (arm64).
 - On Windows, the toolchain automatically falls back to RubyInstaller.
-- Find available prebuilt Ruby releases at https://github.com/jdx/ruby/releases
+- Find available portable Ruby releases at https://github.com/jdx/ruby/releases
 
 ### JRuby
 

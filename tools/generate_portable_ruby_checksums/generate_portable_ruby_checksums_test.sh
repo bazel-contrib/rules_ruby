@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Tests for generate_rv_checksums.sh
+# Tests for generate_portable_ruby_checksums.sh
 
 # --- begin runfiles.bash initialization v3 ---
 # Copy-pasted from the Bazel Bash runfiles library v3.
@@ -29,13 +29,13 @@ assertions_sh="$(rlocation "${assertions_sh_location}")" \
 # shellcheck disable=SC1090
 source "${assertions_sh}"
 
-generate_rv_checksums_location=rules_ruby/tools/generate_rv_checksums/generate_rv_checksums.sh
-generate_rv_checksums="$(rlocation "${generate_rv_checksums_location}")"
+generate_portable_ruby_checksums_location=rules_ruby/tools/generate_portable_ruby_checksums/generate_portable_ruby_checksums.sh
+generate_portable_ruby_checksums="$(rlocation "${generate_portable_ruby_checksums_location}")"
 
-mock_response_location=rules_ruby/tools/generate_rv_checksums/testdata/rv_ruby_release_response.json
+mock_response_location=rules_ruby/tools/generate_portable_ruby_checksums/testdata/jdx_ruby_release_response.json
 mock_response="$(rlocation "${mock_response_location}")"
 
-expected_output_location=rules_ruby/tools/generate_rv_checksums/testdata/expected_checksums_output.txt
+expected_output_location=rules_ruby/tools/generate_portable_ruby_checksums/testdata/expected_checksums_output.txt
 expected_output="$(rlocation "${expected_output_location}")"
 
 # MARK - Cleanup
@@ -69,7 +69,7 @@ test_basic_dry_run() {
 
   # Run the script
   local output
-  output=$("${generate_rv_checksums}" --dry-run)
+  output=$("${generate_portable_ruby_checksums}" --dry-run)
 
   # Verify output matches expected
   local expected
@@ -94,10 +94,10 @@ test_explicit_ruby_version() {
 
   # Run the script with explicit version
   local output
-  output=$("${generate_rv_checksums}" --ruby-version 3.4.8 --dry-run)
+  output=$("${generate_portable_ruby_checksums}" --ruby-version 3.4.8 --dry-run)
 
   # Verify output contains expected checksums
-  assert_match "linux-arm64" "${output}" "Output should contain linux-arm64"
+  assert_match "arm64_linux" "${output}" "Output should contain arm64_linux"
   assert_match "0c08c35a99f10817643d548f98012268c5433ae25a737ab4d6751336108a941d" "${output}" \
     "Output should contain correct checksum"
 
@@ -119,7 +119,7 @@ test_missing_ruby_version() {
   export RV_RUBY_API_URL="file://${mock_response%/*}"
 
   # Run the script and expect failure
-  if "${generate_rv_checksums}" --dry-run 2>/dev/null; then
+  if "${generate_portable_ruby_checksums}" --dry-run 2>/dev/null; then
     fail "Should have failed when .ruby-version is missing"
   fi
 
@@ -139,7 +139,7 @@ test_invalid_ruby_version() {
   export RV_RUBY_API_URL="file:///nonexistent"
 
   # Run the script and expect failure
-  if "${generate_rv_checksums}" --ruby-version 99.99.99 --dry-run 2>/dev/null; then
+  if "${generate_portable_ruby_checksums}" --ruby-version 99.99.99 --dry-run 2>/dev/null; then
     fail "Should have failed for invalid Ruby version"
   fi
 

@@ -1,9 +1,9 @@
-"Provides checksums for prebuilt Ruby versions from jdx/ruby."
+"Provides checksums for portable Ruby versions from jdx/ruby."
 
 # Generated via:
 # gh release list --repo jdx/ruby --limit 200 --json tagName --jq '.[].tagName' | xargs -I{} gh api repos/jdx/ruby/releases/tags/{} --jq '.assets[] | select(.name | endswith(".tar.gz")) | select(.name | contains("no_yjit") | not) | {(.name): (.digest | ltrimstr("sha256:"))}' | jq -s 'add | to_entries | sort_by(.key) | reverse | from_entries'
 
-PREBUILT_RUBY_CHECKSUMS = {
+PORTABLE_RUBY_CHECKSUMS = {
     "ruby-4.0.1.x86_64_linux.tar.gz": "df9793cc730f782273fb17c70bc205f724fd2e127e95c0c059ae198705110b98",
     "ruby-4.0.1.macos.tar.gz": "d5fd316eabcbe58e33be6b44125c7b22f87da90bae0d7e28ffc6be34abe1476e",
     "ruby-4.0.1.arm64_linux.tar.gz": "59f6f03b5113afac408248c7b762a8a4d8bbe223917ef3cc56614d061e296f92",

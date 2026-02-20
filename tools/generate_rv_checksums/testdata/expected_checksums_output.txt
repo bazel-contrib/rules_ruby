@@ -1,6 +1,0 @@
-prebuilt_ruby_checksums = {
-    "linux-arm64": "0c08c35a99f10817643d548f98012268c5433ae25a737ab4d6751336108a941d",
-    "linux-x86_64": "f36cef10365d370e0867f0c3ac36e457a26ab04f3cfbbd7edb227a18e6e9b3c3",
-    "macos-arm64": "cd9d7a1428076bfcc6c2ca3c0eb69b8e671e9b48afb4c351fa4a84927841ffef",
-    "macos-x86_64": "e9da39082d1dd8502d322c850924d929bc45b7a1e35da593a5606c00673218d4",
-},
