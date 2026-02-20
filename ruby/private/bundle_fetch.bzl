@@ -14,7 +14,6 @@ load(
     _join_and_indent = "join_and_indent",
     _normalize_bzlmod_repository_name = "normalize_bzlmod_repository_name",
 )
-load("//ruby/private/bundle_fetch:default_gems.bzl", "DEFAULT_GEMS")
 load("//ruby/private/bundle_fetch:gemfile_lock_parser.bzl", "parse_gemfile_lock")
 
 # Location of Bundler binstubs to generate shims and use during rb_bundle_install(...).
@@ -58,62 +57,6 @@ Please update Bundler version and try again.
 See https://github.com/rubygems/rubygems/issues/4620 for more details.
 
 """
-
-def _is_default_gem(gem_name, gem_version, ruby_version):
-    """Checks if a gem is a default gem for the given Ruby version.
-
-    Default gems are part of a Ruby installation and don't need to be downloaded.
-    Installing them lead to errors on precompiled Ruby distributions
-    because their native extensions lack access to system libraries
-    due to Bazel sandboxing (e.g. psych gem depending on libyaml).
-
-    Args:
-        gem_name: Name of the gem (e.g., "json", "psych")
-        gem_version: Version of the gem (e.g., "2.7.2")
-        ruby_version: Ruby version string (e.g., "3.3.0", "3.3")
-
-    Returns:
-        True if the gem is a standard gem with matching version for the Ruby version.
-    """
-    if gem_name not in DEFAULT_GEMS:
-        return False
-
-    gem_versions = DEFAULT_GEMS[gem_name]
-
-    # Try exact Ruby version match first (e.g., "3.3.0")
-    if ruby_version in gem_versions:
-        return gem_versions[ruby_version] == gem_version
-
-    # Try minor version match (e.g., "3.3" from "3.3.0")
-    parts = ruby_version.split(".")
-    if len(parts) >= 2:
-        minor_version = ".".join(parts[:2])
-        if minor_version in gem_versions:
-            return gem_versions[minor_version] == gem_version
-
-    return False
-
-def _read_ruby_version(repository_ctx):
-    """Reads Ruby version from ruby_version or ruby_version_file attribute.
-
-    Returns:
-        Ruby version string, or None if neither attribute is set.
-    """
-    if repository_ctx.attr.ruby_version:
-        return repository_ctx.attr.ruby_version
-    if repository_ctx.attr.ruby_version_file:
-        version = repository_ctx.read(repository_ctx.attr.ruby_version_file).strip("\r\n")
-        if repository_ctx.attr.ruby_version_file.name == ".tool-versions":
-            return _parse_version_from_tool_versions(version)
-        return version
-    return None
-
-def _parse_version_from_tool_versions(file_content):
-    """Parses Ruby version from .tool-versions file content."""
-    for line in file_content.splitlines():
-        if line.startswith("ruby"):
-            return line.partition(" ")[-1].strip()
-    return None
 
 def _download_gem(repository_ctx, gem, cache_path, sha256 = None):
     """Downloads gem into a predefined vendor/cache location.
@@ -230,9 +173,6 @@ def _rb_bundle_fetch_impl(repository_ctx):
     repository_name = _normalize_bzlmod_repository_name(repository_ctx.name)
 
     # Fetch gems and expose them as `rb_gem()` targets.
-    # Skip gems that are in the excluded_gems list or are default gems for the Ruby version.
-    excluded_gems = {name: True for name in repository_ctx.attr.excluded_gems}
-    ruby_version = _read_ruby_version(repository_ctx)
     for gem in gemfile_lock.remote_packages:
         gem_checksums[gem.full_name] = _download_gem(
             repository_ctx,
@@ -240,20 +180,15 @@ def _rb_bundle_fetch_impl(repository_ctx):
             cache_path,
             repository_ctx.attr.gem_checksums.get(gem.full_name, None),
         )
-
-        # Skip registering excluded or default gems.
-        is_excluded = gem.name in excluded_gems
-        is_default = ruby_version and _is_default_gem(gem.name, gem.version, ruby_version)
-        if not is_excluded and not is_default:
-            executables.extend(_get_gem_executables(repository_ctx, gem, cache_path))
-            gem_full_names.append(":%s" % gem.full_name)
-            gem_fragments.append(
-                _GEM_BUILD_FRAGMENT.format(
-                    name = gem.full_name,
-                    gem = gem.filename,
-                    cache_path = cache_path,
-                ),
-            )
+        executables.extend(_get_gem_executables(repository_ctx, gem, cache_path))
+        gem_full_names.append(":%s" % gem.full_name)
+        gem_fragments.append(
+            _GEM_BUILD_FRAGMENT.format(
+                name = gem.full_name,
+                gem = gem.filename,
+                cache_path = cache_path,
+            ),
+        )
 
     # Fetch Bundler and define an `rb_gem_install()` target for it.
     _download_gem(repository_ctx, gemfile_lock.bundler, cache_path, gemfile_lock.bundler.sha256)
@@ -374,28 +309,6 @@ rb_bundle_fetch = repository_rule(
             default = {},
             doc = "SHA-256 checksums for JAR dependencies. Keys are Maven coordinates (e.g. org.yaml:snakeyaml:1.33), values are SHA-256 checksums.",
         ),
-        "excluded_gems": attr.string_list(
-            default = [],
-            doc = """\
-List of gem names to exclude from downloading. Useful for default gems bundled \
-with Ruby (e.g., psych, stringio).\
-""",
-        ),
-        "ruby_version": attr.string(
-            doc = """\
-Ruby version to use for automatically excluding default gems (e.g., "3.3.0", "3.2"). \
-When set, gems that are bundled with the specified Ruby version will be automatically \
-excluded if their version matches the default gem version for that Ruby.\
-""",
-        ),
-        "ruby_version_file": attr.label(
-            allow_single_file = [".ruby-version", ".tool-versions"],
-            doc = """\
-File to read Ruby version from (e.g., .ruby-version or .tool-versions). \
-Alternative to ruby_version attribute. When set, the Ruby version is read from this file \
-and used for automatically excluding default gems.\
-""",
-        ),
         "ruby": attr.label(
             doc = "Override Ruby toolchain to use for installation.",
             providers = [platform_common.ToolchainInfo],
@@ -449,20 +362,6 @@ rb_bundle_fetch(
         "ast-2.4.2": "1e280232e6a33754cde542bc5ef85520b74db2aac73ec14acef453784447cc12",
         "concurrent-ruby-1.2.2": "3879119b8b75e3b62616acc256c64a134d0b0a7a9a3fcba5a233025bcde22c4f",
     },
-)
-```
-
-Default gems (gems bundled with Ruby) can be automatically excluded by specifying
-the `ruby_version` attribute. When set, gems whose name and version match the
-default gem version for that Ruby will be skipped:
-
-`WORKSPACE`:
-```bazel
-rb_bundle_fetch(
-    name = "bundle",
-    gemfile = "//:Gemfile",
-    gemfile_lock = "//:Gemfile.lock",
-    ruby_version = "3.3.0",  # Automatically excludes default gems for Ruby 3.3.0
 )
 ```
 

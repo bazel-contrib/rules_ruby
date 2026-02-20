@@ -120,7 +120,6 @@ ruby.bundle_fetch(
     },
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
-    ruby_version_file = "//:.ruby-version",
 )
 ruby.bundle_fetch(
     name = "people_tracker_bundle",
@@ -285,7 +284,6 @@ ruby.bundle_fetch(
     },
     gemfile = "//people_tracker:Gemfile",
     gemfile_lock = "//people_tracker:Gemfile.lock",
-    ruby_version_file = "//:.ruby-version",
 )
 use_repo(
     ruby,

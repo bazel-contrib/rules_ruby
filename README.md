@@ -141,58 +141,18 @@ To enable prebuilt Ruby, set `prebuilt_ruby = True` in your toolchain declaratio
 ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
 ruby.toolchain(
     name = "ruby",
-    version_file = "//:.ruby-version",
     prebuilt_ruby = True,
+    version_file = "//:.ruby-version",
 )
 ```
 
 Setting `prebuilt_ruby = True` has no effect on JRuby, TruffleRuby, or Windows.
 
-**Configure Excluded Gems**
-
-When using prebuilt Ruby, you must exclude _default_ gems with C extensions from
-`bundle_fetch` as these are pre-compiled in the prebuilt Ruby binary. You may see
-compilation errors if you do not exclude these gems. Generally, as long as you pin the gem version to your Ruby version standard gem per https://stdgems.org, you should be good.
-
-We have provided a default mapping of standard gems along with the `generate_excluded_gems` utility to update the declaration for you.
-
-```bash
-bazel run @rules_ruby//tools/generate_excluded_gems
-```
-
-The utility reads the Ruby version being used and checks
-https://raw.githubusercontent.com/janlelis/stdgems/main/default_gems.json to
-determine which gems should be excluded. The utility adds/updates the
-`excluded_gems` attribute with the correct list of gems. The `bundle_fetch`
-declaration will look something like the following:
-
-```bazel
-ruby.bundle_fetch(
-    name = "bundle",
-    gemfile = "//:Gemfile",
-    gemfile_lock = "//:Gemfile.lock",
-    excluded_gems = [
-        "date", "digest", "etc", "fcntl", "fiddle",
-        "io-console", "io-nonblock", "io-wait", "json",
-        "openssl", "pathname", "prism", "psych",
-        "stringio", "strscan", "zlib",
-    ],
-)
-```
-
-> [!NOTE]
-> You can find an HTML-rendered list of the default gems for a Ruby version at
-> https://stdgems.org/\<version\> (e.g., https://stdgems.org/3.4.8 for Ruby
-> 3.4.8).
-
 **Notes:**
 
-- Prebuilt Ruby is only supported on Linux and macOS (x86_64 and arm64).
+- Prebuilt Ruby is only supported on Linux (x86_64) and macOS (arm64).
 - On Windows, the toolchain automatically falls back to RubyInstaller.
 - Find available prebuilt Ruby releases at https://github.com/jdx/ruby/releases
-- The utilities support `--name` to target specific toolchains/bundles and
-  `--module-bazel` to specify a custom MODULE.bazel path.
-- Run utilities with `--dry-run` to preview changes without modifying files.
 
 ### JRuby
 
