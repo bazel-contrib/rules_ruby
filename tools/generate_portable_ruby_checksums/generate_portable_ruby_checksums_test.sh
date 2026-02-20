@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Tests for generate_excluded_gems.sh
+# Tests for generate_portable_ruby_checksums.sh
 
 # --- begin runfiles.bash initialization v3 ---
 # Copy-pasted from the Bazel Bash runfiles library v3.
@@ -29,13 +29,13 @@ assertions_sh="$(rlocation "${assertions_sh_location}")" \
 # shellcheck disable=SC1090
 source "${assertions_sh}"
 
-generate_excluded_gems_location=rules_ruby/tools/generate_excluded_gems/generate_excluded_gems.sh
-generate_excluded_gems="$(rlocation "${generate_excluded_gems_location}")"
+generate_portable_ruby_checksums_location=rules_ruby/tools/generate_portable_ruby_checksums/generate_portable_ruby_checksums.sh
+generate_portable_ruby_checksums="$(rlocation "${generate_portable_ruby_checksums_location}")"
 
-mock_response_location=rules_ruby/tools/generate_excluded_gems/testdata/default_gems.json
+mock_response_location=rules_ruby/tools/generate_portable_ruby_checksums/testdata/jdx_ruby_release_response.json
 mock_response="$(rlocation "${mock_response_location}")"
 
-expected_output_location=rules_ruby/tools/generate_excluded_gems/testdata/expected_excluded_gems_output.txt
+expected_output_location=rules_ruby/tools/generate_portable_ruby_checksums/testdata/expected_checksums_output.txt
 expected_output="$(rlocation "${expected_output_location}")"
 
 # MARK - Cleanup
@@ -64,19 +64,18 @@ test_basic_dry_run() {
   # Setup .ruby-version
   echo "3.4.8" >.ruby-version
 
-  # Mock the stdgems response
-  export STDGEMS_URL="file://${mock_response}"
+  # Mock the API response (the release tag is the Ruby version)
+  export RV_RUBY_API_URL="file://${mock_response%/*}"
 
   # Run the script
   local output
-  output=$("${generate_excluded_gems}" --dry-run)
+  output=$("${generate_portable_ruby_checksums}" --dry-run)
 
   # Verify output matches expected
   local expected
   expected=$(cat "${expected_output}")
 
-  assert_equal "${expected}" "${output}" \
-    "Output should match expected excluded gems"
+  assert_equal "${expected}" "${output}" "Output should match expected checksums"
 
 }
 
@@ -90,21 +89,17 @@ test_explicit_ruby_version() {
   cd "${temp_dir}"
   export BUILD_WORKSPACE_DIRECTORY="${temp_dir}"
 
-  # Mock the stdgems response
-  export STDGEMS_URL="file://${mock_response}"
+  # Mock the API response
+  export RV_RUBY_API_URL="file://${mock_response%/*}"
 
   # Run the script with explicit version
   local output
-  output=$("${generate_excluded_gems}" --ruby-version 3.4.8 --dry-run)
+  output=$("${generate_portable_ruby_checksums}" --ruby-version 3.4.8 --dry-run)
 
-  # Verify output contains expected gems
-  assert_match "psych" "${output}" "Output should contain psych"
-  assert_match "json" "${output}" "Output should contain json"
-
-  # Should NOT contain non-native gems
-  if echo "${output}" | grep -q "csv"; then
-    fail "Output should not contain csv (non-native gem)"
-  fi
+  # Verify output contains expected checksums
+  assert_match "arm64_linux" "${output}" "Output should contain arm64_linux"
+  assert_match "0c08c35a99f10817643d548f98012268c5433ae25a737ab4d6751336108a941d" "${output}" \
+    "Output should contain correct checksum"
 
 }
 
@@ -120,18 +115,18 @@ test_missing_ruby_version() {
 
   # Don't create .ruby-version file
 
-  # Mock the stdgems response
-  export STDGEMS_URL="file://${mock_response}"
+  # Mock the API response
+  export RV_RUBY_API_URL="file://${mock_response%/*}"
 
   # Run the script and expect failure
-  if "${generate_excluded_gems}" --dry-run 2>/dev/null; then
+  if "${generate_portable_ruby_checksums}" --dry-run 2>/dev/null; then
     fail "Should have failed when .ruby-version is missing"
   fi
 
 }
 
-# Test 4: Ruby version not in stdgems data
-test_unsupported_ruby_version() {
+# Test 4: Invalid Ruby version (release not found)
+test_invalid_ruby_version() {
 
   local temp_dir
   temp_dir="$(mktemp -d)"
@@ -140,39 +135,13 @@ test_unsupported_ruby_version() {
   cd "${temp_dir}"
   export BUILD_WORKSPACE_DIRECTORY="${temp_dir}"
 
-  # Mock the stdgems response
-  export STDGEMS_URL="file://${mock_response}"
+  # Use a non-existent API URL to simulate 404
+  export RV_RUBY_API_URL="file:///nonexistent"
 
-  # Run the script with unsupported version and expect failure
-  generate_excluded_gems_cmd=(
-    "${generate_excluded_gems}" --ruby-version 1.0.0 --dry-run
-  )
-  if "${generate_excluded_gems_cmd[@]}" 2>/dev/null; then
-    fail "Should have failed for unsupported Ruby version"
+  # Run the script and expect failure
+  if "${generate_portable_ruby_checksums}" --ruby-version 99.99.99 --dry-run 2>/dev/null; then
+    fail "Should have failed for invalid Ruby version"
   fi
-
-}
-
-# Test 5: Ruby 3.3 version
-test_ruby_33_version() {
-
-  local temp_dir
-  temp_dir="$(mktemp -d)"
-  temp_dirs+=("${temp_dir}")
-
-  cd "${temp_dir}"
-  export BUILD_WORKSPACE_DIRECTORY="${temp_dir}"
-
-  # Mock the stdgems response
-  export STDGEMS_URL="file://${mock_response}"
-
-  # Run the script with 3.3.x version
-  local output
-  output=$("${generate_excluded_gems}" --ruby-version 3.3.0 --dry-run)
-
-  # Verify output contains expected gems (same ones exist for 3.3)
-  assert_match "psych" "${output}" "Output should contain psych"
-  assert_match "json" "${output}" "Output should contain json"
 
 }
 
@@ -180,6 +149,4 @@ test_ruby_33_version() {
 test_basic_dry_run
 test_explicit_ruby_version
 test_missing_ruby_version
-test_unsupported_ruby_version
-test_ruby_33_version
-
+test_invalid_ruby_version

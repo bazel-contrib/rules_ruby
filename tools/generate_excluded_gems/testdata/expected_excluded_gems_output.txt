@@ -1,8 +1,0 @@
-excluded_gems = [
-    "date",
-    "digest",
-    "etc",
-    "json",
-    "psych",
-    "stringio",
-],

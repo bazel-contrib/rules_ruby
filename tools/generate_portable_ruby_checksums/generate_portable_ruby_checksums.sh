@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Generates excluded_gems for ruby.bundle_fetch() and updates MODULE.bazel.
+# Generates portable_ruby_checksums for ruby.toolchain() and updates MODULE.bazel.
 
 # --- begin runfiles.bash initialization v3 ---
 # Copy-pasted from the Bazel Bash runfiles library v3.
@@ -38,9 +38,12 @@ buildozer="$(rlocation "${buildozer_location}")" \
 
 # Default values
 dry_run=false
-name="bundle"
+name="ruby"
 module_bazel="${BUILD_WORKSPACE_DIRECTORY:-.}/MODULE.bazel"
 ruby_version=""
+
+# jdx/ruby platform names (order matches portable_ruby_checksums.bzl)
+PLATFORMS=("x86_64_linux" "macos" "arm64_linux")
 
 # MARK - Functions
 
@@ -53,18 +56,10 @@ read_ruby_version() {
   tr -d '[:space:]' <"${version_file}"
 }
 
-# Extract minor version from a Ruby version string (e.g., 3.4.8 -> 3.4)
-# Ruby uses MAJOR.MINOR.PATCH versioning, and stdgems data is organized by
-# minor version since default gems are typically consistent within a minor
-# release series.
-get_minor_version() {
-  local version="$1"
-  echo "${version}" | cut -d. -f1,2
-}
-
 # MARK - Argument Handling
 
 # Parse arguments
+args=()
 while (("$#")); do
   case "${1}" in
     --dry-run)
@@ -87,7 +82,8 @@ while (("$#")); do
       fail "Error: Unknown option: ${1}"
       ;;
     *)
-      fail "Error: Unexpected argument: ${1}"
+      args+=("${1}")
+      shift
       ;;
   esac
 done
@@ -97,61 +93,89 @@ if [[ -z ${ruby_version} ]]; then
   ruby_version="$(read_ruby_version)"
 fi
 
-# Get minor version
-minor_version=$(get_minor_version "${ruby_version}")
+# MARK - Retrieve jdx/ruby release info
 
-# MARK - Retrieve stdgems data
+# Fetch release data from GitHub API
+api_url="${RV_RUBY_API_URL:-https://api.github.com/repos/jdx/ruby/releases/tags}/${ruby_version}"
+response=$(curl -sL --max-time 30 "${api_url}")
 
-# Fetch stdgems data
-stdgems_url="${STDGEMS_URL:-https://raw.githubusercontent.com/janlelis/stdgems/main/default_gems.json}"
-response=$(curl -sL --max-time 30 "${stdgems_url}")
+# Check if release was found
+if echo "${response}" | jq -e '.message == "Not Found"' >/dev/null 2>&1; then
+  fail "Error: jdx/ruby release for Ruby ${ruby_version} not found"
+fi
 
-# Filter for native gems that exist for this Ruby version
-# The jq query:
-# 1. Select gems where native == true
-# 2. Select gems where versions contains the minor version key
-# 3. Extract the gem name
-# 4. Sort
-excluded_gems=$(echo "${response}" | jq -r --arg version "${minor_version}" \
-  '.gems[] | select(.native == true) | select(.versions | has($version)) | .gem' \
-  | sort)
+# MARK - Extract checksums
 
-# Check if we found any gems
-if [[ -z ${excluded_gems} ]]; then
+# Extract checksums for each platform
+declare -A checksums
+found_ruby_version=false
+
+for platform in "${PLATFORMS[@]}"; do
+  # Find asset for this Ruby version and platform
+  asset_name="ruby-${ruby_version}.${platform}.tar.gz"
+  digest=$(echo "${response}" | jq -r --arg name "${asset_name}" \
+    '.assets[] | select(.name == $name) | .digest // ""')
+
+  if [[ -n ${digest} ]]; then
+    found_ruby_version=true
+    # Strip "sha256:" prefix if present
+    checksum="${digest#sha256:}"
+    checksums["${platform}"]="${checksum}"
+  fi
+done
+
+# Check if we found any assets for this Ruby version
+if [[ ${found_ruby_version} != "true" ]]; then
   fail <<-EOT
-Error: No native gems found for Ruby ${ruby_version} (${minor_version})
-This Ruby version may not be supported in stdgems data
+Error: Ruby version ${ruby_version} not found in jdx/ruby releases
 EOT
+fi
+
+# Check if we have all expected platforms
+missing_platforms=()
+for platform in "${PLATFORMS[@]}"; do
+  if [[ -z ${checksums[${platform}]:-} ]]; then
+    missing_platforms+=("${platform}")
+  fi
+done
+
+if [[ ${#missing_platforms[@]} -gt 0 ]]; then
+  warn "Warning: Missing platforms in release: ${missing_platforms[*]}"
 fi
 
 # MARK - Update MODULE.bazel
 
 # Generate output for dry-run or display
-output="excluded_gems = [\n"
-while IFS= read -r gem; do
-  output+="    \"${gem}\",\n"
-done <<<"${excluded_gems}"
-output+="],"
+output="portable_ruby_checksums = {\n"
+for platform in "${PLATFORMS[@]}"; do
+  if [[ -n ${checksums[${platform}]:-} ]]; then
+    output+="    \"ruby-${ruby_version}.${platform}.tar.gz\": \"${checksums[${platform}]}\",\n"
+  fi
+done
+output+="},"
 
 if [[ ${dry_run} == "true" ]]; then
-  # Dry-run: just output the excluded gems
+  # Dry-run: just output the checksums
   echo -e "${output}"
   exit 0
 fi
 
-# Construct list of gems for buildozer 'add' command
-# Convert newline-separated list to space-separated
-gem_list=""
-while IFS= read -r gem; do
-  gem_list+=" ${gem}"
-done <<<"${excluded_gems}"
+# Construct dict string for buildozer
+dict_str=""
+for platform in "${PLATFORMS[@]}"; do
+  if [[ -n ${checksums[${platform}]:-} ]]; then
+    dict_str+=" ruby-${ruby_version}.${platform}.tar.gz:${checksums[${platform}]}"
+  fi
+done
 
 # Update MODULE.bazel using buildozer
+# Set portable_ruby and portable_ruby_checksums
 buildozer_cmd=(
   "${buildozer}"
-  -types ruby.bundle_fetch
-  "remove excluded_gems"
-  "add excluded_gems${gem_list}"
+  -types ruby.toolchain
+  "set portable_ruby True"
+  "remove portable_ruby_checksums"
+  "dict_set portable_ruby_checksums ${dict_str}"
   "${module_bazel}:${name}"
 )
 if ! "${buildozer_cmd[@]}" 2>/dev/null; then
@@ -160,7 +184,7 @@ Failed to update ${module_bazel}
 
 Buildozer command failed. This could mean:
 - The file doesn't exist at ${module_bazel}
-- No ruby.bundle_fetch() call was found with name="${name}"
+- No ruby.toolchain() call was found with name="${name}"
 - The file has syntax errors
 
 You can use --dry-run to see what would be updated:
@@ -168,4 +192,4 @@ $(echo -e "${output}")
 EOT
 fi
 
-echo "Successfully updated excluded_gems in ${module_bazel}"
+echo "Successfully updated portable_ruby and portable_ruby_checksums in ${module_bazel}"

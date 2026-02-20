@@ -4,6 +4,13 @@
 # curl -sSf https://rubygems.org/api/v1/versions/bundler.json | jq 'map({key: .number, value: .sha}) | from_entries' | grep -vE '\.pre|\.rc|\.beta'
 
 BUNDLER_CHECKSUMS = {
+    "4.0.6": "4e43c13acf18c417926053d00f964a45c54f71721b33066336a0d7db5de73f08",
+    "4.0.5": "5d52254ae14057ad6b02b20615436bd585790a7ca5ee3ef7ac05799dc90723fd",
+    "4.0.4": "d0f94b7ba176666896318e419f9a0cc55b698874bffec64cc33537611c61bd16",
+    "4.0.3": "f06623d5edf4183e5fac847a953c1f1bd95e27aa766471525d3a9c70bdee9394",
+    "4.0.2": "9a13f770fff8ee2f27af4b833c10f254d104cc01db53a12adcdb3300841f79fb",
+    "4.0.1": "1d1a19f59f45ae0d9c0698ce0c50a58028963af65e28d755cd6ced017fe7bd39",
+    "4.0.0": "7d9461e65e813863ce9b710d5b2f3636d1b4904ea64595e54e957a25d721bd3d",
     "2.7.2": "1decaf9e2e1acb91b6586a2925c8f3f6da2334a82731a62ff2ded1b83c283871",
     "2.7.1": "0ad5a002a879776b2a98be652f557ac8731be3353612d63fa4ef1b2706dc1e0b",
     "2.7.0": "27c18e8c1593dd0cab39140265453001e3bd2b440e0873480104c6df347e15ab",
