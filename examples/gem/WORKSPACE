@@ -16,6 +16,7 @@ http_archive(
 load("@rules_ruby//ruby:deps.bzl", "rb_bundle_fetch", "rb_register_toolchains")
 
 rb_register_toolchains(
+    portable_ruby = True,
     version_file = "//:.ruby-version",
 )
 
