@@ -15,6 +15,7 @@ load(
     _normalize_bzlmod_repository_name = "normalize_bzlmod_repository_name",
 )
 load("//ruby/private/bundle_fetch:gemfile_lock_parser.bzl", "parse_gemfile_lock")
+load("//ruby/private/bundle_fetch:jars_downloader.bzl", "fetch_jars_for_gem")
 
 # Location of Bundler binstubs to generate shims and use during rb_bundle_install(...).
 BINSTUBS_LOCATION = "bin/private"
@@ -189,6 +190,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
                 cache_path = cache_path,
             ),
         )
+        jar_checksums.update(fetch_jars_for_gem(repository_ctx, gem, jars_path, repository_ctx.attr.jar_checksums))
 
     # Fetch Bundler and define an `rb_gem_install()` target for it.
     _download_gem(repository_ctx, gemfile_lock.bundler, cache_path, gemfile_lock.bundler.sha256)
