@@ -97,15 +97,20 @@ def _get_gem_executables(repository_ctx, gem, cache_path):
 
     repository_ctx.symlink(gem_filepath, gem.filename + ".tar")
     repository_ctx.extract(gem.filename + ".tar", output = gem.full_name)
-    data = "/".join([gem.full_name, "data"])
-    repository_ctx.extract("/".join([gem.full_name, "data.tar.gz"]), output = data)
-    gem_contents = repository_ctx.path(data)
+    data_tar_gz = "/".join([gem.full_name, "data.tar.gz"])
 
-    executable_dirnames = ["bin", "exe"]
-    for executable_dirname in executable_dirnames:
-        if gem_contents.get_child(executable_dirname).exists:
-            for executable in gem_contents.get_child(executable_dirname).readdir():
-                executables.append(executable.basename)
+    # Some gems (e.g. testcontainers) have no files, resulting in an empty data.tar.gz.
+    # An empty gzipped tar is very small, so we skip extraction if the file is tiny.
+    if len(repository_ctx.read(data_tar_gz)) > 100:
+        data = "/".join([gem.full_name, "data"])
+        repository_ctx.extract(data_tar_gz, output = data)
+        gem_contents = repository_ctx.path(data)
+
+        executable_dirnames = ["bin", "exe"]
+        for executable_dirname in executable_dirnames:
+            if gem_contents.get_child(executable_dirname).exists:
+                for executable in gem_contents.get_child(executable_dirname).readdir():
+                    executables.append(executable.basename)
 
     _cleanup_downloads(repository_ctx, gem)
     return executables

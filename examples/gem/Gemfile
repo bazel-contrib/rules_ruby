@@ -10,3 +10,4 @@ gem 'debug', '>= 1.0.0', platforms: %i[mri mswin64]
 gem 'psych', '5.0.1'
 gem 'rspec', '~> 3.0'
 gem 'rubocop', '~> 1.64'
+gem 'testcontainers', '~> 0.2' # empty gem
