@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Generates portable_ruby_checksums for ruby.toolchain() and updates MODULE.bazel.
+# Generates portable_ruby_checksums for ruby.toolchain() and updates MODULE.bazel or
+# ruby/private/portable_ruby_checksums.bzl (when --all is specified).
 
 # --- begin runfiles.bash initialization v3 ---
 # Copy-pasted from the Bazel Bash runfiles library v3.
@@ -41,6 +42,8 @@ dry_run=false
 name="ruby"
 module_bazel="${BUILD_WORKSPACE_DIRECTORY:-.}/MODULE.bazel"
 ruby_version=""
+all_releases=false
+checksums_bzl="${BUILD_WORKSPACE_DIRECTORY:-.}/ruby/private/portable_ruby_checksums.bzl"
 
 # jdx/ruby platform names (order matches portable_ruby_checksums.bzl)
 PLATFORMS=("x86_64_linux" "macos" "arm64_linux")
@@ -66,6 +69,10 @@ while (("$#")); do
       dry_run=true
       shift
       ;;
+    --all)
+      all_releases=true
+      shift
+      ;;
     --ruby-version)
       ruby_version="${2}"
       shift 2
@@ -78,6 +85,10 @@ while (("$#")); do
       module_bazel="${2}"
       shift 2
       ;;
+    --checksums-bzl)
+      checksums_bzl="${2}"
+      shift 2
+      ;;
     -*)
       fail "Error: Unknown option: ${1}"
       ;;
@@ -87,6 +98,50 @@ while (("$#")); do
       ;;
   esac
 done
+
+# MARK - --all mode: update ruby/private/portable_ruby_checksums.bzl
+
+if [[ ${all_releases} == "true" ]]; then
+  # Verify we are running inside the rules_ruby repo
+  workspace_module_bazel="${BUILD_WORKSPACE_DIRECTORY:-.}/MODULE.bazel"
+  if ! grep -q 'name = "rules_ruby"' "${workspace_module_bazel}" 2>/dev/null; then
+    fail "Error: --all is only supported when run inside the rules_ruby repository"
+  fi
+
+  # Fetch list of all releases with their assets
+  list_url="${RV_RUBY_LIST_API_URL:-https://api.github.com/repos/jdx/ruby/releases?per_page=100}"
+  all_response=$(curl -sL --max-time 60 "${list_url}")
+
+  # Extract all checksums (excluding no_yjit), sorted by key in reverse order
+  entries=$(echo "${all_response}" | jq -r \
+    '[.[].assets[] | select(.name | endswith(".tar.gz")) | select(.name | contains("no_yjit") | not) | {(.name): (.digest | ltrimstr("sha256:"))}] | add | to_entries | sort_by(.key) | reverse | .[] | "    \"\(.key)\": \"\(.value)\","')
+
+  if [[ -z ${entries} ]]; then
+    fail "Error: No checksums found in releases response"
+  fi
+
+  # Build the bzl file content
+  bzl_content='"Provides checksums for portable Ruby versions from jdx/ruby."
+
+# Generated via:
+# bazel run //tools/generate_portable_ruby_checksums -- --all
+
+PORTABLE_RUBY_CHECKSUMS = {
+'"${entries}"'
+}
+'
+
+  if [[ ${dry_run} == "true" ]]; then
+    printf "%s" "${bzl_content}"
+    exit 0
+  fi
+
+  printf "%s" "${bzl_content}" >"${checksums_bzl}"
+  echo "Successfully updated ${checksums_bzl}"
+  exit 0
+fi
+
+# MARK - Single-version mode
 
 # Get Ruby version
 if [[ -z ${ruby_version} ]]; then

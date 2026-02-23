@@ -21,6 +21,7 @@ sh_test(
         "testdata/3.4.8",
         "testdata/expected_checksums_output.txt",
         "testdata/jdx_ruby_release_response.json",
+        "testdata/jdx_ruby_releases_list.json",
         ":generate_portable_ruby_checksums",
     ],
     deps = [

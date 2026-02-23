@@ -1,7 +1,7 @@
 "Provides checksums for portable Ruby versions from jdx/ruby."
 
 # Generated via:
-# gh release list --repo jdx/ruby --limit 200 --json tagName --jq '.[].tagName' | xargs -I{} gh api repos/jdx/ruby/releases/tags/{} --jq '.assets[] | select(.name | endswith(".tar.gz")) | select(.name | contains("no_yjit") | not) | {(.name): (.digest | ltrimstr("sha256:"))}' | jq -s 'add | to_entries | sort_by(.key) | reverse | from_entries'
+# bazel run //tools/generate_portable_ruby_checksums -- --all
 
 PORTABLE_RUBY_CHECKSUMS = {
     "ruby-4.0.1.x86_64_linux.tar.gz": "df9793cc730f782273fb17c70bc205f724fd2e127e95c0c059ae198705110b98",

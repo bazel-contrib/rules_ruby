@@ -38,6 +38,9 @@ mock_response="$(rlocation "${mock_response_location}")"
 expected_output_location=rules_ruby/tools/generate_portable_ruby_checksums/testdata/expected_checksums_output.txt
 expected_output="$(rlocation "${expected_output_location}")"
 
+releases_list_location=rules_ruby/tools/generate_portable_ruby_checksums/testdata/jdx_ruby_releases_list.json
+releases_list="$(rlocation "${releases_list_location}")"
+
 # MARK - Cleanup
 
 # Collect temp directories for cleanup
@@ -145,8 +148,113 @@ test_invalid_ruby_version() {
 
 }
 
+# Test 5: --all flag fails outside rules_ruby repo
+test_all_requires_rules_ruby_repo() {
+
+  local temp_dir
+  temp_dir="$(mktemp -d)"
+  temp_dirs+=("${temp_dir}")
+
+  cd "${temp_dir}"
+  export BUILD_WORKSPACE_DIRECTORY="${temp_dir}"
+
+  # Create a MODULE.bazel with a different module name
+  cat >"${temp_dir}/MODULE.bazel" <<'EOF'
+module(name = "some_other_repo")
+EOF
+
+  export RV_RUBY_LIST_API_URL="file://${releases_list}"
+
+  # Should fail because module name is not rules_ruby
+  if "${generate_portable_ruby_checksums}" --all --dry-run 2>/dev/null; then
+    fail "Should have failed when not in rules_ruby repo"
+  fi
+
+}
+
+# Test 6: --all flag dry-run generates correct bzl content
+test_all_dry_run() {
+
+  local temp_dir
+  temp_dir="$(mktemp -d)"
+  temp_dirs+=("${temp_dir}")
+
+  cd "${temp_dir}"
+  export BUILD_WORKSPACE_DIRECTORY="${temp_dir}"
+
+  # Satisfy the rules_ruby repo check
+  printf 'module(name = "rules_ruby")\n' >"${temp_dir}/MODULE.bazel"
+
+  # Mock the releases list API response
+  export RV_RUBY_LIST_API_URL="file://${releases_list}"
+
+  # Run the script with --all --dry-run
+  local output
+  output=$("${generate_portable_ruby_checksums}" --all --dry-run)
+
+  # Verify output is a valid bzl file
+  assert_match 'PORTABLE_RUBY_CHECKSUMS = {' "${output}" \
+    "Output should contain PORTABLE_RUBY_CHECKSUMS dict"
+
+  # Verify no_yjit entries are excluded
+  if echo "${output}" | grep -q "no_yjit"; then
+    fail "Output should not contain no_yjit entries"
+  fi
+
+  # Verify both versions are present
+  assert_match "ruby-3.4.8" "${output}" "Output should contain 3.4.8 checksums"
+  assert_match "ruby-3.4.7" "${output}" "Output should contain 3.4.7 checksums"
+
+  # Verify entries are sorted in reverse order (3.4.8 before 3.4.7)
+  local pos_348 pos_347
+  pos_348=$(echo "${output}" | grep -n "ruby-3.4.8" | head -1 | cut -d: -f1)
+  pos_347=$(echo "${output}" | grep -n "ruby-3.4.7" | head -1 | cut -d: -f1)
+  if [[ ${pos_348} -gt ${pos_347} ]]; then
+    fail "Entries should be in reverse order (3.4.8 before 3.4.7)"
+  fi
+
+}
+
+# Test 7: --all flag writes bzl file
+test_all_writes_bzl_file() {
+
+  local temp_dir
+  temp_dir="$(mktemp -d)"
+  temp_dirs+=("${temp_dir}")
+
+  cd "${temp_dir}"
+  export BUILD_WORKSPACE_DIRECTORY="${temp_dir}"
+
+  # Satisfy the rules_ruby repo check
+  printf 'module(name = "rules_ruby")\n' >"${temp_dir}/MODULE.bazel"
+
+  # Mock the releases list API response
+  export RV_RUBY_LIST_API_URL="file://${releases_list}"
+
+  # Run the script with --all and a custom output path
+  local output_file="${temp_dir}/checksums.bzl"
+  "${generate_portable_ruby_checksums}" --all --checksums-bzl "${output_file}"
+
+  # Verify the file was written
+  if [[ ! -f ${output_file} ]]; then
+    fail "Checksums bzl file should have been written"
+  fi
+
+  local content
+  content=$(cat "${output_file}")
+
+  assert_match 'PORTABLE_RUBY_CHECKSUMS = {' "${content}" \
+    "File should contain PORTABLE_RUBY_CHECKSUMS dict"
+  assert_match "ruby-3.4.8.x86_64_linux.tar.gz" "${content}" \
+    "File should contain x86_64_linux entry"
+
+}
+
 # Run all tests
 test_basic_dry_run
 test_explicit_ruby_version
 test_missing_ruby_version
 test_invalid_ruby_version
+test_all_requires_rules_ruby_repo
+test_all_dry_run
+test_all_writes_bzl_file
