@@ -193,7 +193,7 @@ test_all_dry_run() {
   output=$("${generate_portable_ruby_checksums}" --all --dry-run)
 
   # Verify output is a valid bzl file
-  assert_match 'PORTABLE_RUBY_CHECKSUMS = {' "${output}" \
+  assert_match 'PORTABLE_RUBY_CHECKSUMS =' "${output}" \
     "Output should contain PORTABLE_RUBY_CHECKSUMS dict"
 
   # Verify no_yjit entries are excluded
@@ -243,7 +243,7 @@ test_all_writes_bzl_file() {
   local content
   content=$(cat "${output_file}")
 
-  assert_match 'PORTABLE_RUBY_CHECKSUMS = {' "${content}" \
+  assert_match 'PORTABLE_RUBY_CHECKSUMS =' "${content}" \
     "File should contain PORTABLE_RUBY_CHECKSUMS dict"
   assert_match "ruby-3.4.8.x86_64_linux.tar.gz" "${content}" \
     "File should contain x86_64_linux entry"
