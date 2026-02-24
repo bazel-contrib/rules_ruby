@@ -177,7 +177,7 @@ ruby.toolchain(
 
 **Notes:**
 
-- Portable Ruby is only supported on Linux (x86_64) and macOS (arm64).
+- Portable Ruby is only supported on Linux (arm64, x86_64) and macOS (arm64).
 - Setting `portable_ruby = True` has no effect on JRuby, TruffleRuby, or Windows.
 - On Windows, the toolchain automatically falls back to RubyInstaller.
 - Find available portable Ruby releases at https://github.com/jdx/ruby/releases

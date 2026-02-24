@@ -306,6 +306,11 @@ def _install_portable_ruby(repository_ctx, ruby_version, checksums):
     else:
         arch_key = arch
 
+    if os_key == "macos" and arch_key == "x86_64":
+        print("Warning: Portable Ruby does not support macOS on x86_64, falling back to compiling from source.")  # buildifier: disable=print
+        _install_via_ruby_build(repository_ctx, ruby_version)
+        return
+
     if os_key == "macos":
         # Intel is not supported
         platform_key = "macos"
