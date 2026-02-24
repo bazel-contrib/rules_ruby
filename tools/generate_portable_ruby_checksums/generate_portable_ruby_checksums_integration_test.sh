@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Integration tests for generate_rv_checksums.sh that verify buildozer updates
+# Integration tests for generate_portable_ruby_checksums.sh that verify buildozer updates
 # work
 
 # --- begin runfiles.bash initialization v3 ---
@@ -30,10 +30,10 @@ assertions_sh="$(rlocation "${assertions_sh_location}")" \
 # shellcheck disable=SC1090
 source "${assertions_sh}"
 
-generate_rv_checksums_location=rules_ruby/tools/generate_rv_checksums/generate_rv_checksums.sh
-generate_rv_checksums="$(rlocation "${generate_rv_checksums_location}")"
+generate_portable_ruby_checksums_location=rules_ruby/tools/generate_portable_ruby_checksums/generate_portable_ruby_checksums.sh
+generate_portable_ruby_checksums="$(rlocation "${generate_portable_ruby_checksums_location}")"
 
-mock_response_location=rules_ruby/tools/generate_rv_checksums/testdata/rv_ruby_release_response.json
+mock_response_location=rules_ruby/tools/generate_portable_ruby_checksums/testdata/jdx_ruby_release_response.json
 mock_response="$(rlocation "${mock_response_location}")"
 
 # MARK - Cleanup
@@ -76,40 +76,36 @@ ruby.toolchain(
 use_repo(ruby, "ruby_toolchains")
 EOF
 
-  # Mock the API response
+  # Mock the API response (the release tag is the Ruby version)
   export RV_RUBY_API_URL="file://${mock_response%/*}"
 
   # Run the script WITHOUT --dry-run
-  "${generate_rv_checksums}" 20251225 --ruby-version 3.4.8 \
+  "${generate_portable_ruby_checksums}" --ruby-version 3.4.8 \
     --module-bazel MODULE.bazel
 
   # Verify MODULE.bazel was updated
   local module_content
   module_content=$(cat MODULE.bazel)
 
-  # Check rv_version was set
-  assert_match 'rv_version = "20251225"' "${module_content}" \
-    "MODULE.bazel should contain rv_version"
+  # Check portable_ruby was set
+  assert_match 'portable_ruby = True' "${module_content}" \
+    "MODULE.bazel should contain portable_ruby"
 
-  # Check rv_checksums was set with all platforms
-  assert_match "rv_checksums = \{" "${module_content}" \
-    "MODULE.bazel should contain rv_checksums"
+  # Check portable_ruby_checksums was set with all platforms
+  assert_match "portable_ruby_checksums = \{" "${module_content}" \
+    "MODULE.bazel should contain portable_ruby_checksums"
   assert_match \
-    '"linux-arm64": "0c08c35a99f10817643d548f98012268c5433ae25a737ab4d6751336108a941d"' \
+    '"ruby-3.4.8.arm64_linux.tar.gz": "0c08c35a99f10817643d548f98012268c5433ae25a737ab4d6751336108a941d"' \
     "${module_content}" \
-    "MODULE.bazel should contain linux-arm64 checksum"
+    "MODULE.bazel should contain arm64_linux checksum"
   assert_match \
-    '"linux-x86_64": "f36cef10365d370e0867f0c3ac36e457a26ab04f3cfbbd7edb227a18e6e9b3c3"' \
+    '"ruby-3.4.8.x86_64_linux.tar.gz": "f36cef10365d370e0867f0c3ac36e457a26ab04f3cfbbd7edb227a18e6e9b3c3"' \
     "${module_content}" \
-    "MODULE.bazel should contain linux-x86_64 checksum"
+    "MODULE.bazel should contain x86_64_linux checksum"
   assert_match \
-    '"macos-arm64": "cd9d7a1428076bfcc6c2ca3c0eb69b8e671e9b48afb4c351fa4a84927841ffef"' \
+    '"ruby-3.4.8.macos.tar.gz": "cd9d7a1428076bfcc6c2ca3c0eb69b8e671e9b48afb4c351fa4a84927841ffef"' \
     "${module_content}" \
-    "MODULE.bazel should contain macos-arm64 checksum"
-  assert_match \
-    '"macos-x86_64": "e9da39082d1dd8502d322c850924d929bc45b7a1e35da593a5606c00673218d4"' \
-    "${module_content}" \
-    "MODULE.bazel should contain macos-x86_64 checksum"
+    "MODULE.bazel should contain macos checksum"
 
   # Verify ruby_version was NOT changed (we didn't update it)
   assert_match 'ruby_version = "3.3.0"' "${module_content}" \
@@ -152,22 +148,22 @@ EOF
   export RV_RUBY_API_URL="file://${mock_response%/*}"
 
   # Run the script for "ruby_alt" toolchain
-  "${generate_rv_checksums}" 20251225 --ruby-version 3.4.8 --name ruby_alt \
+  "${generate_portable_ruby_checksums}" --ruby-version 3.4.8 --name ruby_alt \
     --module-bazel MODULE.bazel
 
   # Verify MODULE.bazel was updated
   local module_content
   module_content=$(cat MODULE.bazel)
 
-  # Count how many rv_version assignments there are
-  local rv_version_count
-  rv_version_count=$(grep -c 'rv_version = "20251225"' MODULE.bazel || true)
+  # Count how many portable_ruby assignments there are
+  local portable_ruby_count
+  portable_ruby_count=$(grep -c 'portable_ruby = True' MODULE.bazel || true)
 
-  assert_equal "1" "${rv_version_count}" \
-    'Should have exactly one rv_version = "20251225" (only in ruby_alt)'
+  assert_equal "1" "${portable_ruby_count}" \
+    'Should have exactly one portable_ruby = True (only in ruby_alt)'
 
   # Verify the first toolchain (ruby) was NOT updated
-  # Check that there's still a toolchain without rv_version before ruby_alt
+  # Check that there's still a toolchain without portable_ruby before ruby_alt
   if ! grep -B5 'name = "ruby_alt"' MODULE.bazel | grep -q 'name = "ruby"'; then
     fail "First toolchain should still exist"
   fi

@@ -28,42 +28,11 @@ bazel_dep(
 ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
 ruby.toolchain(
     name = "ruby",
-    rv_checksums = {
-        "linux-arm64": "0c08c35a99f10817643d548f98012268c5433ae25a737ab4d6751336108a941d",
-        "linux-x86_64": "f36cef10365d370e0867f0c3ac36e457a26ab04f3cfbbd7edb227a18e6e9b3c3",
-        "macos-arm64": "cd9d7a1428076bfcc6c2ca3c0eb69b8e671e9b48afb4c351fa4a84927841ffef",
-        "macos-x86_64": "e9da39082d1dd8502d322c850924d929bc45b7a1e35da593a5606c00673218d4",
-    },
-    rv_version = "20251225",
+    portable_ruby = True,
     version_file = "//:.ruby-version",
 )
 ruby.bundle_fetch(
     name = "root_bundle",
-    # Exclude default gems with C extensions as listed at
-    # https://stdgems.org/<ruby-version> (e.g, https://stdgems.org/3.4.8 for
-    # Ruby 3.4.8) - these are pre-compiled in rv-ruby with portable
-    # dependencies. Bundled gems are NOT excluded because bundler needs to
-    # install them normally.
-    #
-    # IMPORTANT: These gems must be pinned in your Gemfile, as well.
-    excluded_gems = [
-        "date",
-        "digest",
-        "etc",
-        "fcntl",
-        "fiddle",
-        "io-console",
-        "io-nonblock",
-        "io-wait",
-        "json",
-        "openssl",
-        "pathname",
-        "prism",
-        "psych",
-        "stringio",
-        "strscan",
-        "zlib",
-    ],
     gem_checksums = {
         "action_text-trix-2.1.16": "f645a2c21821b8449fd1d6770708f4031c91a2eedf9ef476e9be93c64e703a8a",
         "actioncable-8.1.1": "7262307e9693f09b299e281590110ce4b6ba7e4e4cee6da4b9d987eaf56f9139",
@@ -83,12 +52,15 @@ ruby.bundle_fetch(
         "concurrent-ruby-1.3.6": "6b56837e1e7e5292f9864f34b69c5a2cbc75c0cf5338f1ce9903d10fa762d5ab",
         "connection_pool-3.0.2": "33fff5ba71a12d2aa26cb72b1db8bba2a1a01823559fb01d29eb74c286e62e0a",
         "crass-1.0.6": "dc516022a56e7b3b156099abc81b6d2b08ea1ed12676ac7a5657617f012bd45d",
+        "date-3.4.1": "bf268e14ef7158009bfeaec40b5fa3c7271906e88b196d958a89d4b408abe64f",
         "drb-2.2.3": "0b00d6fdb50995fe4a45dea13663493c841112e4068656854646f418fda13373",
         "erb-6.0.1": "28ecdd99c5472aebd5674d6061e3c6b0a45c049578b071e5a52c2a7f13c197e5",
         "erubi-1.13.1": "a082103b0885dbc5ecf1172fede897f9ebdb745a4b97a5e8dc63953db1ee4ad9",
         "globalid-1.3.0": "05c639ad6eb4594522a0b07983022f04aa7254626ab69445a0e493aa3786ff11",
         "i18n-1.14.8": "285778639134865c5e0f6269e0b818256017e8cde89993fdfcbfb64d088824a5",
+        "io-console-0.8.1": "1e15440a6b2f67b6ea496df7c474ed62c860ad11237f29b3bd187f054b925fcb",
         "irb-1.16.0": "2abe56c9ac947cdcb2f150572904ba798c1e93c890c256f8429981a7675b0806",
+        "json-2.9.1": "d2bdef4644052fad91c1785d48263756fe32fcac08b96a20bb15840e96550d11",
         "logger-1.7.0": "196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203",
         "loofah-2.25.0": "df5ed7ac3bac6a4ec802df3877ee5cc86d027299f8952e6243b3dac446b060e6",
         "mail-2.9.0": "6fa6673ecd71c60c2d996260f9ee3dd387d4673b8169b502134659ece6d34941",
@@ -110,6 +82,8 @@ ruby.bundle_fetch(
         "nokogiri-1.19.0-x86_64-linux-musl": "1c4ca6b381622420073ce6043443af1d321e8ed93cc18b08e2666e5bd02ffae4",
         "pp-0.6.3": "2951d514450b93ccfeb1df7d021cae0da16e0a7f95ee1e2273719669d0ab9df6",
         "prettyprint-0.2.0": "2bc9e15581a94742064a3cc8b0fb9d45aae3d03a1baa6ef80922627a0766f193",
+        "prism-1.5.2": "192741663a55af1ac1b987caa1092deb666e4ff46a30c5064ad5456acd05df1d",
+        "psych-5.2.2": "a4a9477c85d3e858086c38cf64e7096abe40d1b1eed248b01020dec0ff9906ab",
         "racc-1.8.1": "4a7f6929691dbec8b5209a0b373bc2614882b55fc5d2e447a21aaa691303d62f",
         "rack-3.2.4": "5d74b6f75082a643f43c1e76b419c40f0e5527fcfee1e669ac1e6b73c0ccb6f6",
         "rack-session-2.1.1": "0b6dc07dea7e4b583f58a48e8b806d4c9f1c6c9214ebc202ec94562cbea2e4e9",
@@ -123,6 +97,7 @@ ruby.bundle_fetch(
         "rdoc-7.0.3": "dfe3d0981d19b7bba71d9dbaeb57c9f4e3a7a4103162148a559c4fc687ea81f9",
         "reline-0.6.3": "1198b04973565b36ec0f11542ab3f5cfeeec34823f4e54cebde90968092b1835",
         "securerandom-0.4.1": "cc5193d414a4341b6e225f0cb4446aceca8e50d5e1888743fac16987638ea0b1",
+        "stringio-3.1.2": "204f1828f85cdb39d57cac4abc6dc44b04505a223f131587f2e20ae3729ba131",
         "thor-1.4.0": "8763e822ccb0f1d7bee88cde131b19a65606657b847cc7b7b4b82e772bcd8a3d",
         "timeout-0.6.0": "6d722ad619f96ee383a0c557ec6eb8c4ecb08af3af62098a0be5057bf00de1af",
         "tsort-0.2.0": "9650a793f6859a43b6641671278f79cfead60ac714148aabe4e3f0060480089f",
@@ -138,31 +113,6 @@ ruby.bundle_fetch(
 )
 ruby.bundle_fetch(
     name = "people_tracker_bundle",
-    # Exclude default gems with C extensions as listed at
-    # https://stdgems.org/<ruby-version> (e.g, https://stdgems.org/3.4.8 for
-    # Ruby 3.4.8) - these are pre-compiled in rv-ruby with portable
-    # dependencies. Bundled gems are NOT excluded because bundler needs to
-    # install them normally.
-    #
-    # IMPORTANT: These gems must be pinned in your Gemfile, as well.
-    excluded_gems = [
-        "date",
-        "digest",
-        "etc",
-        "fcntl",
-        "fiddle",
-        "io-console",
-        "io-nonblock",
-        "io-wait",
-        "json",
-        "openssl",
-        "pathname",
-        "prism",
-        "psych",
-        "stringio",
-        "strscan",
-        "zlib",
-    ],
     gem_checksums = {
         "actioncable-8.0.4": "aadb2bf2977b666cfeaa7dee66fd50e147559f78a8d55f6169e913502475e09f",
         "actionmailbox-8.0.4": "ed0b634a502fb63d1ba01ae025772e9d0261b7ba12e66389c736fcf4635cd80f",
@@ -191,6 +141,7 @@ ruby.bundle_fetch(
         "concurrent-ruby-1.3.6": "6b56837e1e7e5292f9864f34b69c5a2cbc75c0cf5338f1ce9903d10fa762d5ab",
         "connection_pool-3.0.2": "33fff5ba71a12d2aa26cb72b1db8bba2a1a01823559fb01d29eb74c286e62e0a",
         "crass-1.0.6": "dc516022a56e7b3b156099abc81b6d2b08ea1ed12676ac7a5657617f012bd45d",
+        "date-3.4.1": "bf268e14ef7158009bfeaec40b5fa3c7271906e88b196d958a89d4b408abe64f",
         "debug-1.11.1": "2e0b0ac6119f2207a6f8ac7d4a73ca8eb4e440f64da0a3136c30343146e952b6",
         "devise-4.9.4": "920042fe5e704c548aa4eb65ebdd65980b83ffae67feb32c697206bfd975a7f8",
         "dotenv-3.2.0": "e375b83121ea7ca4ce20f214740076129ab8514cd81378161f11c03853fe619d",
@@ -203,8 +154,10 @@ ruby.bundle_fetch(
         "globalid-1.3.0": "05c639ad6eb4594522a0b07983022f04aa7254626ab69445a0e493aa3786ff11",
         "i18n-1.14.8": "285778639134865c5e0f6269e0b818256017e8cde89993fdfcbfb64d088824a5",
         "importmap-rails-2.2.2": "729f5b1092f832780829ade1d0b46c7e53d91c556f06da7254da2977e93fe614",
+        "io-console-0.8.1": "1e15440a6b2f67b6ea496df7c474ed62c860ad11237f29b3bd187f054b925fcb",
         "irb-1.16.0": "2abe56c9ac947cdcb2f150572904ba798c1e93c890c256f8429981a7675b0806",
         "jbuilder-2.14.1": "4eb26376ff60ef100cb4fd6fd7533cd271f9998327e86adf20fd8c0e69fabb42",
+        "json-2.9.1": "d2bdef4644052fad91c1785d48263756fe32fcac08b96a20bb15840e96550d11",
         "kamal-2.10.1": "53b7ecb4c33dd83b1aedfc7aacd1c059f835993258a552d70d584c6ce32b6340",
         "language_server-protocol-3.17.0.5": "fd1e39a51a28bf3eec959379985a72e296e9f9acfce46f6a79d31ca8760803cc",
         "lint_roller-1.1.0": "2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87",
@@ -237,7 +190,9 @@ ruby.bundle_fetch(
         "parser-3.3.10.0": "ce3587fa5cc55a88c4ba5b2b37621b3329aadf5728f9eafa36bbd121462aabd6",
         "pp-0.6.3": "2951d514450b93ccfeb1df7d021cae0da16e0a7f95ee1e2273719669d0ab9df6",
         "prettyprint-0.2.0": "2bc9e15581a94742064a3cc8b0fb9d45aae3d03a1baa6ef80922627a0766f193",
+        "prism-1.5.2": "192741663a55af1ac1b987caa1092deb666e4ff46a30c5064ad5456acd05df1d",
         "propshaft-1.3.1": "9acc664ef67e819ffa3d95bd7ad4c3623ea799110c5f4dee67fa7e583e74c392",
+        "psych-5.2.2": "a4a9477c85d3e858086c38cf64e7096abe40d1b1eed248b01020dec0ff9906ab",
         "public_suffix-7.0.0": "f7090b5beb0e56f9f10d79eed4d5fbe551b3b425da65877e075dad47a6a1b095",
         "puma-7.1.0": "e45c10cb124f224d448c98db653a75499794edbecadc440ad616cf50f2fd49dd",
         "raabro-1.4.0": "d4fa9ff5172391edb92b242eed8be802d1934b1464061ae5e70d80962c5da882",
@@ -278,6 +233,7 @@ ruby.bundle_fetch(
         "sqlite3-2.9.0-x86_64-linux-musl": "ef716ba7a66d7deb1ccc402ac3a6d7343da17fac862793b7f0be3d2917253c90",
         "sshkit-1.25.0": "c8c6543cdb60f91f1d277306d585dd11b6a064cb44eab0972827e4311ff96744",
         "stimulus-rails-1.3.4": "765676ffa1f33af64ce026d26b48e8ffb2e0b94e0f50e9119e11d6107d67cb06",
+        "stringio-3.1.2": "204f1828f85cdb39d57cac4abc6dc44b04505a223f131587f2e20ae3729ba131",
         "tailwindcss-rails-4.4.0": "efa2961351a52acebe616e645a81a30bb4f27fde46cc06ce7688d1cd1131e916",
         "tailwindcss-ruby-4.1.18": "b62fad5b00494e92987ee319dfb5c5ad272f0ed93649963d62f08d2ba0f03fa7",
         "tailwindcss-ruby-4.1.18-aarch64-linux-gnu": "e10f9560bccddbb4955fd535b3bcc8c7071a7df07404dd473a23fa791ec4e46b",

@@ -2,8 +2,8 @@ load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 
 sh_binary(
-    name = "generate_excluded_gems",
-    srcs = ["generate_excluded_gems.sh"],
+    name = "generate_portable_ruby_checksums",
+    srcs = ["generate_portable_ruby_checksums.sh"],
     data = [
         "@buildifier_prebuilt//buildozer",
     ],
@@ -15,12 +15,14 @@ sh_binary(
 )
 
 sh_test(
-    name = "generate_excluded_gems_test",
-    srcs = ["generate_excluded_gems_test.sh"],
+    name = "generate_portable_ruby_checksums_test",
+    srcs = ["generate_portable_ruby_checksums_test.sh"],
     data = [
-        "testdata/default_gems.json",
-        "testdata/expected_excluded_gems_output.txt",
-        ":generate_excluded_gems",
+        "testdata/3.4.8",
+        "testdata/expected_checksums_output.txt",
+        "testdata/jdx_ruby_release_response.json",
+        "testdata/jdx_ruby_releases_list.json",
+        ":generate_portable_ruby_checksums",
     ],
     deps = [
         "@cgrindel_bazel_starlib//shlib/lib:assertions",
@@ -29,11 +31,12 @@ sh_test(
 )
 
 sh_test(
-    name = "generate_excluded_gems_integration_test",
-    srcs = ["generate_excluded_gems_integration_test.sh"],
+    name = "generate_portable_ruby_checksums_integration_test",
+    srcs = ["generate_portable_ruby_checksums_integration_test.sh"],
     data = [
-        "testdata/default_gems.json",
-        ":generate_excluded_gems",
+        "testdata/3.4.8",
+        "testdata/jdx_ruby_release_response.json",
+        ":generate_portable_ruby_checksums",
     ],
     deps = [
         "@cgrindel_bazel_starlib//shlib/lib:assertions",

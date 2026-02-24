@@ -1,19 +1,14 @@
 "Repository rule for fetching Ruby interpreters"
 
+load("//ruby/private:portable_ruby_checksums.bzl", "PORTABLE_RUBY_CHECKSUMS")
+
 RUBY_BUILD_VERSION = "20260114"
 
 _JRUBY_BINARY_URL = "https://repo1.maven.org/maven2/org/jruby/jruby-dist/{version}/jruby-dist-{version}-bin.tar.gz"
 _RUBY_BUILD_URL = "https://github.com/rbenv/ruby-build/archive/refs/tags/v{version}.tar.gz"
 _RUBY_INSTALLER_URL = "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-{version}-1/rubyinstaller-devkit-{version}-1-x64.exe"
-_RV_RUBY_URL = "https://github.com/spinel-coop/rv-ruby/releases/download/{release}/ruby-{version}.{platform}.tar.gz"
-
-# Map Bazel OS/arch to rv-ruby artifact naming
-_RV_RUBY_PLATFORMS = {
-    "linux-x86_64": "x86_64_linux",
-    "linux-arm64": "arm64_linux",
-    "macos-arm64": "arm64_sonoma",
-    "macos-x86_64": "ventura",
-}
+_PORTABLE_RUBY_NAME = "ruby-{version}.{platform}.tar.gz"
+_MISE_RUBY_URL = "https://github.com/jdx/ruby/releases/download/{release}/{name}"
 
 # Maintained JRuby versions integrity from https://repo1.maven.org/maven2/org/jruby/jruby-dist.
 # Run the following script to update the list:
@@ -105,26 +100,7 @@ def _rb_download_impl(repository_ctx):
     ruby_binary_name = "ruby"
     gem_binary_name = "gem"
 
-    # Handle rv-ruby: only supported on Linux and macOS
-    use_rv_ruby = False
-    if repository_ctx.attr.rv_version:
-        if repository_ctx.os.name.startswith("windows"):
-            # buildifier: disable=print
-            print("""\
-WARNING: rv-ruby is not supported on Windows. Falling back to RubyInstaller \
-for Ruby %s.\
-""" % version)
-        else:
-            use_rv_ruby = True
-
-    if use_rv_ruby:
-        _install_rv_ruby(
-            repository_ctx,
-            repository_ctx.attr.rv_version,
-            version,
-            repository_ctx.attr.rv_checksums,
-        )
-    elif version.startswith("jruby"):
+    if version.startswith("jruby"):
         _install_jruby(repository_ctx, version)
 
         engine = "jruby"
@@ -152,11 +128,25 @@ for Ruby %s.\
         openssl_prefix = _execute_command(repository_ctx, ["dist/bin/ruby", "-rrbconfig", "-e", "puts ENV['OPENSSL_PREFIX']"])
         if openssl_prefix:
             env.update({"OPENSSL_PREFIX": openssl_prefix})
-
     elif version == "system":
         engine = _symlink_system_ruby(repository_ctx)
     elif repository_ctx.os.name.startswith("windows"):
         _install_via_rubyinstaller(repository_ctx, version)
+    elif repository_ctx.attr.portable_ruby:
+        _install_portable_ruby(
+            repository_ctx,
+            version,
+            repository_ctx.attr.portable_ruby_checksums,
+        )
+
+        # Portable Ruby may ship with libyaml and openssl which are needed to compile the
+        # psych and openssl gems respectively when built with --incompatible_strict_action_env).
+        # TODO: This won't work on RBE.
+        dist_dir = str(repository_ctx.path("dist"))
+        if repository_ctx.path("dist/include/yaml.h").exists:
+            env.update({"BUNDLE_BUILD__PSYCH": "--with-libyaml-dir=" + dist_dir})
+        if repository_ctx.path("dist/include/openssl").exists:
+            env.update({"BUNDLE_BUILD__OPENSSL": "--with-openssl-dir=" + dist_dir})
     else:
         _install_via_ruby_build(repository_ctx, version)
 
@@ -289,12 +279,11 @@ def _install_via_ruby_build(repository_ctx, version):
 
     repository_ctx.delete("ruby-build")
 
-def _install_rv_ruby(repository_ctx, rv_version, ruby_version, checksums):
-    """Install prebuilt Ruby from rv-ruby project.
+def _install_portable_ruby(repository_ctx, ruby_version, checksums):
+    """Install portable Ruby from jdx/ruby project.
 
     Args:
         repository_ctx: Repository context
-        rv_version: rv-ruby release version (e.g., "20251225")
         ruby_version: Ruby version (e.g., "3.4.8")
         checksums: Dict mapping platform keys to SHA256 checksums
     """
@@ -317,48 +306,39 @@ def _install_rv_ruby(repository_ctx, rv_version, ruby_version, checksums):
     else:
         arch_key = arch
 
-    platform_key = os_key + "-" + arch_key
+    if os_key == "macos" and arch_key == "x86_64":
+        print("Warning: Portable Ruby does not support macOS on x86_64, falling back to compiling from source.")  # buildifier: disable=print
+        _install_via_ruby_build(repository_ctx, ruby_version)
+        return
 
-    # Validate platform is supported by rv-ruby
-    if platform_key not in _RV_RUBY_PLATFORMS:
-        supported = ", ".join(sorted(_RV_RUBY_PLATFORMS.keys()))
-        fail("""
-rv-ruby does not support platform: {platform}
-Detected OS: {os} ({os_raw})
-Detected architecture: {arch} ({arch_raw})
-Supported platforms: {supported}
-""".format(
-            platform = platform_key,
-            os = os_key,
-            os_raw = os_name,
-            arch = arch_key,
-            arch_raw = arch,
-            supported = supported,
-        ))
+    if os_key == "macos":
+        # Intel is not supported
+        platform_key = "macos"
+    else:
+        platform_key = arch_key + "_" + os_key
 
-    rv_platform = _RV_RUBY_PLATFORMS[platform_key]
+    artifact_name = _PORTABLE_RUBY_NAME.format(
+        version = ruby_version,
+        platform = platform_key,
+    )
 
     # Get checksum if provided (Bazel will warn if not provided)
     kwargs = {}
-    if platform_key in checksums:
-        kwargs["sha256"] = checksums[platform_key]
+    if artifact_name in checksums:
+        kwargs["sha256"] = checksums[artifact_name]
+    elif artifact_name in PORTABLE_RUBY_CHECKSUMS:
+        kwargs["sha256"] = PORTABLE_RUBY_CHECKSUMS[artifact_name]
 
     repository_ctx.report_progress(
-        "Downloading rv-ruby %s for %s" % (ruby_version, platform_key),
+        "Downloading portable Ruby %s for %s" % (ruby_version, platform_key),
     )
-
-    # rv-ruby releases have a nested directory structure:
-    # rv-ruby@<version>/<version>/bin/ruby
-    # rv-ruby@<version>/<version>/lib/...
-    # Strip the outer directories to get the Ruby installation at dist/
     repository_ctx.download_and_extract(
-        url = _RV_RUBY_URL.format(
-            release = rv_version,
-            version = ruby_version,
-            platform = rv_platform,
+        url = _MISE_RUBY_URL.format(
+            release = ruby_version,
+            name = artifact_name,
         ),
         output = "dist/",
-        stripPrefix = "rv-ruby@{v}/{v}".format(v = ruby_version),
+        stripPrefix = "ruby-{}".format(ruby_version),
         **kwargs
     )
 
@@ -416,21 +396,19 @@ to install. You normally don't need to change this, unless `version` you pass is
 which isn't available in this ruby-build yet.
             """,
         ),
-        "rv_version": attr.string(
-            default = "",
+        "portable_ruby": attr.bool(
+            default = False,
             doc = """
-rv-ruby release version (e.g., "20251225").
-
-When set, downloads prebuilt Ruby from rv-ruby instead of compiling via ruby-build.
-The Ruby version is still read from the `version` or `version_file` attribute.
+When set to True, downloads portable Ruby from jdx/ruby instead of compiling via ruby-build.
+Has no effect on JRuby, TruffleRuby, or Windows (which use their own installation methods).
 """,
         ),
-        "rv_checksums": attr.string_dict(
+        "portable_ruby_checksums": attr.string_dict(
             default = {},
             doc = """
-Platform checksums for rv-ruby downloads.
+Platform checksums for portable Ruby downloads, overriding built-in checksums. Can be generated by running `bazel run @rules_ruby//tools/generate_portable_ruby_checksums`.
 
-Keys: linux-x86_64, linux-arm64, macos-arm64, macos-x86_64.
+Keys: artifact names (e.g., ruby-3.4.8.x86_64_linux.tar.gz, ruby-3.4.8.macos.tar.gz).
 Values: SHA256 checksums for the corresponding platform.
 """,
         ),

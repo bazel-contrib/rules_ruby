@@ -129,25 +129,33 @@ Keep in mind, that it takes some time for compilation to complete.
 
 On Windows, [RubyInstaller][6] is used to install MRI.
 
-#### Fast Installation with rv-ruby
+#### Fast Installation with Portable Ruby
 
-For faster MRI installation on Linux and macOS, you can use prebuilt Ruby
-binaries from [rv-ruby][19] instead of compiling from source. This significantly
+For faster MRI installation on Linux and macOS, you can use portable Ruby
+binaries from [jdx/ruby][19] instead of compiling from source. This significantly
 reduces installation time and ensures consistent, portable Ruby environments.
 
-**Configure rv-ruby Downloads**
+To enable portable Ruby, set `portable_ruby = True` in your toolchain declaration:
 
-To securely download and properly cache the Ruby binaries, the `ruby.toolchain`
-declaration must be updated with the `rv_version` and `rv_checksums` attributes.
+```bazel
+ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
+ruby.toolchain(
+    name = "ruby",
+    portable_ruby = True,
+    version_file = "//:.ruby-version",
+)
+```
 
-We have provided the `generate_rv_checksums` utility to add/update these
-attributes for you. The utility needs to know the `rv-ruby` version to use
-(https://github.com/spinel-coop/rv-ruby/releases) and the version of Ruby to
-download. By default, it will use the Ruby version specified in the
-`.ruby-version` file.
+This ruleset ships with [default checksums][20] to securely download and properly cache
+the Ruby binaries. If you want to use Ruby version not available with ruleset release,
+you should use `portable_ruby_checksums` attribute.
+
+We have provided the `generate_portable_ruby_checksums` utility to add/update these
+attributes for you. The utility needs to know the version of Ruby to download.
+By default, it will use the Ruby version specified in the `.ruby-version` file.
 
 ```bash
-bazel run @rules_ruby//tools/generate_rv_checksums -- 20251225
+bazel run @rules_ruby//tools/generate_portable_ruby_checksums -- 3.4.8
 ```
 
 After running the utility, the toolchain declaration in your `MODULE.bazel`
@@ -158,63 +166,21 @@ ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
 ruby.toolchain(
     name = "ruby",
     version_file = "//:.ruby-version",
-    rv_version = "20251225",
-    rv_checksums = {
-        "linux-arm64": "0c08c35a99f10817643d548f98012268c5433ae25a737ab4d6751336108a941d",
-        "linux-x86_64": "f36cef10365d370e0867f0c3ac36e457a26ab04f3cfbbd7edb227a18e6e9b3c3",
-        "macos-arm64": "cd9d7a1428076bfcc6c2ca3c0eb69b8e671e9b48afb4c351fa4a84927841ffef",
-        "macos-x86_64": "e9da39082d1dd8502d322c850924d929bc45b7a1e35da593a5606c00673218d4",
+    portable_ruby = True,
+    portable_ruby_checksums = {
+        "ruby-3.4.8.x86_64_linux.tar.gz": "e1c5ed91dc8b05e516cb5386a695e5ffed7b585fd577b93880b7eb61d20092e7",
+        "ruby-3.4.8.macos.tar.gz": "46c48fceb34d11b848f1fd7456ac77df49406f355de4f7d5667f254ea9da2f84",
+        "ruby-3.4.8.arm64_linux.tar.gz": "fdf6833e7ebe0b9c26a151a6f7481d81e178372046ad2b3f54ae56d159da8b1e",
     },
 )
 ```
 
-**Configure Excluded Gems**
-
-When using `rv-ruby`, you must exclude _default_ gems with C extensions from
-`bundle_fetch` as these are pre-compiled in the `rv-ruby` binary. You may see
-compilation errors if you do not exclude these gems.
-
-We have provided the `generate_excluded_gems` utility to update the declaration
-for you.
-
-```bash
-bazel run @rules_ruby//tools/generate_excluded_gems
-```
-
-The utility reads the Ruby version being used and checks
-https://raw.githubusercontent.com/janlelis/stdgems/main/default_gems.json to
-determine which gems should be excluded. The utility adds/updates the
-`excluded_gems` attribute with the correct list of gems. The `bundle_fetch`
-declaration will look something like the following:
-
-```bazel
-ruby.bundle_fetch(
-    name = "bundle",
-    gemfile = "//:Gemfile",
-    gemfile_lock = "//:Gemfile.lock",
-    excluded_gems = [
-        "date", "digest", "etc", "fcntl", "fiddle",
-        "io-console", "io-nonblock", "io-wait", "json",
-        "openssl", "pathname", "prism", "psych",
-        "stringio", "strscan", "zlib",
-    ],
-)
-```
-
-> [!NOTE]
-> You can find an HTML-rendered list of the default gems for a Ruby version at
-> https://stdgems.org/\<version\> (e.g., https://stdgems.org/3.4.8 for Ruby
-> 3.4.8).
-
 **Notes:**
 
-- `rv-ruby` is only supported on Linux and macOS (x86_64 and arm64).
+- Portable Ruby is only supported on Linux (arm64, x86_64) and macOS (arm64).
+- Setting `portable_ruby = True` has no effect on JRuby, TruffleRuby, or Windows.
 - On Windows, the toolchain automatically falls back to RubyInstaller.
-- Find available `rv-ruby` releases at
-  https://github.com/spinel-coop/rv-ruby/releases
-- The utilities support `--name` to target specific toolchains/bundles and
-  `--module-bazel` to specify a custom MODULE.bazel path.
-- Run utilities with `--dry-run` to preview changes without modifying files.
+- Find available portable Ruby releases at https://github.com/jdx/ruby/releases
 
 ### JRuby
 
@@ -267,4 +233,5 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
 [16]: https://bazel.build/reference/command-line-reference#flag--experimental_inprocess_symlink_creation
 [17]: https://github.com/bazelbuild/bazel/issues/4327
 [18]: docs/rails.md
-[19]: https://github.com/spinel-coop/rv-ruby
+[19]: https://github.com/jdx/ruby
+[20]: ruby/private/portable_ruby_checksums.bzl

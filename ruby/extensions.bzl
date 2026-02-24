@@ -23,7 +23,6 @@ ruby_bundle_fetch = tag_class(attrs = {
     "jar_checksums": attr.string_dict(),
     "bundler_remote": attr.string(default = "https://rubygems.org/"),
     "bundler_checksums": attr.string_dict(),
-    "excluded_gems": attr.string_list(default = []),
 })
 
 ruby_toolchain = tag_class(attrs = {
@@ -32,17 +31,17 @@ ruby_toolchain = tag_class(attrs = {
     "version_file": attr.label(doc = "File to read Ruby version from."),
     "ruby_build_version": attr.string(doc = "Version of ruby-build to use.", default = RUBY_BUILD_VERSION),
     "msys2_packages": attr.string_list(doc = "Extra MSYS2 packages to install.", default = ["libyaml"]),
-    "rv_version": attr.string(
+    "portable_ruby": attr.bool(
         doc = """\
-rv-ruby release version (e.g., '20251225'). When set, downloads prebuilt Ruby \
-from rv-ruby instead of compiling via ruby-build.\
+When True, downloads portable Ruby from jdx/ruby instead of compiling via \
+ruby-build. Has no effect on JRuby, TruffleRuby, or Windows.\
 """,
-        default = "",
+        default = False,
     ),
-    "rv_checksums": attr.string_dict(
+    "portable_ruby_checksums": attr.string_dict(
         doc = """\
-Platform checksums for rv-ruby downloads. Keys: linux-x86_64, linux-arm64, \
-macos-arm64, macos-x86_64.\
+Platform checksums for portable Ruby downloads, overriding built-in checksums. \
+Keys: linux-x86_64, linux-arm64, macos-arm64, macos-x86_64.\
 """,
         default = {},
     ),
@@ -77,7 +76,6 @@ def _ruby_module_extension(module_ctx):
                 jar_checksums = bundle_fetch.jar_checksums,
                 bundler_remote = bundle_fetch.bundler_remote,
                 bundler_checksums = bundle_fetch.bundler_checksums,
-                excluded_gems = bundle_fetch.excluded_gems,
             )
             if module_ctx.is_dev_dependency(bundle_fetch):
                 direct_dev_dep_names.append(bundle_fetch.name)
@@ -106,8 +104,8 @@ def _ruby_module_extension(module_ctx):
                     toolchain.version_file,
                     toolchain.msys2_packages,
                     toolchain.ruby_build_version,
-                    toolchain.rv_version,
-                    toolchain.rv_checksums,
+                    toolchain.portable_ruby,
+                    toolchain.portable_ruby_checksums,
                 )
                 if module_ctx.is_dev_dependency(toolchain):
                     direct_dev_dep_names.append(toolchain.name)
@@ -122,8 +120,8 @@ def _ruby_module_extension(module_ctx):
             version_file,
             msys2_packages,
             ruby_build_version,
-            rv_version,
-            rv_checksums,
+            portable_ruby,
+            portable_ruby_checksums,
         ) = config
         rb_register_toolchains(
             name = name,
@@ -131,8 +129,8 @@ def _ruby_module_extension(module_ctx):
             version_file = version_file,
             msys2_packages = msys2_packages,
             ruby_build_version = ruby_build_version,
-            rv_version = rv_version,
-            rv_checksums = rv_checksums,
+            portable_ruby = portable_ruby,
+            portable_ruby_checksums = portable_ruby_checksums,
             register = False,
         )
 

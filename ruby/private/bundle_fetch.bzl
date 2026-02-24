@@ -179,13 +179,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
     repository_name = _normalize_bzlmod_repository_name(repository_ctx.name)
 
     # Fetch gems and expose them as `rb_gem()` targets.
-    # Skip gems that are in the excluded_gems list (e.g., default gems bundled with Ruby).
-    excluded_gems = {name: True for name in repository_ctx.attr.excluded_gems}
-
     for gem in gemfile_lock.remote_packages:
-        if gem.name in excluded_gems:
-            # Skip downloading this gem - it's bundled with Ruby
-            continue
         gem_checksums[gem.full_name] = _download_gem(
             repository_ctx,
             gem,
@@ -321,13 +315,6 @@ rb_bundle_fetch = repository_rule(
         "jar_checksums": attr.string_dict(
             default = {},
             doc = "SHA-256 checksums for JAR dependencies. Keys are Maven coordinates (e.g. org.yaml:snakeyaml:1.33), values are SHA-256 checksums.",
-        ),
-        "excluded_gems": attr.string_list(
-            default = [],
-            doc = """\
-List of gem names to exclude from downloading. Useful for default gems bundled \
-with Ruby (e.g., psych, stringio).\
-""",
         ),
         "ruby": attr.label(
             doc = "Override Ruby toolchain to use for installation.",
