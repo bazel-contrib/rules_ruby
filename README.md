@@ -8,7 +8,6 @@ The ruleset is known to work with:
 
 - Bazel 8 using WORKSPACE and Bzlmod _(tested on CI)_.
 - Bazel 7 using WORKSPACE and Bzlmod _(no longer tested on CI)_.
-- Bazel 6 using WORKSPACE and Bzlmod _(no longer tested on CI)_.
 
 ## Getting Started
 
