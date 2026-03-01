@@ -38,6 +38,23 @@ sh_test(
     deps = ["@bazel_tools//tools/bash/runfiles"],
 )
 
+sh_test(
+    name = "coverage_test",
+    srcs = ["test_coverage.sh"],
+    data = glob(
+        ["**/*"],
+        exclude = [
+            "bazel-*/**",
+            "test_coverage.sh",
+        ],
+    ),
+    tags = [
+        "local",
+        "manual",
+    ],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
+)
+
 rb_binary(
     name = "rake",
     main = "@bundle//bin:rake",

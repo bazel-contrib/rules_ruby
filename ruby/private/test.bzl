@@ -116,6 +116,16 @@ $ bazel test :rubocop
 Executed 1 out of 1 test: 1 test passes.
 ```
 
+### Code Coverage
+
+To enable code coverage, run tests with the `coverage` command:
+
+```bash
+bazel coverage //...
+```
+
+See the [README](../../README.md#code-coverage) for more details.
+
 Note that you can also `run` every test target passing extra arguments to
 the Ruby script. For example, you can re-use `:rubocop` target to perform autocorrect:
 

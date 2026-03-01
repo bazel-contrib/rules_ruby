@@ -214,6 +214,23 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
   To work it around, use [`--experimental_inprocess_symlink_creation`][16] Bazel flag.
   See [`bazelbuild/bazel#4327`][17] for more details.
 
+## Code Coverage
+
+Ruby rules support Bazel's native coverage collection using [SimpleCov][21] and [simplecov-lcov][22].
+
+To enable coverage:
+
+1. Add `simplecov` and `simplecov-lcov` gems to your `Gemfile`.
+2. Run your tests with the `coverage` command:
+
+```bash
+bazel coverage //...
+```
+
+The rules automatically configure SimpleCov to use the LCOV formatter and output reports to the location expected by Bazel. Coverage reports will have workspace-relative paths, allowing Bazel to aggregate results from multiple targets.
+
+For JRuby, coverage requires `--debug` mode, which is automatically enabled by the rules when coverage is requested.
+
 [1]: https://www.ruby-lang.org
 [2]: https://bazel.build
 [3]: docs/repository_rules.md
@@ -234,3 +251,5 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
 [18]: docs/rails.md
 [19]: https://github.com/jdx/ruby
 [20]: ruby/private/portable_ruby_checksums.bzl
+[21]: https://github.com/simplecov-ruby/simplecov
+[22]: https://github.com/fortissimo1997/simplecov-lcov
