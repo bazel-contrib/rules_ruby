@@ -10,8 +10,9 @@ build --incompatible_strict_action_env=true
 # Don't allow empty glob patterns by default
 build --incompatible_disallow_empty_glob
 
-# Enable bzlmod
-common --enable_bzlmod
-
 # Download the JDK to run Bazel
 build --java_runtime_version=remotejdk_11
+
+# Do not autoload language-specific rules removed in Bazel core.
+# https://github.com/bazelbuild/bazel/issues/23043
+common --incompatible_autoload_externally=
