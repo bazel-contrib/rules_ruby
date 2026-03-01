@@ -6,7 +6,8 @@ This repository hosts [Ruby][1] language ruleset for [Bazel][2].
 
 The ruleset is known to work with:
 
-- Bazel 8 using WORKSPACE and Bzlmod _(tested on CI)_.
+- Bazel 9 using Bzlmod _(tested on CI)_.
+- Bazel 8 using WORKSPACE and Bzlmod _(no longer tested on CI)_.
 - Bazel 7 using WORKSPACE and Bzlmod _(no longer tested on CI)_.
 
 ## Getting Started
@@ -14,39 +15,6 @@ The ruleset is known to work with:
 ### Starter repo
 
 The fastest way to try this in an empty project is to click the green "Use this template" button on https://github.com/bazel-starters/ruby.
-
-### WORKSPACE
-
-1. Install the ruleset following WORKSPACE instructions on the [latest release][13].
-2. Download and install Ruby:
-
-```bazel
-# WORKSPACE
-load("@rules_ruby//ruby:deps.bzl", "rb_register_toolchains")
-
-rb_register_toolchains(
-    version = "3.3.9",
-    # alternatively, load version from .ruby-version file
-    # version_file = "//:.ruby-version",
-)
-```
-
-3. _(Optional)_ Download and install Bundler dependencies:
-
-```bazel
-# WORKSPACE
-load("@rules_ruby//ruby:deps.bzl", "rb_bundle_fetch")
-
-rb_bundle_fetch(
-    name = "bundle",
-    gemfile = "//:Gemfile",
-    gemfile_lock = "//:Gemfile.lock",
-)
-```
-
-4. Start defining your library, binary and test targets in `BUILD` files.
-
-### Bzlmod
 
 1. Install ruleset following Bzlmod instructions on the [latest release][13].
 2. Download and install Ruby:

@@ -1,2 +1,6 @@
 common --@protobuf//bazel/toolchains:prefer_prebuilt_protoc
 common --repo_env="JAVA_HOME=../bazel_tools/jdk"
+
+# Do not autoload language-specific rules removed in Bazel core.
+# https://github.com/bazelbuild/bazel/issues/23043
+common --incompatible_autoload_externally=
