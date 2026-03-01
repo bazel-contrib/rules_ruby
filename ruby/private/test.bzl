@@ -7,6 +7,7 @@ rb_test = rule(
     implementation = rb_binary_impl,
     executable = True,
     test = True,
+    fragments = ["coverage"],
     attrs = dict(
         ATTRS,
         srcs = LIBRARY_ATTRS["srcs"],

@@ -65,6 +65,9 @@ Supports `$(location)` expansion for targets from `srcs`, `data` and `deps`.
         allow_single_file = True,
         default = "@rules_ruby//ruby/private:coverage.rb",
     ),
+    "coverage_filters": attr.string_list(
+        doc = "Additional coverage filters to add to SimpleCov. Only applied during 'bazel coverage'.",
+    ),
 }
 
 # buildifier: disable=function-docstring
@@ -181,6 +184,9 @@ def rb_binary_impl(ctx):
     env.update(ruby_toolchain.env)
     env.update(ctx.attr.env)
 
+    if ctx.configuration.coverage_enabled and ctx.attr.coverage_filters:
+        env["COVERAGE_FILTERS"] = ",".join(ctx.attr.coverage_filters)
+
     runfiles = ctx.runfiles(tools, transitive_files = depset(transitive = [transitive_srcs, transitive_data]))
     runfiles = get_transitive_runfiles(runfiles, ctx.attr.srcs, ctx.attr.deps, ctx.attr.data)
     runfiles = runfiles.merge(ctx.attr._runfiles_library[DefaultInfo].default_runfiles)
@@ -223,6 +229,7 @@ def rb_binary_impl(ctx):
 rb_binary = rule(
     implementation = rb_binary_impl,
     executable = True,
+    fragments = ["coverage"],
     attrs = dict(
         ATTRS,
         srcs = LIBRARY_ATTRS["srcs"],

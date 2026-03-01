@@ -25,10 +25,16 @@ if ENV['COVERAGE'] == '1'
         # We must set root to the sandbox root.
         root Dir.pwd
       end
-      
+
       add_filter '/external/'
       add_filter '/spec/'
       add_filter '/test/'
+
+      if ENV['COVERAGE_FILTERS']
+        ENV['COVERAGE_FILTERS'].split(',').each do |filter|
+          add_filter filter.strip
+        end
+      end
     end
   rescue LoadError => e
     warn "Coverage enabled but simplecov or simplecov-lcov gems not found: #{e.message}"

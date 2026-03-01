@@ -231,6 +231,17 @@ The rules automatically configure SimpleCov to use the LCOV formatter and output
 
 For JRuby, coverage requires `--debug` mode, which is automatically enabled by the rules when coverage is requested.
 
+You can add additional coverage filters using `coverage_filters` attribute in `rb_test` or `rb_binary`:
+
+```python
+rb_test(
+    name = "my_test",
+    ...
+    coverage_filters = ["/vendor/", "/custom/"],
+)
+```
+
+
 [1]: https://www.ruby-lang.org
 [2]: https://bazel.build
 [3]: docs/repository_rules.md
