@@ -81,6 +81,7 @@ jobs:
       - run: bazel run "@bundle//bin:rake" "--" --version
       - run: bazel run "@bundle//bin:rspec" "--" --help
       - run: bazel test ...
+      - run: ./test_coverage.sh
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
 

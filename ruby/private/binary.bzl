@@ -61,10 +61,17 @@ Supports `$(location)` expansion for targets from `srcs`, `data` and `deps`.
     "_windows_constraint": attr.label(
         default = "@platforms//os:windows",
     ),
+    "_coverage_helper": attr.label(
+        allow_single_file = True,
+        default = "@rules_ruby//ruby/private:coverage.rb",
+    ),
+    "coverage_filters": attr.string_list(
+        doc = "Additional coverage filters to add to SimpleCov. Only applied during 'bazel coverage'.",
+    ),
 }
 
 # buildifier: disable=function-docstring
-def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {}, java_bin = "", jars_home_strip_suffix = ""):
+def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {}, java_bin = "", jars_home_strip_suffix = "", coverage_helper = "", is_jruby = False):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
     if ctx.attr.ruby != None:
         toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
@@ -79,7 +86,7 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
         # running binary scripts directly and should not affect normal `bazel run`.
         # See BATCH_RLOCATION_FUNCTION comments for more details.
         if binary_path.startswith("../") and not _is_windows(ctx):
-            binary_path = _to_rlocation_path(binary)
+            binary_path = _to_rlocation_path(ctx, binary)
             locate_binary_in_runfiles = "true"
         else:
             binary_path = _normalize_path(ctx, binary_path)
@@ -116,11 +123,13 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
             "{env}": _convert_env_to_script(ctx, environment),
             "{bundler_command}": bundler_command,
             "{jars_home_strip_suffix}": jars_home_strip_suffix,
-            "{ruby}": _to_rlocation_path(toolchain.ruby),
+            "{ruby}": _to_rlocation_path(ctx, toolchain.ruby),
             "{ruby_binary_name}": toolchain.ruby.basename,
             "{java_bin}": java_bin,
             "{rlocation_function}": rlocation_function,
             "{locate_binary_in_runfiles}": locate_binary_in_runfiles,
+            "{coverage_helper}": coverage_helper,
+            "{is_jruby}": "true" if is_jruby else "",
         },
     )
 
@@ -143,6 +152,7 @@ def rb_binary_impl(ctx):
     if ctx.attr.ruby != None:
         ruby_toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
     tools = list(ruby_toolchain.files)
+    tools.append(ctx.file._coverage_helper)
 
     if ruby_toolchain.version.startswith("jruby"):
         java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
@@ -163,8 +173,8 @@ def rb_binary_impl(ctx):
 
             # See https://bundler.io/v2.5/man/bundle-config.1.html for confiugration keys.
             env.update({
-                "BUNDLE_GEMFILE": _to_rlocation_path(info.gemfile),
-                "BUNDLE_PATH": _to_rlocation_path(info.path),
+                "BUNDLE_GEMFILE": _to_rlocation_path(ctx, info.gemfile),
+                "BUNDLE_PATH": _to_rlocation_path(ctx, info.path),
             })
     if len(bundler_srcs) > 0:
         transitive_srcs = depset(bundler_srcs, transitive = [transitive_srcs])
@@ -173,6 +183,9 @@ def rb_binary_impl(ctx):
     env.update(bundle_env)
     env.update(ruby_toolchain.env)
     env.update(ctx.attr.env)
+
+    if ctx.configuration.coverage_enabled and ctx.attr.coverage_filters:
+        env["COVERAGE_FILTERS"] = ",".join(ctx.attr.coverage_filters)
 
     runfiles = ctx.runfiles(tools, transitive_files = depset(transitive = [transitive_srcs, transitive_data]))
     runfiles = get_transitive_runfiles(runfiles, ctx.attr.srcs, ctx.attr.deps, ctx.attr.data)
@@ -190,6 +203,8 @@ def rb_binary_impl(ctx):
         env = env,
         java_bin = java_bin,
         jars_home_strip_suffix = jars_home_strip_suffix,
+        coverage_helper = _to_rlocation_path(ctx, ctx.file._coverage_helper),
+        is_jruby = ruby_toolchain.version.startswith("jruby"),
     )
 
     return [
@@ -214,6 +229,7 @@ def rb_binary_impl(ctx):
 rb_binary = rule(
     implementation = rb_binary_impl,
     executable = True,
+    fragments = ["coverage"],
     attrs = dict(
         ATTRS,
         srcs = LIBRARY_ATTRS["srcs"],

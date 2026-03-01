@@ -81,6 +81,13 @@ else
   binary="{binary}"
 fi
 
+if [[ "${COVERAGE:-}" == "1" ]]; then
+  export RUBYOPT="-r$(rlocation {coverage_helper}) ${RUBYOPT:-}"
+  if [ -n "{is_jruby}" ]; then
+    export JRUBY_OPTS="--debug ${JRUBY_OPTS:-}"
+  fi
+fi
+
 exec {bundler_command} {ruby_binary_name} $binary {args} "$@"
 
 # vim: ft=bash

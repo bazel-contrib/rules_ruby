@@ -7,4 +7,7 @@ gem 'debug', '>= 1.0.0', platforms: %i[mri mswin64]
 gem 'psych', '~> 5.3' # native extensions
 gem 'rspec', '~> 3.0'
 gem 'rubocop', '~> 1.64'
+gem 'simplecov', '~> 0.22'
+gem 'simplecov-lcov', '~> 0.8'
+
 gem 'testcontainers', '~> 0.2' # empty gem
