@@ -86,20 +86,10 @@ jobs:
         shell: bash
         run: |
           bazel coverage //spec:add
-          if [ ! -s "bazel-testlogs/spec/add/coverage.dat" ]; then
-            echo "Error: Coverage report is empty or missing"
-            exit 1
-          fi
           if ! grep -q "SF:./examples/gem/lib/gem/add.rb" bazel-testlogs/spec/add/coverage.dat; then
             echo "Error: Coverage report does not contain expected file coverage"
             exit 1
           fi
-      - name: Upload coverage report
-        if: matrix.ruby != 'truffleruby-33.0.0'
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-${{ matrix.os }}-${{ matrix.ruby }}-${{ matrix.mode }}
-          path: examples/gem/bazel-testlogs/spec/add/coverage.dat
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
 
