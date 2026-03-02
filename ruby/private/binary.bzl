@@ -90,6 +90,8 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
             locate_binary_in_runfiles = "true"
         else:
             binary_path = _normalize_path(ctx, binary_path)
+            if _is_windows(ctx):
+                binary_path = binary_path.replace("/", "\\")
 
     environment = {}
     environment.update(env)

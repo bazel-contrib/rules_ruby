@@ -42,6 +42,11 @@ if "{bundler_command}" neq "" (
 
 if "%COVERAGE%" == "1" (
   call :rlocation {coverage_helper} coverage_helper
+  if not exist "!coverage_helper!" (
+    echo>&2 ERROR: coverage_helper not found at !coverage_helper!
+    exit 1
+  )
+  set "coverage_helper=!coverage_helper:/=\!"
   set RUBYOPT=-r"!coverage_helper!" %RUBYOPT%
   if "{is_jruby}" neq "" (
     set JRUBY_OPTS=--debug %JRUBY_OPTS%

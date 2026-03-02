@@ -167,8 +167,11 @@ def to_rlocation_path(ctx, source):
         return source.short_path[3:]
 
     # For files in the same workspace as the rule being evaluated.
+    # In Bzlmod, workspace_name can be the canonical name.
     workspace_name = source.owner.workspace_name
     if not workspace_name:
+        # If we are in the main workspace, the path in runfiles
+        # starts with the workspace name.
         workspace_name = ctx.workspace_name
 
     if workspace_name:

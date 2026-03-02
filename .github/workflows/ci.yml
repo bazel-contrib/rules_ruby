@@ -24,7 +24,7 @@ jobs:
           bazelrc: common --announce_rc --color=yes
           repository-cache: true
       - run: bazel run :buildifier.check
-      - run: bazel test --verbose_failures --test_output=all --test_summary=detailed ...
+      - run: bazel test --verbose_failures --test_output=errors --test_summary=detailed ...
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
 
@@ -82,7 +82,7 @@ jobs:
       - run: bazel run "@ruby//:gem" "--" info
       - run: bazel run "@bundle//bin:rake" "--" --version
       - run: bazel run "@bundle//bin:rspec" "--" --help
-      - run: bazel test --test_output=all ...
+      - run: bazel test ...
       - name: Run coverage
         # if: matrix.ruby != 'truffleruby-33.0.0'
         shell: bash
