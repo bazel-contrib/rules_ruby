@@ -54,8 +54,6 @@ jobs:
           # TruffleRuby doesn't work on Windows.
           - os: windows-latest
             ruby: truffleruby-33.0.0
-    env:
-      MSYS_NO_PATHCONV: 1
     defaults:
       run:
         working-directory: examples/gem
@@ -84,9 +82,10 @@ jobs:
       - run: bazel run "@bundle//bin:rspec" "--" --help
       - run: bazel test ...
       - name: Run coverage
+        if: matrix.os != 'windows-latest'
         shell: bash
         run: |
-          bazel coverage --test_output=all //spec:add
+          bazel coverage //spec:add
           COVERAGE_FILE=bazel-testlogs/spec/add/coverage.dat
           if ! grep -q "SF:.*lib/gem/add.rb" "$COVERAGE_FILE"; then
             echo "Error: Coverage report does not contain expected file coverage"
@@ -94,6 +93,7 @@ jobs:
             exit 1
           fi
       - name: Upload coverage report
+        if: matrix.os != 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ matrix.os }}-${{ matrix.ruby }}-${{ matrix.mode }}
@@ -170,8 +170,6 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
-    env:
-      MSYS_NO_PATHCONV: 1
     defaults:
       run:
         working-directory: examples/deep_gem
@@ -205,8 +203,6 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
-    env:
-      MSYS_NO_PATHCONV: 1
     defaults:
       run:
         working-directory: examples/rails

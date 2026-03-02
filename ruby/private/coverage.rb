@@ -26,9 +26,6 @@ if ENV['COVERAGE'] == '1'
         root Dir.pwd
       end
 
-      # On Windows, SimpleCov might receive mixed slashes.
-      # Ensure everything matches the root's slash style if needed.
-
       add_filter '/external/'
       add_filter '/spec/'
       add_filter '/test/'
