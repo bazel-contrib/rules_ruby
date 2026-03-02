@@ -652,9 +652,6 @@ To enable code coverage, run tests with the `coverage` command:
 bazel coverage //...
 ```
 
-> [!NOTE]
-> Code coverage is currently not supported on Windows.
-
 See the [README](../../README.md#code-coverage) for more details.
 
 Note that you can also `run` every test target passing extra arguments to

@@ -218,9 +218,6 @@ However, some are known not to work or work only partially (e.g. mRuby has no bu
 
 Ruby rules support Bazel's native coverage collection using [SimpleCov][21] and [simplecov-lcov][22].
 
-> [!NOTE]
-> Code coverage is currently not supported on Windows.
-
 To enable coverage:
 
 1. Add `simplecov` and `simplecov-lcov` gems to your `Gemfile`.
