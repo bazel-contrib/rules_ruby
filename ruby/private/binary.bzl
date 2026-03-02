@@ -85,7 +85,7 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
         # so for now we skip locating the binary in runfiles. This only prevents
         # running binary scripts directly and should not affect normal `bazel run`.
         # See BATCH_RLOCATION_FUNCTION comments for more details.
-        if binary_path.startswith("../") and not _is_windows(ctx):
+        if binary_path.startswith("../"):
             binary_path = _to_rlocation_path(ctx, binary)
             locate_binary_in_runfiles = "true"
         else:

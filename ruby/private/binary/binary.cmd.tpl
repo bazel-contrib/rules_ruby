@@ -48,6 +48,12 @@ if "%COVERAGE%" == "1" (
   )
 )
 
-{bundler_command} {ruby_binary_name} {binary} {args} %*
+if "{locate_binary_in_runfiles}" neq "" (
+  call :rlocation "{binary}" binary
+) else (
+  set "binary={binary}"
+)
+
+{bundler_command} {ruby_binary_name} "!binary!" {args} %*
 
 :: vim: ft=dosbatch
