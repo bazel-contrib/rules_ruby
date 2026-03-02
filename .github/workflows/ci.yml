@@ -81,7 +81,21 @@ jobs:
       - run: bazel run "@bundle//bin:rake" "--" --version
       - run: bazel run "@bundle//bin:rspec" "--" --help
       - run: bazel test ...
-      - run: ./test_coverage.sh
+      - name: Run coverage
+        if: matrix.ruby != 'truffleruby-33.0.0'
+        shell: bash
+        run: |
+          bazel coverage //spec:add
+          if [ ! -s "bazel-testlogs/spec/add/coverage.dat" ]; then
+            echo "Error: Coverage report is empty or missing"
+            exit 1
+          fi
+      - name: Upload coverage report
+        if: matrix.ruby != 'truffleruby-33.0.0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.os }}-${{ matrix.ruby }}-${{ matrix.mode }}
+          path: examples/gem/bazel-testlogs/spec/add/coverage.dat
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
 
