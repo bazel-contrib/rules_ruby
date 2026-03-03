@@ -3,7 +3,6 @@
 load("@bazel_skylib//lib:unittest.bzl", "asserts", "unittest")
 load(
     "//ruby/private/bundle_fetch:jars_downloader.bzl",
-    "fetch_jars_for_gem",
     "jars_downloader_internal",
 )
 
