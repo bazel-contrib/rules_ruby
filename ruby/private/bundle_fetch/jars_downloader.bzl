@@ -96,7 +96,8 @@ def _fetch_gem_requirements(repository_ctx, gem):
     gem_info = json.decode(repository_ctx.read(file_name))
     repository_ctx.delete(file_name)
 
-    return gem_info.get("requirements", [])
+    reqs = gem_info.get("requirements", [])
+    return reqs if reqs != None else []
 
 def _parse_jar_requirement(requirement):
     """Parses a JAR requirement string into Maven coordinates.
@@ -192,3 +193,10 @@ def _download_jar(repository_ctx, jar, jars_path, sha256 = None):
         fail("Failed to download JAR from {}: {}".format(url, result))
 
     return result.sha256
+
+# Export internal functions for testing
+jars_downloader_internal = struct(
+    is_java_gem = _is_java_gem,
+    parse_jar_requirement = _parse_jar_requirement,
+    fetch_gem_requirements = _fetch_gem_requirements,
+)
