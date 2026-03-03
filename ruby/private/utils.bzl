@@ -162,6 +162,25 @@ def normalize_bzlmod_repository_name(name):
 
     return name.rpartition("~")[-1]
 
-def to_rlocation_path(source):
-    """Returns source path that can be used with runfiles library."""
-    return source.short_path.removeprefix("../")
+def to_rlocation_path(ctx, source):
+    """Returns source path that can be used with runfiles library.
+
+    Args:
+        ctx: The rule context.
+        source: The source file.
+
+    Returns:
+        A string representing the path in runfiles.
+    """
+    if source.short_path.startswith("../"):
+        return source.short_path[3:]
+
+    # For files in the same workspace as the rule being evaluated.
+    workspace_name = source.owner.workspace_name
+    if not workspace_name:
+        workspace_name = ctx.workspace_name
+
+    if workspace_name:
+        return workspace_name + "/" + source.short_path
+
+    return source.short_path

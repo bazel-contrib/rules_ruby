@@ -10,7 +10,7 @@ load(
     _to_rlocation_path = "to_rlocation_path",
 )
 
-def _jars_home(jars, jars_path):
+def _jars_home(ctx, jars, jars_path):
     # Runtime environment includes JARS_HOME for JRuby to find pre-downloaded JARs,
     # but it needs to be an rlocation path that can be resolved at runtime.
     # On Windows, runfiles manifest doesn't include directories, so we keep a
@@ -20,7 +20,7 @@ def _jars_home(jars, jars_path):
         # Compute rlocation path from the first jar file's short_path.
         # Short path is like "../repo_name/vendor/jars/org/yaml/snakeyaml/1.33/snakeyaml-1.33.jar"
         # We need to extract the base path "repo_name/vendor/jars".
-        jar_short_path = _to_rlocation_path(jars[0])
+        jar_short_path = _to_rlocation_path(ctx, jars[0])
 
         # Remove the Maven path portion to get the jars base directory.
         # The jars_path attribute tells us where the jars root is.
@@ -72,7 +72,7 @@ def _rb_bundle_install_impl(ctx):
             "JARS_SKIP": "true",  # Avoid installing extra dependencies during install.
             "JAVA_HOME": java_toolchain.java_runtime.java_home,
         })
-        jars_info = _jars_home(jar_files, ctx.attr.jars_path)
+        jars_info = _jars_home(ctx, jar_files, ctx.attr.jars_path)
         jars_home_strip_suffix = jars_info.strip
         env.update(jars_info.env)
         bundler_env.update(jars_info.env)

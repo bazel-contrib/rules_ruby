@@ -81,6 +81,23 @@ jobs:
       - run: bazel run "@bundle//bin:rake" "--" --version
       - run: bazel run "@bundle//bin:rspec" "--" --help
       - run: bazel test ...
+      - name: Run coverage
+        if: matrix.os != 'windows-latest'
+        shell: bash
+        run: |
+          bazel coverage //spec:add
+          COVERAGE_FILE=bazel-testlogs/spec/add/coverage.dat
+          if ! grep -q "SF:.*lib/gem/add.rb" "$COVERAGE_FILE"; then
+            echo "Error: Coverage report does not contain expected file coverage"
+            cat "$COVERAGE_FILE"
+            exit 1
+          fi
+      - name: Upload coverage report
+        if: matrix.os != 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.os }}-${{ matrix.ruby }}-${{ matrix.mode }}
+          path: examples/gem/bazel-testlogs/spec/add/coverage.dat
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
 
