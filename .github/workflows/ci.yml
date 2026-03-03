@@ -94,7 +94,7 @@ jobs:
           fi
       - name: Upload coverage report
         if: matrix.os != 'windows-latest'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-${{ matrix.os }}-${{ matrix.ruby }}-${{ matrix.mode }}
           path: examples/gem/bazel-testlogs/spec/add/coverage.dat
