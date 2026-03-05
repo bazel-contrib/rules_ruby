@@ -2,6 +2,7 @@
 
 if ENV['COVERAGE'] == '1'
   begin
+    require 'bundler/setup'
     require 'simplecov'
     require 'simplecov-lcov'
 
@@ -17,7 +18,10 @@ if ENV['COVERAGE'] == '1'
       if RUBY_ENGINE == 'jruby'
         # JRuby resolves files to their absolute realpaths (outside the sandbox).
         # We must set root to match these realpaths.
-        root File.expand_path('../../../', File.realpath(__FILE__))
+        src_file = ENV['COVERAGE_SRC_FILE']
+        src_file_real_path = File.realpath(File.join(Dir.pwd, src_file))
+        workspace_root = src_file_real_path.delete_suffix(src_file)
+        root workspace_root
         # Redirect output to writable sandbox.
         coverage_dir Dir.pwd
       else

@@ -184,8 +184,24 @@ def rb_binary_impl(ctx):
     env.update(ruby_toolchain.env)
     env.update(ctx.attr.env)
 
-    if ctx.configuration.coverage_enabled and ctx.attr.coverage_filters:
-        env["COVERAGE_FILTERS"] = ",".join(ctx.attr.coverage_filters)
+    if ctx.configuration.coverage_enabled:
+        if ctx.attr.coverage_filters:
+            env["COVERAGE_FILTERS"] = ",".join(ctx.attr.coverage_filters)
+
+        # To support coverage on JRuby, we need to determine the real path of the workspace
+        # because JRuby simplecov instrumentation only works on real files, not symlinks.
+        if ruby_toolchain.version.startswith("jruby"):
+            sample_src = None
+            if ctx.executable.main and ctx.executable.main.is_source and ctx.executable.main.owner.workspace_root == "":
+                sample_src = ctx.executable.main
+            else:
+                for f in ctx.files.srcs:
+                    if f.is_source and f.owner.workspace_root == "":
+                        sample_src = f
+                        break
+
+            if sample_src:
+                env["COVERAGE_SRC_FILE"] = sample_src.short_path
 
     runfiles = ctx.runfiles(tools, transitive_files = depset(transitive = [transitive_srcs, transitive_data]))
     runfiles = get_transitive_runfiles(runfiles, ctx.attr.srcs, ctx.attr.deps, ctx.attr.data)
