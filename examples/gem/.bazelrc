@@ -15,6 +15,10 @@
 startup --windows_enable_symlinks
 build --enable_runfiles
 
+# Do not autoload language-specific rules removed in Bazel core.
+# https://github.com/bazelbuild/bazel/issues/23043
+common --incompatible_autoload_externally=
+
 # Allow to run Bazel without pre-installed JDK.
 # Docs: https://bazel.build/reference/command-line-reference#flag--java_runtime_version
 build --java_runtime_version=remotejdk_21 --tool_java_runtime_version=remotejdk_21
