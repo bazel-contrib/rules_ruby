@@ -71,7 +71,7 @@ jobs:
       - if: matrix.ruby == 'system'
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2.9
+          ruby-version: 3.4.9
       - run: bazel build ...
       - run: bazel run lib/gem:add-numbers 2
       - run: bazel run lib/gem:print-version
@@ -187,7 +187,7 @@ jobs:
       - if: matrix.ruby == 'system'
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2.9
+          ruby-version: 3.4.9
       - run: ./do_test
 
   examples-rails:
