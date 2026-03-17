@@ -50,6 +50,7 @@ bzl_library(
     visibility = ["//ruby:__subpackages__"],
     deps = [
         ":providers",
+        "@bazel_skylib//lib:paths",
         "@protobuf//bazel/common:proto_info_bzl",
     ],
 )
