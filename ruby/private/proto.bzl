@@ -24,8 +24,6 @@ def _ruby_proto_aspect_impl(target, ctx):
     service_outputs = proto_common.declare_generated_files(ctx.actions, proto_info, "_services_pb.rb")
     proto_outdir = proto_common.output_directory(proto_info, msg_outputs[0].root)
 
-    # bazel-out/darwin_arm64-fastbuild/bin/external/protobuf+/src/google/protobuf/_virtual_imports/timestamp_proto
-    #                              output 'external/protobuf+/src/google/protobuf/_virtual_imports/timestamp_proto/google/protobuf/timestamp_pb.rb' was not created
     # FIXME: Use Bazel 9 feature to have a dynamic dependency graph based on file contents.
     # We can peek into the .proto file and produce a directory that has some indicator of whether services were found.
     # Then ctx.actions.map_directory lets us stamp out new actions during execution.
