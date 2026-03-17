@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package foo;
 import "google/protobuf/empty.proto";
+import "proto/subdir/bar.proto";
 
 service FooService {
   rpc GetFoo(GetFooRequest) returns (GetFooResponse);
@@ -9,6 +10,7 @@ service FooService {
 
 message GetFooRequest {
   google.protobuf.Empty empty = 1;
+  subdir.Status status = 2;
 }
 
 message GetFooResponse {

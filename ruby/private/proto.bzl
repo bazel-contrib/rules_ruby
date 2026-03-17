@@ -4,68 +4,76 @@ This file is loaded by `rules_ruby` (see its `rb_library` implementation) using
 `@@//proto:ruby.bzl`, so it must remain in this workspace at `proto/ruby.bzl`.
 """
 
-load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@protobuf//bazel/common:proto_info.bzl", "ProtoInfo")
 load("//ruby/private:providers.bzl", "RubyFilesInfo")
+load(":proto_common.bzl", "proto_common")
 
 GRPC_PLUGIN_TOOLCHAIN = "@rules_ruby//ruby:ruby_grpc_protoc_plugin.toolchain_type"
 PROTO_TOOLCHAIN = "@protobuf//bazel/private:proto_toolchain_type"
 RUBY_OUTPUT_FILE = "{proto_file_basename}_pb.rb"
 RUBY_SERVICE_OUTPUT_FILE = "{proto_file_basename}_services_pb.rb"
 
-def _short_path_to_workspace_relative(path):
-    """Convert short_path to workspace-relative, handling external repos."""
-    if path.startswith("../"):
-        return "external/" + path[3:]
-    return path
-
 def _ruby_proto_aspect_impl(target, ctx):
     if not ProtoInfo in target:
         return []
 
-    proto_info = ctx.toolchains[PROTO_TOOLCHAIN].proto
+    proto_info = target[ProtoInfo]
+    protoc_info = ctx.toolchains[PROTO_TOOLCHAIN].proto
     grpc_info = ctx.toolchains[GRPC_PLUGIN_TOOLCHAIN].proto
-    proto_srcs = target[ProtoInfo].direct_sources
-    proto_deps = target[ProtoInfo].transitive_sources
-    outputs = []
-    for src in proto_srcs:
-        src_path = _short_path_to_workspace_relative(src.short_path)
-        pkg = target.label.package
-        if target.label.workspace_root:
-            # external target: workspace_root is e.g. "external/repo_name"
-            pkg = target.label.workspace_root + "/" + pkg
+    msg_outputs = proto_common.declare_generated_files(ctx.actions, proto_info, "_pb.rb")
+    service_outputs = proto_common.declare_generated_files(ctx.actions, proto_info, "_services_pb.rb")
+    proto_outdir = proto_common.output_directory(proto_info, msg_outputs[0].root)
 
-        proto_rel_basename = paths.relativize(src_path, pkg).replace(".proto", "")
-        msg_output = ctx.actions.declare_file(RUBY_OUTPUT_FILE.format(proto_file_basename = proto_rel_basename))
-        service_output = ctx.actions.declare_file(RUBY_SERVICE_OUTPUT_FILE.format(proto_file_basename = proto_rel_basename))
+    # bazel-out/darwin_arm64-fastbuild/bin/external/protobuf+/src/google/protobuf/_virtual_imports/timestamp_proto
+    #                              output 'external/protobuf+/src/google/protobuf/_virtual_imports/timestamp_proto/google/protobuf/timestamp_pb.rb' was not created
+    # FIXME: Use Bazel 9 feature to have a dynamic dependency graph based on file contents.
+    # We can peek into the .proto file and produce a directory that has some indicator of whether services were found.
+    # Then ctx.actions.map_directory lets us stamp out new actions during execution.
+    services_not_created_workarounds = [
+        ">{service_output} echo '# No Services'".format(service_output = out.path)
+        for out in service_outputs
+    ]
 
-        # FIXME: Use Bazel 9 feature to have a dynamic dependency graph based on file contents.
-        # We can peek into the .proto file and produce a directory that has some indicator of whether services were found.
-        # Then ctx.actions.map_directory lets us stamp out new actions during execution.
-        services_not_created_workaround = ">{service_output} echo '# No Services'".format(service_output = service_output.path)
+    args = ctx.actions.args()
+    args.add_joined(["--plugin", "protoc-gen-grpc", grpc_info.plugin.executable.path], join_with = "=")
+    args.add_joined(["--ruby_out", proto_outdir], join_with = "=")
+    args.add_joined(["--grpc_out", proto_outdir], join_with = "=")
 
-        ctx.actions.run_shell(
-            # https://grpc.io/docs/languages/ruby/basics/#generating-client-and-server-code
-            # grpc_tools_ruby_protoc -I ../../protos --ruby_out=../lib --grpc_out=../lib ../../protos/route_guide.proto
-            command = " && ".join([
-                services_not_created_workaround,
-                "{protoc} --plugin=protoc-gen-grpc={grpc} --ruby_out={bindir} --grpc_out={bindir} {sources}".format(
-                    protoc = proto_info.proto_compiler.executable.path,
-                    sources = " ".join([p.path for p in proto_srcs]),
-                    grpc = grpc_info.plugin.executable.path,
-                    bindir = ctx.bin_dir.path,
-                    service_output = service_output.path,
-                ),
-            ]),
-            tools = [grpc_info.plugin, proto_info.proto_compiler],
-            inputs = depset(proto_srcs, transitive = [proto_deps]),
-            outputs = [msg_output, service_output],
-        )
-        outputs.append(msg_output)
-        outputs.append(service_output)
+    # Vendored: https://github.com/protocolbuffers/protobuf/blob/v31.1/bazel/common/proto_common.bzl#L193-L204
+    # Protoc searches for .protos -I paths in order they are given and then
+    # uses the path within the directory as the package.
+    # This requires ordering the paths from most specific (longest) to least
+    # specific ones, so that no path in the list is a prefix of any of the
+    # following paths in the list.
+    # For example: 'bazel-out/k8-fastbuild/bin/external/foo' needs to be listed
+    # before 'bazel-out/k8-fastbuild/bin'. If not, protoc will discover file under
+    # the shorter path and use 'external/foo/...' as its package path.
+    args.add_all(proto_info.transitive_proto_path, map_each = proto_common.import_virtual_proto_path)
+    args.add_all(proto_info.transitive_proto_path, map_each = proto_common.import_repo_proto_path)
+    args.add_all(proto_info.transitive_proto_path, map_each = proto_common.import_main_output_proto_path)
+    args.add("-I.")  # Needs to come last
+    args.add_all(proto_info.direct_sources)
+    ctx.actions.run_shell(
+        # https://grpc.io/docs/languages/ruby/basics/#generating-client-and-server-code
+        # grpc_tools_ruby_protoc -I ../../protos --ruby_out=../lib --grpc_out=../lib ../../protos/route_guide.proto
+        command = " && ".join(services_not_created_workarounds + ["{} $@".format(protoc_info.proto_compiler.executable.path)]),
+        tools = [grpc_info.plugin, protoc_info.proto_compiler],
+        inputs = depset(proto_info.direct_sources, transitive = [
+            proto_info.transitive_descriptor_sets,
+            # The ruby plugin expects to read .proto files from transitives, though the descriptor sets should be sufficient
+            proto_info.transitive_sources,
+        ]),
+        outputs = msg_outputs + service_outputs,
+        arguments = [args],
+    )
+
     return [
         RubyFilesInfo(
-            transitive_srcs = depset(outputs),
+            transitive_srcs = depset(msg_outputs + service_outputs, transitive = [
+                dep[RubyFilesInfo].transitive_srcs
+                for dep in ctx.rule.attr.deps
+                if RubyFilesInfo in dep
+            ]),
             transitive_deps = depset(),
             transitive_data = depset(),
             bundle_env = {},
