@@ -1,5 +1,6 @@
 bazel_dep(name = "rules_ruby")
 bazel_dep(name = "protobuf", version = "33.5")
+bazel_dep(name = "rules_go", version = "0.59.0", repo_name = None)
 bazel_dep(
     name = "aspect_bazel_lib",
     version = "2.22.5",
