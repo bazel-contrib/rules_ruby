@@ -6,6 +6,7 @@ rb_binary(
     main = "hello.rb",
     deps = [
         "//proto:foo_proto",
+        "//proto:subdir_proto",
         "@bundle",
     ],
 )

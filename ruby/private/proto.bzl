@@ -4,6 +4,7 @@ This file is loaded by `rules_ruby` (see its `rb_library` implementation) using
 `@@//proto:ruby.bzl`, so it must remain in this workspace at `proto/ruby.bzl`.
 """
 
+load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@protobuf//bazel/common:proto_info.bzl", "ProtoInfo")
 load("//ruby/private:providers.bzl", "RubyFilesInfo")
 
@@ -11,6 +12,12 @@ GRPC_PLUGIN_TOOLCHAIN = "@rules_ruby//ruby:ruby_grpc_protoc_plugin.toolchain_typ
 PROTO_TOOLCHAIN = "@protobuf//bazel/private:proto_toolchain_type"
 RUBY_OUTPUT_FILE = "{proto_file_basename}_pb.rb"
 RUBY_SERVICE_OUTPUT_FILE = "{proto_file_basename}_services_pb.rb"
+
+def _short_path_to_workspace_relative(path):
+    """Convert short_path to workspace-relative, handling external repos."""
+    if path.startswith("../"):
+        return "external/" + path[3:]
+    return path
 
 def _ruby_proto_aspect_impl(target, ctx):
     if not ProtoInfo in target:
@@ -22,9 +29,15 @@ def _ruby_proto_aspect_impl(target, ctx):
     proto_deps = target[ProtoInfo].transitive_sources
     outputs = []
     for src in proto_srcs:
-        proto_file_basename = src.basename.replace(".proto", "")
-        msg_output = ctx.actions.declare_file(RUBY_OUTPUT_FILE.format(proto_file_basename = proto_file_basename))
-        service_output = ctx.actions.declare_file(RUBY_SERVICE_OUTPUT_FILE.format(proto_file_basename = proto_file_basename))
+        src_path = _short_path_to_workspace_relative(src.short_path)
+        pkg = target.label.package
+        if target.label.workspace_root:
+            # external target: workspace_root is e.g. "external/repo_name"
+            pkg = target.label.workspace_root + "/" + pkg
+
+        proto_rel_basename = paths.relativize(src_path, pkg).replace(".proto", "")
+        msg_output = ctx.actions.declare_file(RUBY_OUTPUT_FILE.format(proto_file_basename = proto_rel_basename))
+        service_output = ctx.actions.declare_file(RUBY_SERVICE_OUTPUT_FILE.format(proto_file_basename = proto_rel_basename))
 
         # FIXME: Use Bazel 9 feature to have a dynamic dependency graph based on file contents.
         # We can peek into the .proto file and produce a directory that has some indicator of whether services were found.
