@@ -33,6 +33,7 @@ def _ruby_proto_aspect_impl(target, ctx):
     ]
 
     args = ctx.actions.args()
+    args.add_joined("--descriptor_set_in", proto_info.transitive_descriptor_sets, join_with = ctx.configuration.host_path_separator)
     args.add_joined(["--plugin", "protoc-gen-grpc", grpc_info.plugin.executable.path], join_with = "=")
     args.add_joined(["--ruby_out", proto_outdir], join_with = "=")
     args.add_joined(["--grpc_out", proto_outdir], join_with = "=")
@@ -56,11 +57,7 @@ def _ruby_proto_aspect_impl(target, ctx):
         # grpc_tools_ruby_protoc -I ../../protos --ruby_out=../lib --grpc_out=../lib ../../protos/route_guide.proto
         command = " && ".join(services_not_created_workarounds + ["{} $@".format(protoc_info.proto_compiler.executable.path)]),
         tools = [grpc_info.plugin, protoc_info.proto_compiler],
-        inputs = depset(proto_info.direct_sources, transitive = [
-            proto_info.transitive_descriptor_sets,
-            # The ruby plugin expects to read .proto files from transitives, though the descriptor sets should be sufficient
-            proto_info.transitive_sources,
-        ]),
+        inputs = depset(proto_info.direct_sources, transitive = [proto_info.transitive_descriptor_sets]),
         outputs = msg_outputs + service_outputs,
         arguments = [args],
     )
