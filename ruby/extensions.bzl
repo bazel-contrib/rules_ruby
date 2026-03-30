@@ -33,10 +33,18 @@ ruby_toolchain = tag_class(attrs = {
     "msys2_packages": attr.string_list(doc = "Extra MSYS2 packages to install.", default = ["libyaml"]),
     "portable_ruby": attr.bool(
         doc = """\
-When True, downloads portable Ruby from jdx/ruby instead of compiling via \
+When True, downloads portable Ruby from bazel-contrib/portable-ruby instead of compiling via \
 ruby-build. Has no effect on JRuby, TruffleRuby, or Windows.\
 """,
         default = False,
+    ),
+    "portable_ruby_release_suffix": attr.string(
+        doc = """\
+Release suffix for portable Ruby downloads. When empty (default), uses the built-in \
+PORTABLE_RUBY_DEFAULT_SUFFIXES mapping. Set explicitly to pin to a specific rebuild, \
+e.g. "2" downloads version X.Y.Z-2.\
+""",
+        default = "",
     ),
     "portable_ruby_checksums": attr.string_dict(
         doc = """\
@@ -105,6 +113,7 @@ def _ruby_module_extension(module_ctx):
                     toolchain.msys2_packages,
                     toolchain.ruby_build_version,
                     toolchain.portable_ruby,
+                    toolchain.portable_ruby_release_suffix,
                     toolchain.portable_ruby_checksums,
                 )
                 if module_ctx.is_dev_dependency(toolchain):
@@ -121,6 +130,7 @@ def _ruby_module_extension(module_ctx):
             msys2_packages,
             ruby_build_version,
             portable_ruby,
+            portable_ruby_release_suffix,
             portable_ruby_checksums,
         ) = config
         rb_register_toolchains(
@@ -130,6 +140,7 @@ def _ruby_module_extension(module_ctx):
             msys2_packages = msys2_packages,
             ruby_build_version = ruby_build_version,
             portable_ruby = portable_ruby,
+            portable_ruby_release_suffix = portable_ruby_release_suffix,
             portable_ruby_checksums = portable_ruby_checksums,
             register = False,
         )

@@ -11,6 +11,7 @@ def rb_register_toolchains(
         version_file = None,
         msys2_packages = ["libyaml"],
         portable_ruby = False,
+        portable_ruby_release_suffix = "",
         portable_ruby_checksums = {},
         register = True,
         **kwargs):
@@ -62,10 +63,11 @@ def rb_register_toolchains(
         version: a semver version of MRI, or a string like [interpreter type]-[version], or "system"
         version_file: .ruby-version or .tool-versions file to read version from
         msys2_packages: extra MSYS2 packages to install
-        portable_ruby: when True, downloads portable Ruby from jdx/ruby instead of compiling
+        portable_ruby: when True, downloads portable Ruby from bazel-contrib/portable-ruby instead of compiling
             via ruby-build. Has no effect on JRuby, TruffleRuby, or Windows.
+        portable_ruby_release_suffix: release suffix for portable Ruby (default "1", e.g. "2" downloads X.Y.Z-2).
         portable_ruby_checksums: platform checksums for portable Ruby downloads, overriding
-            built-in checksums. Keys: linux-x86_64, linux-arm64, macos-arm64, macos-x86_64.
+            built-in checksums.
         register: whether to register the resulting toolchains, should be False under bzlmod
         **kwargs: additional parameters to the downloader for this interpreter type
     """
@@ -77,6 +79,7 @@ def rb_register_toolchains(
             version_file = version_file,
             msys2_packages = msys2_packages,
             portable_ruby = portable_ruby,
+            portable_ruby_release_suffix = portable_ruby_release_suffix,
             portable_ruby_checksums = portable_ruby_checksums,
             **kwargs
         )
