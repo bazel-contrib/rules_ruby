@@ -33,7 +33,7 @@ source "${assertions_sh}"
 generate_portable_ruby_checksums_location=rules_ruby/tools/generate_portable_ruby_checksums/generate_portable_ruby_checksums.sh
 generate_portable_ruby_checksums="$(rlocation "${generate_portable_ruby_checksums_location}")"
 
-mock_response_location=rules_ruby/tools/generate_portable_ruby_checksums/testdata/jdx_ruby_release_response.json
+mock_response_location=rules_ruby/tools/generate_portable_ruby_checksums/testdata/portable_ruby_release_response.json
 mock_response="$(rlocation "${mock_response_location}")"
 
 # MARK - Cleanup
@@ -77,7 +77,7 @@ use_repo(ruby, "ruby_toolchains")
 EOF
 
   # Mock the API response (the release tag is the Ruby version)
-  export RV_RUBY_API_URL="file://${mock_response%/*}"
+  export PORTABLE_RUBY_API_URL="file://${mock_response%/*}"
 
   # Run the script WITHOUT --dry-run
   "${generate_portable_ruby_checksums}" --ruby-version 3.4.8 \
@@ -103,9 +103,13 @@ EOF
     "${module_content}" \
     "MODULE.bazel should contain x86_64_linux checksum"
   assert_match \
-    '"ruby-3.4.8.macos.tar.gz": "cd9d7a1428076bfcc6c2ca3c0eb69b8e671e9b48afb4c351fa4a84927841ffef"' \
+     '"ruby-3.4.8.arm64_darwin.tar.gz": "4b5343a5513523409b4cc1b285ebaeb75356c758080e45d99f506a827492a8fb"' \
     "${module_content}" \
-    "MODULE.bazel should contain macos checksum"
+    "MODULE.bazel should contain arm64_darwin checksum"
+  assert_match \
+     '"ruby-3.4.8.x86_64_darwin.tar.gz": "75b72e64e42bb36a80e3382751c74bfe379efcf28880ed3c4c86657cac9d8462"' \
+    "${module_content}" \
+    "MODULE.bazel should contain x86_64_darwin checksum"
 
   # Verify ruby_version was NOT changed (we didn't update it)
   assert_match 'ruby_version = "3.3.0"' "${module_content}" \
@@ -145,7 +149,7 @@ use_repo(ruby, "ruby_toolchains")
 EOF
 
   # Mock the API response
-  export RV_RUBY_API_URL="file://${mock_response%/*}"
+  export PORTABLE_RUBY_API_URL="file://${mock_response%/*}"
 
   # Run the script for "ruby_alt" toolchain
   "${generate_portable_ruby_checksums}" --ruby-version 3.4.8 --name ruby_alt \

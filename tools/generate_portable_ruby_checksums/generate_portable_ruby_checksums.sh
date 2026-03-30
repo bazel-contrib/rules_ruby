@@ -42,11 +42,12 @@ dry_run=false
 name="ruby"
 module_bazel="${BUILD_WORKSPACE_DIRECTORY:-.}/MODULE.bazel"
 ruby_version=""
+release_suffix="1"
 all_releases=false
 checksums_bzl="${BUILD_WORKSPACE_DIRECTORY:-.}/ruby/private/portable_ruby_checksums.bzl"
 
-# jdx/ruby platform names (order matches portable_ruby_checksums.bzl)
-PLATFORMS=("x86_64_linux" "macos" "arm64_linux")
+# bazel-contrib/portable-ruby platform names (order matches portable_ruby_checksums.bzl)
+PLATFORMS=("arm64_darwin" "arm64_linux" "x86_64_darwin" "x86_64_linux")
 
 # MARK - Functions
 
@@ -89,6 +90,10 @@ while (("$#")); do
       checksums_bzl="${2}"
       shift 2
       ;;
+    --release-suffix)
+      release_suffix="${2}"
+      shift 2
+      ;;
     -*)
       fail "Error: Unknown option: ${1}"
       ;;
@@ -109,23 +114,57 @@ if [[ ${all_releases} == "true" ]]; then
   fi
 
   # Fetch list of all releases with their assets
-  list_url="${RV_RUBY_LIST_API_URL:-https://api.github.com/repos/jdx/ruby/releases?per_page=100}"
+  list_url="${PORTABLE_RUBY_LIST_API_URL:-https://api.github.com/repos/bazel-contrib/portable-ruby/releases?per_page=100}"
   all_response=$(curl -sL --max-time 60 "${list_url}")
 
-  # Extract all checksums (excluding no_yjit), sorted by key in reverse order
-  entries=$(echo "${all_response}" | jq -r \
-    '[.[].assets[] | select(.name | endswith(".tar.gz")) | select(.name | contains("no_yjit") | not) | {(.name): (.digest | ltrimstr("sha256:"))}] | add | to_entries | sort_by(.key) | reverse | .[] | "    \"\(.key)\": \"\(.value)\","')
+  # Extract checksums grouped by suffix; keys are plain asset names (ruby-VERSION.PLATFORM.tar.gz)
+  entries=$(echo "${all_response}" | jq -r '
+    [
+      .[] |
+      (.tag_name | split("-") | last) as $suffix |
+      (.tag_name | split("-")[:-1] | join("-")) as $version |
+      .assets[] |
+      select(.name | endswith(".tar.gz")) |
+      select(.name | contains("no_yjit") | not) |
+      {suffix: $suffix, key: .name, checksum: (.digest | ltrimstr("sha256:"))}
+    ] |
+    group_by(.suffix) |
+    sort_by(.[0].suffix | tonumber) | reverse |
+    .[] |
+    (.[0].suffix) as $s |
+    "    \"" + $s + "\": {\n" + (map("        \"" + .key + "\": \"" + .checksum + "\",") | sort | join("\n")) + "\n    },"')
+
+  # Build PORTABLE_RUBY_DEFAULT_SUFFIXES: highest suffix per version
+  default_suffixes=$(echo "${all_response}" | jq -r '
+    [
+      .[] |
+      (.tag_name | split("-") | last | tonumber) as $suffix |
+      (.tag_name | split("-")[:-1] | join("-")) as $version |
+      {version: $version, suffix: $suffix}
+    ] |
+    group_by(.version) |
+    map({(.[0].version): (map(.suffix) | max | tostring)}) |
+    add |
+    to_entries | sort_by(.key) | reverse | .[] |
+    "    \"\(.key)\": \"\(.value)\","')
 
   if [[ -z ${entries} ]]; then
     fail "Error: No checksums found in releases response"
   fi
 
   # Build the bzl file content
-  bzl_content='"Provides checksums for portable Ruby versions from jdx/ruby."
+  bzl_content='"Provides checksums for portable Ruby versions from bazel-contrib/portable-ruby."
 
 # Generated via:
 # bazel run //tools/generate_portable_ruby_checksums -- --all
 
+# Maps each Ruby version to its current default release suffix.
+# Updated automatically when a new rebuild (-2, -3, etc.) is published.
+PORTABLE_RUBY_DEFAULT_SUFFIXES = {
+'"${default_suffixes}"'
+}
+
+# Checksums keyed as {suffix: {ruby-VERSION.PLATFORM.tar.gz: sha256}}
 PORTABLE_RUBY_CHECKSUMS = {
 '"${entries}"'
 }
@@ -148,15 +187,15 @@ if [[ -z ${ruby_version} ]]; then
   ruby_version="$(read_ruby_version)"
 fi
 
-# MARK - Retrieve jdx/ruby release info
+# MARK - Retrieve bazel-contrib/portable-ruby release info
 
 # Fetch release data from GitHub API
-api_url="${RV_RUBY_API_URL:-https://api.github.com/repos/jdx/ruby/releases/tags}/${ruby_version}"
+api_url="${PORTABLE_RUBY_API_URL:-https://api.github.com/repos/bazel-contrib/portable-ruby/releases/tags}/${ruby_version}-${release_suffix}"
 response=$(curl -sL --max-time 30 "${api_url}")
 
 # Check if release was found
 if echo "${response}" | jq -e '.message == "Not Found"' >/dev/null 2>&1; then
-  fail "Error: jdx/ruby release for Ruby ${ruby_version} not found"
+  fail "Error: bazel-contrib/portable-ruby release for Ruby ${ruby_version} not found"
 fi
 
 # MARK - Extract checksums
@@ -182,7 +221,7 @@ done
 # Check if we found any assets for this Ruby version
 if [[ ${found_ruby_version} != "true" ]]; then
   fail <<-EOT
-Error: Ruby version ${ruby_version} not found in jdx/ruby releases
+Error: Ruby version ${ruby_version} not found in bazel-contrib/portable-ruby releases
 EOT
 fi
 
@@ -201,7 +240,8 @@ fi
 # MARK - Update MODULE.bazel
 
 # Generate output for dry-run or display
-output="portable_ruby_checksums = {\n"
+output="portable_ruby_release_suffix = \"${release_suffix}\",\n"
+output+="portable_ruby_checksums = {\n"
 for platform in "${PLATFORMS[@]}"; do
   if [[ -n ${checksums[${platform}]:-} ]]; then
     output+="    \"ruby-${ruby_version}.${platform}.tar.gz\": \"${checksums[${platform}]}\",\n"
@@ -224,11 +264,12 @@ for platform in "${PLATFORMS[@]}"; do
 done
 
 # Update MODULE.bazel using buildozer
-# Set portable_ruby and portable_ruby_checksums
+# Set portable_ruby, portable_ruby_release_suffix, and portable_ruby_checksums
 buildozer_cmd=(
   "${buildozer}"
   -types ruby.toolchain
   "set portable_ruby True"
+  "set portable_ruby_release_suffix \"${release_suffix}\""
   "remove portable_ruby_checksums"
   "dict_set portable_ruby_checksums ${dict_str}"
   "${module_bazel}:${name}"
@@ -247,4 +288,4 @@ $(echo -e "${output}")
 EOT
 fi
 
-echo "Successfully updated portable_ruby and portable_ruby_checksums in ${module_bazel}"
+echo "Successfully updated portable_ruby, portable_ruby_release_suffix, and portable_ruby_checksums in ${module_bazel}"
