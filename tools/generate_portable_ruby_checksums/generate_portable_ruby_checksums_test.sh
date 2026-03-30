@@ -32,13 +32,13 @@ source "${assertions_sh}"
 generate_portable_ruby_checksums_location=rules_ruby/tools/generate_portable_ruby_checksums/generate_portable_ruby_checksums.sh
 generate_portable_ruby_checksums="$(rlocation "${generate_portable_ruby_checksums_location}")"
 
-mock_response_location=rules_ruby/tools/generate_portable_ruby_checksums/testdata/jdx_ruby_release_response.json
+mock_response_location=rules_ruby/tools/generate_portable_ruby_checksums/testdata/portable_ruby_release_response.json
 mock_response="$(rlocation "${mock_response_location}")"
 
 expected_output_location=rules_ruby/tools/generate_portable_ruby_checksums/testdata/expected_checksums_output.txt
 expected_output="$(rlocation "${expected_output_location}")"
 
-releases_list_location=rules_ruby/tools/generate_portable_ruby_checksums/testdata/jdx_ruby_releases_list.json
+releases_list_location=rules_ruby/tools/generate_portable_ruby_checksums/testdata/portable_ruby_releases_list.json
 releases_list="$(rlocation "${releases_list_location}")"
 
 # MARK - Cleanup
@@ -68,7 +68,7 @@ test_basic_dry_run() {
   echo "3.4.8" >.ruby-version
 
   # Mock the API response (the release tag is the Ruby version)
-  export RV_RUBY_API_URL="file://${mock_response%/*}"
+  export PORTABLE_RUBY_API_URL="file://${mock_response%/*}"
 
   # Run the script
   local output
@@ -93,7 +93,7 @@ test_explicit_ruby_version() {
   export BUILD_WORKSPACE_DIRECTORY="${temp_dir}"
 
   # Mock the API response
-  export RV_RUBY_API_URL="file://${mock_response%/*}"
+  export PORTABLE_RUBY_API_URL="file://${mock_response%/*}"
 
   # Run the script with explicit version
   local output
@@ -119,7 +119,7 @@ test_missing_ruby_version() {
   # Don't create .ruby-version file
 
   # Mock the API response
-  export RV_RUBY_API_URL="file://${mock_response%/*}"
+  export PORTABLE_RUBY_API_URL="file://${mock_response%/*}"
 
   # Run the script and expect failure
   if "${generate_portable_ruby_checksums}" --dry-run 2>/dev/null; then
@@ -139,7 +139,7 @@ test_invalid_ruby_version() {
   export BUILD_WORKSPACE_DIRECTORY="${temp_dir}"
 
   # Use a non-existent API URL to simulate 404
-  export RV_RUBY_API_URL="file:///nonexistent"
+  export PORTABLE_RUBY_API_URL="file:///nonexistent"
 
   # Run the script and expect failure
   if "${generate_portable_ruby_checksums}" --ruby-version 99.99.99 --dry-run 2>/dev/null; then
@@ -163,7 +163,7 @@ test_all_requires_rules_ruby_repo() {
 module(name = "some_other_repo")
 EOF
 
-  export RV_RUBY_LIST_API_URL="file://${releases_list}"
+  export PORTABLE_RUBY_LIST_API_URL="file://${releases_list}"
 
   # Should fail because module name is not rules_ruby
   if "${generate_portable_ruby_checksums}" --all --dry-run 2>/dev/null; then
@@ -186,7 +186,7 @@ test_all_dry_run() {
   printf 'module(name = "rules_ruby")\n' >"${temp_dir}/MODULE.bazel"
 
   # Mock the releases list API response
-  export RV_RUBY_LIST_API_URL="file://${releases_list}"
+  export PORTABLE_RUBY_LIST_API_URL="file://${releases_list}"
 
   # Run the script with --all --dry-run
   local output
@@ -229,7 +229,7 @@ test_all_writes_bzl_file() {
   printf 'module(name = "rules_ruby")\n' >"${temp_dir}/MODULE.bazel"
 
   # Mock the releases list API response
-  export RV_RUBY_LIST_API_URL="file://${releases_list}"
+  export PORTABLE_RUBY_LIST_API_URL="file://${releases_list}"
 
   # Run the script with --all and a custom output path
   local output_file="${temp_dir}/checksums.bzl"

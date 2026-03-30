@@ -131,7 +131,7 @@ On Windows, [RubyInstaller][6] is used to install MRI.
 #### Fast Installation with Portable Ruby
 
 For faster MRI installation on Linux and macOS, you can use portable Ruby
-binaries from [jdx/ruby][19] instead of compiling from source. This significantly
+binaries from [bazel-contrib/portable-ruby][19] instead of compiling from source. This significantly
 reduces installation time and ensures consistent, portable Ruby environments.
 
 To enable portable Ruby, set `portable_ruby = True` in your toolchain declaration:
@@ -147,7 +147,7 @@ ruby.toolchain(
 
 This ruleset ships with [default checksums][20] to securely download and properly cache
 the Ruby binaries. If you want to use Ruby version not available with ruleset release,
-you should use `portable_ruby_checksums` attribute.
+you should use `portable_ruby_release_suffix` and `portable_ruby_checksums` attribute.
 
 We have provided the `generate_portable_ruby_checksums` utility to add/update these
 attributes for you. The utility needs to know the version of Ruby to download.
@@ -166,10 +166,12 @@ ruby.toolchain(
     name = "ruby",
     version_file = "//:.ruby-version",
     portable_ruby = True,
+    portable_ruby_release_suffix = "2",  # default is 1
     portable_ruby_checksums = {
-        "ruby-3.4.8.x86_64_linux.tar.gz": "e1c5ed91dc8b05e516cb5386a695e5ffed7b585fd577b93880b7eb61d20092e7",
-        "ruby-3.4.8.macos.tar.gz": "46c48fceb34d11b848f1fd7456ac77df49406f355de4f7d5667f254ea9da2f84",
-        "ruby-3.4.8.arm64_linux.tar.gz": "fdf6833e7ebe0b9c26a151a6f7481d81e178372046ad2b3f54ae56d159da8b1e",
+        "ruby-3.2.8.arm64_darwin.tar.gz": "4b5343a5513523409b4cc1b285ebaeb75356c758080e45d99f506a827492a8fb",
+        "ruby-3.4.8.arm64_linux.tar.gz": "8348296d8148acbc6e5a170861810b693fb6ea72e1d59cc7b82f0369bffa9870",
+        "ruby-3.2.8.x86_64_darwin.tar.gz": "75b72e64e42bb36a80e3382751c74bfe379efcf28880ed3c4c86657cac9d8462",
+        "ruby-3.2.8.x86_64_linux.tar.gz": "2a2f40774634abed8eb32b762b8f440f85c6add74b5c14f28e70b42f49537464",
     },
 )
 ```
@@ -179,7 +181,7 @@ ruby.toolchain(
 - Portable Ruby is only supported on Linux (arm64, x86_64) and macOS (arm64).
 - Setting `portable_ruby = True` has no effect on JRuby, TruffleRuby, or Windows.
 - On Windows, the toolchain automatically falls back to RubyInstaller.
-- Find available portable Ruby releases at https://github.com/jdx/ruby/releases
+- Find available portable Ruby releases at https://github.com/bazel-contrib/portable-ruby/releases
 
 ### JRuby
 
@@ -263,7 +265,7 @@ rb_test(
 [16]: https://bazel.build/reference/command-line-reference#flag--experimental_inprocess_symlink_creation
 [17]: https://github.com/bazelbuild/bazel/issues/4327
 [18]: docs/rails.md
-[19]: https://github.com/jdx/ruby
+[19]: https://github.com/bazel-contrib/portable-ruby
 [20]: ruby/private/portable_ruby_checksums.bzl
 [21]: https://github.com/simplecov-ruby/simplecov
 [22]: https://github.com/fortissimo1997/simplecov-lcov

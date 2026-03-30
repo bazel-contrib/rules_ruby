@@ -31,7 +31,7 @@ Wraps `rb_bundle_rule()` providing default toolchain name.
 load("@rules_ruby//ruby:deps.bzl", "rb_register_toolchains")
 
 rb_register_toolchains(<a href="#rb_register_toolchains-name">name</a>, <a href="#rb_register_toolchains-version">version</a>, <a href="#rb_register_toolchains-version_file">version_file</a>, <a href="#rb_register_toolchains-msys2_packages">msys2_packages</a>, <a href="#rb_register_toolchains-portable_ruby">portable_ruby</a>,
-                       <a href="#rb_register_toolchains-portable_ruby_checksums">portable_ruby_checksums</a>, <a href="#rb_register_toolchains-register">register</a>, <a href="#rb_register_toolchains-kwargs">**kwargs</a>)
+                       <a href="#rb_register_toolchains-portable_ruby_release_suffix">portable_ruby_release_suffix</a>, <a href="#rb_register_toolchains-portable_ruby_checksums">portable_ruby_checksums</a>, <a href="#rb_register_toolchains-register">register</a>, <a href="#rb_register_toolchains-kwargs">**kwargs</a>)
 </pre>
 
 Register a Ruby toolchain and lazily download the Ruby Interpreter.
@@ -40,7 +40,7 @@ Register a Ruby toolchain and lazily download the Ruby Interpreter.
 * _(For MRI on Windows)_ Installed using [RubyInstaller](https://rubyinstaller.org).
 * _(For JRuby on any OS)_ Downloaded and installed directly from [official website](https://www.jruby.org).
 * _(For TruffleRuby on Linux and macOS)_ Installed using [ruby-build](https://github.com/rbenv/ruby-build).
-* _(With portable_ruby)_ Portable Ruby downloaded from [jdx/ruby](https://github.com/jdx/ruby).
+* _(With portable_ruby)_ Portable Ruby downloaded from [bazel-contrib/portable-ruby](https://github.com/bazel-contrib/portable-ruby).
 * _(For "system")_ Ruby found on the PATH is used. Please note that builds are not hermetic in this case.
 
 `WORKSPACE`:
@@ -86,8 +86,9 @@ rb_library(
 | <a id="rb_register_toolchains-version"></a>version |  a semver version of MRI, or a string like [interpreter type]-[version], or "system"   |  `None` |
 | <a id="rb_register_toolchains-version_file"></a>version_file |  .ruby-version or .tool-versions file to read version from   |  `None` |
 | <a id="rb_register_toolchains-msys2_packages"></a>msys2_packages |  extra MSYS2 packages to install   |  `["libyaml"]` |
-| <a id="rb_register_toolchains-portable_ruby"></a>portable_ruby |  when True, downloads portable Ruby from jdx/ruby instead of compiling via ruby-build. Has no effect on JRuby, TruffleRuby, or Windows.   |  `False` |
-| <a id="rb_register_toolchains-portable_ruby_checksums"></a>portable_ruby_checksums |  platform checksums for portable Ruby downloads, overriding built-in checksums. Keys: linux-x86_64, linux-arm64, macos-arm64, macos-x86_64.   |  `{}` |
+| <a id="rb_register_toolchains-portable_ruby"></a>portable_ruby |  when True, downloads portable Ruby from bazel-contrib/portable-ruby instead of compiling via ruby-build. Has no effect on JRuby, TruffleRuby, or Windows.   |  `False` |
+| <a id="rb_register_toolchains-portable_ruby_release_suffix"></a>portable_ruby_release_suffix |  release suffix for portable Ruby (default "1", e.g. "2" downloads X.Y.Z-2).   |  `""` |
+| <a id="rb_register_toolchains-portable_ruby_checksums"></a>portable_ruby_checksums |  platform checksums for portable Ruby downloads, overriding built-in checksums.   |  `{}` |
 | <a id="rb_register_toolchains-register"></a>register |  whether to register the resulting toolchains, should be False under bzlmod   |  `True` |
 | <a id="rb_register_toolchains-kwargs"></a>kwargs |  additional parameters to the downloader for this interpreter type   |  none |
 
