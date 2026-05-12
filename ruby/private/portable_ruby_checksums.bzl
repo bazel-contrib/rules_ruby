@@ -6,6 +6,7 @@
 # Maps each Ruby version to its current default release suffix.
 # Updated automatically when a new rebuild (-2, -3, etc.) is published.
 PORTABLE_RUBY_DEFAULT_SUFFIXES = {
+    "4.0.4": "1",
     "4.0.3": "1",
     "4.0.2": "1",
     "4.0.1": "1",
@@ -211,5 +212,9 @@ PORTABLE_RUBY_CHECKSUMS = {
         "ruby-4.0.3.arm64_linux.tar.gz": "809787624ef02d09fa467dc1cc3b97f353134f4444523409194eb8b824d9f2c6",
         "ruby-4.0.3.x86_64_darwin.tar.gz": "fd67f963deed2768659b5e04e8571dd6d46c0f12731eef33a682c6c35c85d377",
         "ruby-4.0.3.x86_64_linux.tar.gz": "98ea581ad9b351496eb9360cfb3da2ad8cf1eeba44d8473420c00edf8e418a20",
+        "ruby-4.0.4.arm64_darwin.tar.gz": "ac99dc401aacf7c6d7f234cc4b7347d8d1faaa8e6f5a8d240c56b1a05ccddc2a",
+        "ruby-4.0.4.arm64_linux.tar.gz": "a00464b216e9de42203ca5bb66f881e35a57cea41335b0880a4fade9988977a4",
+        "ruby-4.0.4.x86_64_darwin.tar.gz": "df7ca6d15cfbf884f5a51b59439e23d1da9c88789992783e7e2f3c50d0995985",
+        "ruby-4.0.4.x86_64_linux.tar.gz": "2bf52d9d39e04afc0a06fa549dba4a13c75d30afb50f45a0ca9d7032f6d441ac",
     },
 }

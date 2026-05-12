@@ -2,7 +2,7 @@
 
 load("//ruby/private:portable_ruby_checksums.bzl", "PORTABLE_RUBY_CHECKSUMS", "PORTABLE_RUBY_DEFAULT_SUFFIXES")
 
-RUBY_BUILD_VERSION = "20260114"
+RUBY_BUILD_VERSION = "20260512"
 
 _JRUBY_BINARY_URL = "https://repo1.maven.org/maven2/org/jruby/jruby-dist/{version}/jruby-dist-{version}-bin.tar.gz"
 _RUBY_BUILD_URL = "https://github.com/rbenv/ruby-build/archive/refs/tags/v{version}.tar.gz"
@@ -48,6 +48,10 @@ _JRUBY_VERSIONS = {
     "10.0.0.1": "0ba34ac5dfec7c22659b14db668a06284db7fc1c820c49c04b92271a6636bafb",
     "10.0.1.0": "22174ed408aa19340fc3c609b67f5a83374539ecc50053153d60f6e1f81faa9d",
     "10.0.2.0": "b8a026f38aa98461a04ed0aa0b20891ce257ecbe53e124719ce9ee5b804525f1",
+    "10.0.3.0": "0edb5b02c3f482205d1cf8358f38e31d9e4c6d93a210039224750c72501e4717",
+    "10.0.4.0": "d0260ebc753a5e9ae49be1eec0e4eec907aaf2b7184faaafc879b0ec3253ca24",
+    "10.0.5.0": "6b3aa0340bd60a2b131e12490bb498c45359d9c91e477f5760c3aa18e37d1988",
+    "10.1.0.0": "9c14a0ce81f3a312fd98c415986982132e91d36b12cb8d74a3dfdae93fe984ac",
 }
 _JRUBY_INTEGRITY_MISSING = """
 
