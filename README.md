@@ -104,8 +104,8 @@ The following toolchains are known to work and tested on CI.
 | MRI 3.4          | 🟩    | 🟩    | 🟩      |
 | MRI 3.3          | 🟩    | 🟩    | 🟩      |
 | MRI 3.2          | 🟩    | 🟩    | 🟩      |
-| JRuby 10.0       | 🟩    | 🟩    | 🟩      |
-| TruffleRuby 33.0 | 🟩    | 🟩    | 🟥      |
+| JRuby 10.1       | 🟩    | 🟩    | 🟩      |
+| TruffleRuby 34.0 | 🟩    | 🟩    | 🟥      |
 
 The following toolchains were previously known to work but _no longer tested on CI_.
 
@@ -114,8 +114,10 @@ The following toolchains were previously known to work but _no longer tested on 
 | MRI 3.1          | 🟩    | 🟩    | 🟩      |
 | MRI 3.0          | 🟩    | 🟩    | 🟩      |
 | MRI 2.7          | 🟩    | 🟩    | 🟩      |
+| JRuby 10.0       | 🟩    | 🟩    | 🟩      |
 | JRuby 9.4        | 🟩    | 🟩    | 🟩      |
 | JRuby 9.3        | 🟩    | 🟩    | 🟩      |
+| TruffleRuby 33.0 | 🟩    | 🟩    | 🟥      |
 | TruffleRuby 25.0 | 🟩    | 🟩    | 🟥      |
 | TruffleRuby 24.0 | 🟩    | 🟩    | 🟥      |
 | TruffleRuby 23.0 | 🟩    | 🟩    | 🟥      |

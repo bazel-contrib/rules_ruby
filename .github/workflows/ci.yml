@@ -36,12 +36,12 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - 3.2.9
-          - 3.3.9
-          - 3.4.6
-          - 4.0.1
-          - jruby-10.0.2.0
-          - truffleruby-33.0.0
+          - 3.2.11
+          - 3.3.11
+          - 3.4.9
+          - 4.0.3
+          - jruby-10.1.0.0
+          - truffleruby-34.0.1
           - system
         os:
           - ubuntu-latest
@@ -53,7 +53,7 @@ jobs:
         exclude:
           # TruffleRuby doesn't work on Windows.
           - os: windows-latest
-            ruby: truffleruby-33.0.0
+            ruby: truffleruby-34.0.1
     defaults:
       run:
         working-directory: examples/gem
@@ -71,7 +71,7 @@ jobs:
       - if: matrix.ruby == 'system'
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2.9
+          ruby-version: 3.2.11
       - run: bazel build ...
       - run: bazel run lib/gem:add-numbers 2
       - run: bazel run lib/gem:print-version
@@ -133,8 +133,8 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - 3.3.9
-          - jruby-10.0.2.0
+          - 3.3.11
+          - jruby-10.1.0.0
         use-system-ruby:
           - true
           - false
@@ -165,7 +165,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - jruby-10.0.2.0
+          - jruby-10.1.0.0
         os:
           - ubuntu-latest
           - macos-latest
@@ -187,7 +187,7 @@ jobs:
       - if: matrix.ruby == 'system'
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2.9
+          ruby-version: 3.2.11
       - run: ./do_test
 
   examples-rails:
@@ -198,7 +198,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - 3.4.8
+          - 3.4.9
         os:
           - ubuntu-latest
           - macos-latest
@@ -224,7 +224,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - 3.4.5
+          - 3.4.9
         os:
           - ubuntu-latest
           - macos-latest
