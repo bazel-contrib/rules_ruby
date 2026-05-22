@@ -10,7 +10,19 @@ def _is_java_gem_test_impl(ctx):
     env = unittest.begin(ctx)
     asserts.true(env, jars_downloader_internal.is_java_gem(struct(version = "5.0.1-java")))
     asserts.true(env, jars_downloader_internal.is_java_gem(struct(version = "5.0.1-java-8")))
+    asserts.true(env, jars_downloader_internal.is_java_gem(struct(version = "2.6.0-universal-java")))
+    asserts.true(env, jars_downloader_internal.is_java_gem(struct(version = "2.6.0-universal-java-21")))
     asserts.false(env, jars_downloader_internal.is_java_gem(struct(version = "5.0.1")))
+    return unittest.end(env)
+
+def _strip_java_platform_suffix_test_impl(ctx):
+    env = unittest.begin(ctx)
+    strip = jars_downloader_internal.strip_java_platform_suffix
+    asserts.equals(env, "5.0.1", strip("5.0.1-java"))
+    asserts.equals(env, "5.0.1", strip("5.0.1-java-8"))
+    asserts.equals(env, "2.6.0", strip("2.6.0-universal-java"))
+    asserts.equals(env, "2.6.0", strip("2.6.0-universal-java-21"))
+    asserts.equals(env, "5.0.1", strip("5.0.1"))
     return unittest.end(env)
 
 def _parse_jar_requirement_test_impl(ctx):
@@ -40,6 +52,7 @@ def _fetch_gem_requirements_null_test_impl(ctx):
     return unittest.end(env)
 
 is_java_gem_test = unittest.make(_is_java_gem_test_impl)
+strip_java_platform_suffix_test = unittest.make(_strip_java_platform_suffix_test_impl)
 parse_jar_requirement_test = unittest.make(_parse_jar_requirement_test_impl)
 fetch_gem_requirements_null_test = unittest.make(_fetch_gem_requirements_null_test_impl)
 
@@ -47,6 +60,7 @@ def jars_downloader_test_suite():
     unittest.suite(
         "jars_downloader_tests",
         is_java_gem_test,
+        strip_java_platform_suffix_test,
         parse_jar_requirement_test,
         fetch_gem_requirements_null_test,
     )
