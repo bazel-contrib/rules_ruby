@@ -1,6 +1,7 @@
 "Repository rule for fetching Ruby interpreters"
 
 load("//ruby/private:portable_ruby_checksums.bzl", "PORTABLE_RUBY_CHECKSUMS", "PORTABLE_RUBY_DEFAULT_SUFFIXES")
+load("//ruby/private/toolchain:platforms.bzl", "PORTABLE_RUBY_ARTIFACT_KEY")
 
 RUBY_BUILD_VERSION = "20260512"
 
@@ -89,6 +90,34 @@ load Gem.bin_path("bundler", "bundle", version)
 end
 """
 
+def _resolve_platform(repository_ctx):
+    """Return the canonical platform key (e.g. 'linux_x86_64').
+
+    Honors the explicit `platform` attr when set; otherwise infers from host.
+    """
+    if repository_ctx.attr.platform:
+        return repository_ctx.attr.platform
+
+    os_name = repository_ctx.os.name
+    if os_name.startswith("mac"):
+        os_key = "darwin"
+    elif os_name.startswith("linux"):
+        os_key = "linux"
+    elif os_name.startswith("windows"):
+        os_key = "windows"
+    else:
+        os_key = os_name
+
+    arch = repository_ctx.os.arch
+    if arch == "amd64" or arch == "x86_64":
+        arch_key = "x86_64"
+    elif arch in ["arm64", "aarch64"]:
+        arch_key = "arm64"
+    else:
+        arch_key = arch
+
+    return "{}_{}".format(os_key, arch_key)
+
 def _rb_download_impl(repository_ctx):
     if repository_ctx.attr.version and not repository_ctx.attr.version_file:
         version = repository_ctx.attr.version
@@ -104,8 +133,11 @@ def _rb_download_impl(repository_ctx):
     ruby_binary_name = "ruby"
     gem_binary_name = "gem"
 
+    platform = _resolve_platform(repository_ctx)
+    is_windows_target = platform.startswith("windows_")
+
     if version.startswith("jruby"):
-        _install_jruby(repository_ctx, version)
+        _install_jruby(repository_ctx, version, platform)
 
         engine = "jruby"
         ruby_binary_name = "jruby"
@@ -134,12 +166,16 @@ def _rb_download_impl(repository_ctx):
             env.update({"OPENSSL_PREFIX": openssl_prefix})
     elif version == "system":
         engine = _symlink_system_ruby(repository_ctx)
-    elif repository_ctx.os.name.startswith("windows"):
+    elif is_windows_target and not repository_ctx.attr.platform:
+        # Windows host with implicit platform: use RubyInstaller. When `platform` attr
+        # is set explicitly we skip this branch — Windows portable Ruby is not supported,
+        # and an explicit non-JRuby Windows download would have no path that works here.
         _install_via_rubyinstaller(repository_ctx, version)
     elif repository_ctx.attr.portable_ruby:
         _install_portable_ruby(
             repository_ctx,
             version,
+            platform,
             repository_ctx.attr.portable_ruby_checksums,
         )
 
@@ -199,7 +235,7 @@ def _parse_version_from_tool_versions(file):
             return version
     return None
 
-def _install_jruby(repository_ctx, version):
+def _install_jruby(repository_ctx, version, platform):
     version = version.removeprefix("jruby-")
     repository_ctx.report_progress("Downloading JRuby %s" % version)
 
@@ -219,7 +255,7 @@ def _install_jruby(repository_ctx, version):
     if sha256 != download.sha256:
         print(_JRUBY_INTEGRITY_MISSING.format(sha256 = download.sha256, version = version))  # buildifier: disable=print
 
-    if repository_ctx.os.name.startswith("windows"):
+    if platform.startswith("windows_"):
         repository_ctx.symlink("dist/bin/bundle.bat", "dist/bin/bundle.cmd")
         repository_ctx.symlink("dist/bin/jgem.bat", "dist/bin/jgem.cmd")
 
@@ -283,35 +319,22 @@ def _install_via_ruby_build(repository_ctx, version):
 
     repository_ctx.delete("ruby-build")
 
-def _install_portable_ruby(repository_ctx, ruby_version, checksums):
+def _install_portable_ruby(repository_ctx, ruby_version, platform, checksums):
     """Install portable Ruby from bazel-contrib/portable-ruby project.
 
     Args:
         repository_ctx: Repository context
         ruby_version: Ruby version (e.g., "3.4.8")
-        checksums: Dict mapping platform keys to SHA256 checksums
+        platform: Canonical platform key (e.g., "linux_x86_64")
+        checksums: Dict mapping artifact names to SHA256 checksums
     """
+    if platform not in PORTABLE_RUBY_ARTIFACT_KEY:
+        fail("portable Ruby is not available for platform {}; supported: {}".format(
+            platform,
+            sorted(PORTABLE_RUBY_ARTIFACT_KEY.keys()),
+        ))
 
-    # Detect platform
-    os_name = repository_ctx.os.name
-    if os_name.startswith("mac"):
-        os_key = "darwin"
-    elif os_name.startswith("linux"):
-        os_key = "linux"
-    else:
-        os_key = os_name
-
-    # Detect architecture
-    arch = repository_ctx.os.arch
-    if arch == "amd64":
-        arch_key = "x86_64"
-    elif arch in ["arm64", "aarch64"]:
-        arch_key = "arm64"
-    else:
-        arch_key = arch
-
-    # Combine to form platform key
-    platform_key = arch_key + "_" + os_key
+    platform_key = PORTABLE_RUBY_ARTIFACT_KEY[platform]
 
     # Determine release suffix: explicit attr overrides built-in default
     suffix = repository_ctx.attr.portable_ruby_release_suffix
@@ -421,6 +444,22 @@ Platform checksums for portable Ruby downloads, overriding built-in checksums. C
 Keys: artifact names (e.g., ruby-3.4.8.x86_64_linux.tar.gz, ruby-3.4.8.arm64_darwin.tar.gz).
 Values: SHA256 checksums for the corresponding platform.
 """,
+        ),
+        "platform": attr.string(
+            doc = """
+Explicit canonical platform key (e.g. `linux_x86_64`). When set, overrides host
+auto-detection and is used to select the right portable Ruby download. Used by
+`rb_register_toolchains` when registering per-platform toolchains.
+""",
+            values = [
+                "",
+                "linux_x86_64",
+                "linux_arm64",
+                "darwin_x86_64",
+                "darwin_arm64",
+                "windows_x86_64",
+                "windows_arm64",
+            ],
         ),
         "_build_tpl": attr.label(
             allow_single_file = True,

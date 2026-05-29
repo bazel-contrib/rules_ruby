@@ -5,6 +5,26 @@ load("//ruby/private:download.bzl", "RUBY_BUILD_VERSION")
 load("//ruby/private:toolchain.bzl", "DEFAULT_RUBY_REPOSITORY")
 load(":deps.bzl", "rb_bundle", "rb_bundle_fetch", "rb_register_toolchains")
 
+def _resolve_version(module_ctx, toolchain):
+    """Resolve the Ruby version string for a toolchain tag.
+
+    The hub repo and platform list (CRuby vs JRuby) are decided at extension
+    evaluation time, before any per-platform repository rule runs — so when the
+    user provides `version_file`, the extension must read it itself to know
+    which engine/platforms to register.
+    """
+    if toolchain.version:
+        return toolchain.version
+    if not toolchain.version_file:
+        return None
+    content = module_ctx.read(toolchain.version_file).strip("\r\n")
+    if toolchain.version_file.name == ".tool-versions":
+        for line in content.splitlines():
+            if line.startswith("ruby"):
+                return line.partition(" ")[-1]
+        return None
+    return content
+
 ruby_bundle = tag_class(attrs = {
     "name": attr.string(doc = "Resulting repository name for the bundle"),
     "srcs": attr.label_list(),
@@ -107,6 +127,7 @@ def _ruby_module_extension(module_ctx):
                     registrations[toolchain.name],
                 ))
             else:
+                resolved_version = _resolve_version(module_ctx, toolchain)
                 registrations[toolchain.name] = (
                     toolchain.version,
                     toolchain.version_file,
@@ -115,6 +136,7 @@ def _ruby_module_extension(module_ctx):
                     toolchain.portable_ruby,
                     toolchain.portable_ruby_release_suffix,
                     toolchain.portable_ruby_checksums,
+                    resolved_version,
                 )
                 if module_ctx.is_dev_dependency(toolchain):
                     direct_dev_dep_names.append(toolchain.name)
@@ -132,6 +154,7 @@ def _ruby_module_extension(module_ctx):
             portable_ruby,
             portable_ruby_release_suffix,
             portable_ruby_checksums,
+            resolved_version,
         ) = config
         rb_register_toolchains(
             name = name,
@@ -142,6 +165,7 @@ def _ruby_module_extension(module_ctx):
             portable_ruby = portable_ruby,
             portable_ruby_release_suffix = portable_ruby_release_suffix,
             portable_ruby_checksums = portable_ruby_checksums,
+            resolved_version = resolved_version,
             register = False,
         )
 
