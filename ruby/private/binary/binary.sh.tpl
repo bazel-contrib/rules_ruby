@@ -36,6 +36,9 @@ realpath() (
 
 export RUNFILES_DIR="$(realpath "${RUNFILES_DIR:-$0.runfiles}")"
 
+# Set RUBYLIB to include the runfiles library.
+export RUBYLIB="$(dirname "$(dirname "$(rlocation "{runfiles_helper}")")")${RUBYLIB:+:${RUBYLIB}}"
+
 # Find location of Ruby in runfiles.
 export PATH=$(dirname $(rlocation {ruby})):$PATH
 

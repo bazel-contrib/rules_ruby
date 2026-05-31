@@ -8,6 +8,10 @@ set RUNFILES_MANIFEST_ONLY=1
 call :rlocation {ruby} ruby
 for %%a in ("!ruby!\..") do set PATH=%%~fa;%PATH%
 
+:: Set RUBYLIB to include the runfiles library.
+call :rlocation {runfiles_helper} _runfiles_helper_path
+for %%a in ("!_runfiles_helper_path!\..\..") do set "RUBYLIB=%%~fa;!RUBYLIB!"
+
 :: Find location of JAVA_HOME in runfiles.
 if "{java_bin}" neq "" (
   call :rlocation {java_bin} java_bin
