@@ -1,23 +1,18 @@
 "Shared platform constants for multi-platform Ruby toolchains."
 
+# Canonical platform keys use the `{arch}_{os}` order to match the naming used
+# by portable-ruby's release artifacts (e.g. `ruby-X.Y.Z.x86_64_linux.tar.gz`),
+# avoiding any conversion when constructing the download URL.
 PORTABLE_RUBY_PLATFORMS = [
-    "linux_x86_64",
-    "linux_arm64",
-    "darwin_x86_64",
-    "darwin_arm64",
+    "arm64_darwin",
+    "arm64_linux",
+    "x86_64_darwin",
+    "x86_64_linux",
 ]
 
 PLATFORM_CONSTRAINTS = {
-    "linux_x86_64": ["@platforms//os:linux", "@platforms//cpu:x86_64"],
-    "linux_arm64": ["@platforms//os:linux", "@platforms//cpu:arm64"],
-    "darwin_x86_64": ["@platforms//os:macos", "@platforms//cpu:x86_64"],
-    "darwin_arm64": ["@platforms//os:macos", "@platforms//cpu:arm64"],
-}
-
-# Mapping from canonical platform key to portable-ruby artifact suffix.
-PORTABLE_RUBY_ARTIFACT_KEY = {
-    "linux_x86_64": "x86_64_linux",
-    "linux_arm64": "arm64_linux",
-    "darwin_x86_64": "x86_64_darwin",
-    "darwin_arm64": "arm64_darwin",
+    "arm64_darwin": ["@platforms//os:macos", "@platforms//cpu:arm64"],
+    "arm64_linux": ["@platforms//os:linux", "@platforms//cpu:arm64"],
+    "x86_64_darwin": ["@platforms//os:macos", "@platforms//cpu:x86_64"],
+    "x86_64_linux": ["@platforms//os:linux", "@platforms//cpu:x86_64"],
 }

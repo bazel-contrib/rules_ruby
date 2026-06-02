@@ -1,7 +1,7 @@
 "Repository rule for fetching Ruby interpreters"
 
 load("//ruby/private:portable_ruby_checksums.bzl", "PORTABLE_RUBY_CHECKSUMS", "PORTABLE_RUBY_DEFAULT_SUFFIXES")
-load("//ruby/private/toolchain:platforms.bzl", "PORTABLE_RUBY_ARTIFACT_KEY")
+load("//ruby/private/toolchain:platforms.bzl", "PORTABLE_RUBY_PLATFORMS")
 
 RUBY_BUILD_VERSION = "20260512"
 
@@ -91,7 +91,7 @@ end
 """
 
 def _resolve_platform(repository_ctx):
-    """Return the canonical platform key (e.g. 'linux_x86_64').
+    """Return the canonical platform key (e.g. 'x86_64_linux').
 
     Honors the explicit `platform` attr when set; otherwise infers from host.
     """
@@ -109,14 +109,14 @@ def _resolve_platform(repository_ctx):
         os_key = os_name
 
     arch = repository_ctx.os.arch
-    if arch == "amd64" or arch == "x86_64":
+    if arch in ["amd64", "x86_64"]:
         arch_key = "x86_64"
     elif arch in ["arm64", "aarch64"]:
         arch_key = "arm64"
     else:
         arch_key = arch
 
-    return "{}_{}".format(os_key, arch_key)
+    return "{}_{}".format(arch_key, os_key)
 
 def _rb_download_impl(repository_ctx):
     if repository_ctx.attr.version and not repository_ctx.attr.version_file:
@@ -134,7 +134,7 @@ def _rb_download_impl(repository_ctx):
     gem_binary_name = "gem"
 
     platform = _resolve_platform(repository_ctx)
-    is_windows_target = platform.startswith("windows_")
+    is_windows_target = platform.endswith("_windows")
 
     if version.startswith("jruby"):
         _install_jruby(repository_ctx, version)
@@ -327,16 +327,14 @@ def _install_portable_ruby(repository_ctx, ruby_version, platform, checksums):
     Args:
         repository_ctx: Repository context
         ruby_version: Ruby version (e.g., "3.4.8")
-        platform: Canonical platform key (e.g., "linux_x86_64")
+        platform: Canonical platform key (e.g., "x86_64_linux")
         checksums: Dict mapping artifact names to SHA256 checksums
     """
-    if platform not in PORTABLE_RUBY_ARTIFACT_KEY:
+    if platform not in PORTABLE_RUBY_PLATFORMS:
         fail("portable Ruby is not available for platform {}; supported: {}".format(
             platform,
-            sorted(PORTABLE_RUBY_ARTIFACT_KEY.keys()),
+            sorted(PORTABLE_RUBY_PLATFORMS),
         ))
-
-    platform_key = PORTABLE_RUBY_ARTIFACT_KEY[platform]
 
     # Determine release suffix: explicit attr overrides built-in default
     suffix = repository_ctx.attr.portable_ruby_release_suffix
@@ -345,7 +343,7 @@ def _install_portable_ruby(repository_ctx, ruby_version, platform, checksums):
 
     artifact_name = _PORTABLE_RUBY_NAME.format(
         version = ruby_version,
-        platform = platform_key,
+        platform = platform,
     )
 
     # Get checksum if provided (Bazel will warn if not provided)
@@ -356,7 +354,7 @@ def _install_portable_ruby(repository_ctx, ruby_version, platform, checksums):
         kwargs["sha256"] = PORTABLE_RUBY_CHECKSUMS[suffix][artifact_name]
 
     repository_ctx.report_progress(
-        "Downloading portable Ruby %s-%s for %s" % (ruby_version, suffix, platform_key),
+        "Downloading portable Ruby %s-%s for %s" % (ruby_version, suffix, platform),
     )
     repository_ctx.download_and_extract(
         url = _PORTABLE_RUBY_URL.format(
@@ -449,18 +447,18 @@ Values: SHA256 checksums for the corresponding platform.
         ),
         "platform": attr.string(
             doc = """
-Explicit canonical platform key (e.g. `linux_x86_64`). When set, overrides host
+Explicit canonical platform key (e.g. `x86_64_linux`). When set, overrides host
 auto-detection and is used to select the right portable Ruby download. Used by
 `rb_register_toolchains` when registering per-platform toolchains.
 """,
             values = [
                 "",
-                "linux_x86_64",
-                "linux_arm64",
-                "darwin_x86_64",
-                "darwin_arm64",
-                "windows_x86_64",
-                "windows_arm64",
+                "arm64_darwin",
+                "arm64_linux",
+                "arm64_windows",
+                "x86_64_darwin",
+                "x86_64_linux",
+                "x86_64_windows",
             ],
         ),
         "_build_tpl": attr.label(
