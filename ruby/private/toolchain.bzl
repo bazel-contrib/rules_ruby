@@ -2,7 +2,7 @@
 
 load("//ruby/private:download.bzl", _rb_download = "rb_download")
 load("//ruby/private/toolchain:hub.bzl", _rb_hub_repository = "rb_hub_repository")
-load("//ruby/private/toolchain:platforms.bzl", "PORTABLE_RUBY_PLATFORMS")
+load("//ruby/private/toolchain:platforms.bzl", "MULTI_PLATFORM_RUBY_PLATFORMS")
 load("//ruby/private/toolchain:repository_proxy.bzl", _rb_toolchain_repository_proxy = "rb_toolchain_repository_proxy")
 
 DEFAULT_RUBY_REPOSITORY = "ruby"
@@ -96,16 +96,27 @@ def rb_register_toolchains(
     """
     proxy_repo_name = name + "_toolchains"
 
-    # `portable_ruby` only meaningfully applies to CRuby. For JRuby the archive is
-    # platform-independent, so we use the single-platform path even when the user
-    # passes `portable_ruby = True` (matches the "has no effect on JRuby" docstring).
+    # Multi-platform mode is only meaningful for CRuby + portable_ruby. JRuby's
+    # archive is platform-independent, TruffleRuby and "system" can't cross-
+    # compile, and Windows CRuby goes through RubyInstaller (handled per
+    # per-platform repo). When we can't determine the engine ahead of time
+    # (e.g. WORKSPACE mode with version_file but no module_ctx to read it), we
+    # fall back to single-platform host-only.
     effective_version = resolved_version if resolved_version != None else version
     is_jruby = effective_version != None and effective_version.startswith("jruby")
-    use_portable_ruby = portable_ruby and not is_jruby
+    is_truffleruby = effective_version != None and effective_version.startswith("truffleruby")
+    is_system = effective_version == "system"
+    use_multi_platform = (
+        portable_ruby and
+        effective_version != None and
+        not is_jruby and
+        not is_truffleruby and
+        not is_system
+    )
 
-    if use_portable_ruby:
+    if use_multi_platform:
         entries = []
-        for plat in PORTABLE_RUBY_PLATFORMS:
+        for plat in MULTI_PLATFORM_RUBY_PLATFORMS:
             per_repo = "{}_{}".format(name, plat)
             if per_repo not in native.existing_rules():
                 _rb_download(
@@ -124,7 +135,7 @@ def rb_register_toolchains(
             _rb_hub_repository(
                 name = name,
                 apparent_name = name,
-                platforms = PORTABLE_RUBY_PLATFORMS,
+                platforms = MULTI_PLATFORM_RUBY_PLATFORMS,
                 engine = "ruby",
             )
         if proxy_repo_name not in native.existing_rules():

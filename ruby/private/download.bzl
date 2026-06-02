@@ -1,7 +1,11 @@
 "Repository rule for fetching Ruby interpreters"
 
 load("//ruby/private:portable_ruby_checksums.bzl", "PORTABLE_RUBY_CHECKSUMS", "PORTABLE_RUBY_DEFAULT_SUFFIXES")
-load("//ruby/private/toolchain:platforms.bzl", "PORTABLE_RUBY_PLATFORMS")
+load(
+    "//ruby/private/toolchain:platforms.bzl",
+    "MULTI_PLATFORM_RUBY_PLATFORMS",
+    "PORTABLE_RUBY_PLATFORMS",
+)
 
 RUBY_BUILD_VERSION = "20260512"
 
@@ -166,10 +170,11 @@ def _rb_download_impl(repository_ctx):
             env.update({"OPENSSL_PREFIX": openssl_prefix})
     elif version == "system":
         engine = _symlink_system_ruby(repository_ctx)
-    elif is_windows_target and not repository_ctx.attr.platform:
-        # Windows host with implicit platform: use RubyInstaller. When `platform` attr
-        # is set explicitly we skip this branch — Windows portable Ruby is not supported,
-        # and an explicit non-JRuby Windows download would have no path that works here.
+    elif is_windows_target:
+        # Windows CRuby uses RubyInstaller — portable-ruby does not publish
+        # Windows tarballs. Applies whether the platform was inferred from the
+        # host (single-platform mode) or set explicitly via the `platform` attr
+        # (multi-platform mode picking the Windows per-platform repo).
         _install_via_rubyinstaller(repository_ctx, version)
     elif repository_ctx.attr.portable_ruby:
         _install_portable_ruby(
@@ -451,15 +456,7 @@ Explicit canonical platform key (e.g. `x86_64_linux`). When set, overrides host
 auto-detection and is used to select the right portable Ruby download. Used by
 `rb_register_toolchains` when registering per-platform toolchains.
 """,
-            values = [
-                "",
-                "arm64_darwin",
-                "arm64_linux",
-                "arm64_windows",
-                "x86_64_darwin",
-                "x86_64_linux",
-                "x86_64_windows",
-            ],
+            values = [""] + MULTI_PLATFORM_RUBY_PLATFORMS,
         ),
         "_build_tpl": attr.label(
             allow_single_file = True,
