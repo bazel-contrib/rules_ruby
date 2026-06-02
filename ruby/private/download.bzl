@@ -137,7 +137,7 @@ def _rb_download_impl(repository_ctx):
     is_windows_target = platform.startswith("windows_")
 
     if version.startswith("jruby"):
-        _install_jruby(repository_ctx, version, platform)
+        _install_jruby(repository_ctx, version)
 
         engine = "jruby"
         ruby_binary_name = "jruby"
@@ -235,7 +235,7 @@ def _parse_version_from_tool_versions(file):
             return version
     return None
 
-def _install_jruby(repository_ctx, version, platform):
+def _install_jruby(repository_ctx, version):
     version = version.removeprefix("jruby-")
     repository_ctx.report_progress("Downloading JRuby %s" % version)
 
@@ -255,9 +255,11 @@ def _install_jruby(repository_ctx, version, platform):
     if sha256 != download.sha256:
         print(_JRUBY_INTEGRITY_MISSING.format(sha256 = download.sha256, version = version))  # buildifier: disable=print
 
-    if platform.startswith("windows_"):
-        repository_ctx.symlink("dist/bin/bundle.bat", "dist/bin/bundle.cmd")
-        repository_ctx.symlink("dist/bin/jgem.bat", "dist/bin/jgem.cmd")
+    # Always create the Windows `.cmd` wrappers — JRuby's archive is the same
+    # across platforms, and the BUILD.tpl select picks `bundle.cmd` / `jgem.cmd`
+    # when consumed at a Windows target config. Symlinks are harmless on Unix.
+    repository_ctx.symlink("dist/bin/bundle.bat", "dist/bin/bundle.cmd")
+    repository_ctx.symlink("dist/bin/jgem.bat", "dist/bin/jgem.cmd")
 
 # https://github.com/oneclick/rubyinstaller2/wiki/FAQ#q-how-do-i-perform-a-silentunattended-install-with-the-rubyinstaller
 def _install_via_rubyinstaller(repository_ctx, version):

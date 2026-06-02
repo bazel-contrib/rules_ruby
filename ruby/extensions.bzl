@@ -6,12 +6,13 @@ load("//ruby/private:toolchain.bzl", "DEFAULT_RUBY_REPOSITORY")
 load(":deps.bzl", "rb_bundle", "rb_bundle_fetch", "rb_register_toolchains")
 
 def _resolve_version(module_ctx, toolchain):
-    """Resolve the Ruby version string for a toolchain tag.
+    """Resolve the Ruby version string from `version` or `version_file`.
 
-    The hub repo and platform list (CRuby vs JRuby) are decided at extension
-    evaluation time, before any per-platform repository rule runs — so when the
-    user provides `version_file`, the extension must read it itself to know
-    which engine/platforms to register.
+    `rb_register_toolchains` needs to know whether the requested engine is
+    JRuby to decide between the multi-platform `portable_ruby` path and the
+    single-platform path. When the user supplies `version_file` instead of an
+    explicit `version`, the extension reads the file here so the decision can
+    be made at extension-evaluation time, before the repo rules fire.
     """
     if toolchain.version:
         return toolchain.version
@@ -127,7 +128,6 @@ def _ruby_module_extension(module_ctx):
                     registrations[toolchain.name],
                 ))
             else:
-                resolved_version = _resolve_version(module_ctx, toolchain)
                 registrations[toolchain.name] = (
                     toolchain.version,
                     toolchain.version_file,
@@ -136,7 +136,7 @@ def _ruby_module_extension(module_ctx):
                     toolchain.portable_ruby,
                     toolchain.portable_ruby_release_suffix,
                     toolchain.portable_ruby_checksums,
-                    resolved_version,
+                    _resolve_version(module_ctx, toolchain),
                 )
                 if module_ctx.is_dev_dependency(toolchain):
                     direct_dev_dep_names.append(toolchain.name)

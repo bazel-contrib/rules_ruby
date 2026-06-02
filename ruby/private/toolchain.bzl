@@ -2,31 +2,12 @@
 
 load("//ruby/private:download.bzl", _rb_download = "rb_download")
 load("//ruby/private/toolchain:hub.bzl", _rb_hub_repository = "rb_hub_repository")
-load(
-    "//ruby/private/toolchain:platforms.bzl",
-    "JRUBY_PLATFORMS",
-    "PORTABLE_RUBY_PLATFORMS",
-    "engine_from_version",
-)
+load("//ruby/private/toolchain:platforms.bzl", "PORTABLE_RUBY_PLATFORMS")
 load("//ruby/private/toolchain:repository_proxy.bzl", _rb_toolchain_repository_proxy = "rb_toolchain_repository_proxy")
 
 DEFAULT_RUBY_REPOSITORY = "ruby"
 
 _TOOLCHAIN_TYPE = "@rules_ruby//ruby:toolchain_type"
-
-def _is_multi_platform(version, portable_ruby):
-    if portable_ruby:
-        return True
-    if version and engine_from_version(version) == "jruby":
-        return True
-    return False
-
-def _platforms_for(version, portable_ruby):
-    if version and engine_from_version(version) == "jruby":
-        return JRUBY_PLATFORMS
-    if portable_ruby:
-        return PORTABLE_RUBY_PLATFORMS
-    return []
 
 def rb_register_toolchains(
         name = DEFAULT_RUBY_REPOSITORY,
@@ -49,14 +30,17 @@ def rb_register_toolchains(
     * _(With portable_ruby)_ Portable Ruby downloaded from [bazel-contrib/portable-ruby](https://github.com/bazel-contrib/portable-ruby).
     * _(For "system")_ Ruby found on the PATH is used. Please note that builds are not hermetic in this case.
 
-    When `portable_ruby = True` (CRuby) or `version` starts with `jruby`, this
-    function registers a Bazel toolchain per supported execution platform so
-    that builds resolve to the right interpreter on remote execution and
-    cross-platform setups. Per-platform repositories `@<name>_<platform>` are
-    created lazily — Bazel only fetches the one matching the resolved exec
-    platform. A hub repository `@<name>` aliases the canonical targets
-    (`:bundle`, `:gem`, `:ruby`, `:headers`, `:jars`, etc.) via `select()`,
-    preserving direct references like `@ruby//:bundle`.
+    When `portable_ruby = True`, this function registers a Bazel toolchain per
+    supported execution platform so that builds resolve to the right
+    interpreter on remote execution and cross-platform setups. Per-platform
+    repositories `@<name>_<platform>` are created lazily — Bazel only fetches
+    the one matching the resolved exec platform. A hub repository `@<name>`
+    aliases the canonical targets (`:bundle`, `:gem`, `:ruby`, `:headers`,
+    `:jars`, etc.) via `select()`, preserving direct references like
+    `@ruby//:bundle`.
+
+    JRuby's archive is platform-independent (JVM-based), so it is registered
+    as a single unconstrained toolchain — no per-platform repos needed.
 
     Other modes (ruby-build for MRI source compile, TruffleRuby, RubyInstaller,
     `system`) remain single-platform host-only.
@@ -104,24 +88,24 @@ def rb_register_toolchains(
         portable_ruby_release_suffix: release suffix for portable Ruby (default "1", e.g. "2" downloads X.Y.Z-2).
         portable_ruby_checksums: platform checksums for portable Ruby downloads, overriding
             built-in checksums.
-        resolved_version: the version string resolved from `version_file`
-            by the module extension. Used to decide engine and platform set when
-            `version` itself is not provided.
+        resolved_version: the version string resolved from `version_file` by the module
+            extension. Used to detect JRuby (which skips the multi-platform `portable_ruby`
+            path since its archive is platform-independent).
         register: whether to register the resulting toolchains, should be False under bzlmod
         **kwargs: additional parameters to the downloader for this interpreter type
     """
     proxy_repo_name = name + "_toolchains"
 
-    # Used for engine/platform decisions when the user passed `version_file`
-    # instead of an explicit `version` — the extension reads the file and
-    # forwards the resolved value via the (private) `resolved_version` arg.
+    # `portable_ruby` only meaningfully applies to CRuby. For JRuby the archive is
+    # platform-independent, so we use the single-platform path even when the user
+    # passes `portable_ruby = True` (matches the "has no effect on JRuby" docstring).
     effective_version = resolved_version if resolved_version != None else version
-    multi = _is_multi_platform(effective_version, portable_ruby)
+    is_jruby = effective_version != None and effective_version.startswith("jruby")
+    use_portable_ruby = portable_ruby and not is_jruby
 
-    if multi:
-        platforms = _platforms_for(effective_version, portable_ruby)
+    if use_portable_ruby:
         entries = []
-        for plat in platforms:
+        for plat in PORTABLE_RUBY_PLATFORMS:
             per_repo = "{}_{}".format(name, plat)
             if per_repo not in native.existing_rules():
                 _rb_download(
@@ -140,8 +124,8 @@ def rb_register_toolchains(
             _rb_hub_repository(
                 name = name,
                 apparent_name = name,
-                platforms = platforms,
-                engine = engine_from_version(effective_version),
+                platforms = PORTABLE_RUBY_PLATFORMS,
+                engine = "ruby",
             )
         if proxy_repo_name not in native.existing_rules():
             _rb_toolchain_repository_proxy(
