@@ -96,9 +96,9 @@ def rb_register_toolchains(
     """
     proxy_repo_name = name + "_toolchains"
 
-    # Multi-platform mode is only meaningful for CRuby + portable_ruby. JRuby's
+    # Multi-platform mode is only meaningful for MRI + portable_ruby. JRuby's
     # archive is platform-independent, TruffleRuby and "system" can't cross-
-    # compile, and Windows CRuby goes through RubyInstaller (handled per
+    # compile, and Windows MRI goes through RubyInstaller (handled per
     # per-platform repo). When we can't determine the engine ahead of time
     # (e.g. WORKSPACE mode with version_file but no module_ctx to read it), we
     # fall back to single-platform host-only.

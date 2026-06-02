@@ -171,7 +171,7 @@ def _rb_download_impl(repository_ctx):
     elif version == "system":
         engine = _symlink_system_ruby(repository_ctx)
     elif is_windows_target:
-        # Windows CRuby uses RubyInstaller — portable-ruby does not publish
+        # Windows MRI uses RubyInstaller — portable-ruby does not publish
         # Windows tarballs. Applies whether the platform was inferred from the
         # host (single-platform mode) or set explicitly via the `platform` attr
         # (multi-platform mode picking the Windows per-platform repo).
