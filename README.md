@@ -180,16 +180,17 @@ ruby.toolchain(
 
 **Notes:**
 
-- Portable Ruby is only supported on Linux (arm64, x86_64) and macOS (arm64).
+- Portable Ruby is only supported on Linux (arm64, x86_64) and macOS (arm64, x86_64).
 - Setting `portable_ruby = True` has no effect on JRuby, TruffleRuby, or Windows.
 - On Windows, the toolchain automatically falls back to RubyInstaller.
 - Find available portable Ruby releases at https://github.com/bazel-contrib/portable-ruby/releases
+- Portable Ruby toolchains are multi-platform and can be used on for [Remote Build Execution][15].
 
 ### JRuby
 
 On all operating systems, JRuby is downloaded manually.
 It uses Bazel runtime Java toolchain as JDK.
-JRuby is currently the only toolchain that supports [Remote Build Execution][15].
+JRuby toolchain is cross-platform and fully supports [Remote Build Execution][15].
 
 ### TruffleRuby
 
