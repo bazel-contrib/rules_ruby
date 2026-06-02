@@ -58,6 +58,34 @@ def _is_java_gem(gem):
     """
     return gem.version.endswith("-java") or "-java-" in gem.version
 
+def _strip_java_platform_suffix(version):
+    """Strips the Java platform suffix from a Ruby gem version string.
+
+    RubyGems joins the platform onto the version with "-", and the Java
+    platform can take several shapes — `java`, `universal-java`, or either
+    of those with a trailing Java version (e.g. `-21`). Examples:
+
+      "5.0.1-java"              -> "5.0.1"
+      "5.0.1-java-8"            -> "5.0.1"
+      "2.6.0-universal-java"    -> "2.6.0"
+      "2.6.0-universal-java-21" -> "2.6.0"
+
+    Args:
+        version: Gem version string, possibly with a Java platform suffix.
+
+    Returns:
+        Version string with the Java platform suffix removed.
+    """
+
+    # Drop any trailing `-N` Java-version segment first ("-java-21" -> "-java").
+    java_idx = version.rfind("-java-")
+    if java_idx >= 0:
+        version = version[:java_idx + len("-java")]
+    for suffix in ("-universal-java", "-java"):
+        if version.endswith(suffix):
+            return version[:-len(suffix)]
+    return version
+
 def _fetch_gem_requirements(repository_ctx, gem):
     """Fetches JAR requirements for a gem from RubyGems API.
 
@@ -72,9 +100,7 @@ def _fetch_gem_requirements(repository_ctx, gem):
         List of JAR requirement strings (e.g., ["jar org.yaml:snakeyaml, 1.33"]).
     """
 
-    # Extract base version without platform suffix
-    # e.g., "psych-5.0.1-java" -> name="psych", version="5.0.1"
-    base_version = gem.version.replace("-java", "")
+    base_version = _strip_java_platform_suffix(gem.version)
 
     url = _RUBYGEMS_API_URL.format(
         gem = gem.name,
@@ -199,4 +225,5 @@ jars_downloader_internal = struct(
     is_java_gem = _is_java_gem,
     parse_jar_requirement = _parse_jar_requirement,
     fetch_gem_requirements = _fetch_gem_requirements,
+    strip_java_platform_suffix = _strip_java_platform_suffix,
 )
