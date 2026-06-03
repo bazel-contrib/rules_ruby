@@ -80,6 +80,8 @@ bzl_library(
     visibility = ["//ruby:__subpackages__"],
     deps = [
         ":download",
+        "//ruby/private/toolchain:hub",
+        "//ruby/private/toolchain:platforms",
         "//ruby/private/toolchain:repository_proxy",
     ],
 )
@@ -132,7 +134,10 @@ bzl_library(
     name = "download",
     srcs = ["download.bzl"],
     visibility = ["//ruby:__subpackages__"],
-    deps = [":portable_ruby_checksums"],
+    deps = [
+        ":portable_ruby_checksums",
+        "//ruby/private/toolchain:platforms",
+    ],
 )
 
 bzl_library(

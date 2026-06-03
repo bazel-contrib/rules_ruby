@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bazel build *)",
+      "Bash(bazel clean *)",
+      "Bash(bazel query *)",
+      "Bash(bazel run *)",
+      "Bash(bazel test *)"
+    ]
+  }
+}

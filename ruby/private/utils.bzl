@@ -119,26 +119,34 @@ def normalize_path(ctx, path):
     else:
         return path.replace("\\", "/")
 
-def join_and_indent(names, indentation_level = 2):
-    """Convers a list of strings to a pretty indented BUILD variant.
+def join_and_indent(items, indentation_level = 2):
+    """Converts a list or dict of strings into a pretty indented BUILD literal.
+
+    Lists produce `["a", "b", ...]`; dicts produce `{"k": "v", ...}` — both
+    multi-line with each entry on its own line.
 
     Args:
-        names: list of strings
+        items: list of strings, or dict of string -> string
         indentation_level: how many 4 spaces to indent with
 
     Returns:
         indented string
     """
-    indentation = ""
-    for _ in range(0, indentation_level):
-        indentation += "    "
+    indentation = "    " * indentation_level
+    close_indentation = indentation[:-4]
 
-    string = "["
-    for name in names:
-        string += '\n%s"%s",' % (indentation, name)
-    string += "\n%s]" % indentation[:-4]
+    if type(items) == "dict":
+        body = "".join([
+            '\n%s"%s": "%s",' % (indentation, k, v)
+            for k, v in items.items()
+        ])
+        return "{" + body + "\n" + close_indentation + "}"
 
-    return string
+    body = "".join([
+        '\n%s"%s",' % (indentation, item)
+        for item in items
+    ])
+    return "[" + body + "\n" + close_indentation + "]"
 
 def normalize_bzlmod_repository_name(name):
     """Converts Bzlmod repostory to its private name.
