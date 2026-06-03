@@ -1,5 +1,6 @@
 "Hub repository rule for multi-platform Ruby toolchains."
 
+load("//ruby/private:utils.bzl", "join_and_indent")
 load("//ruby/private/toolchain:platforms.bzl", "PLATFORM_CONSTRAINTS")
 
 # Canonical bin targets exposed by `download/BUILD.tpl` for an MRI Ruby install.
@@ -42,36 +43,38 @@ _STATIC_ALIASES = [
     "jars",
 ]
 
+_CONFIG_SETTING_TPL = """
+config_setting(
+    name = "is_{platform}",
+    constraint_values = {constraint_values},
+)
+"""
+
+_ALIAS_TPL = """
+alias(
+    name = "{name}",
+    actual = select({branches}),
+    visibility = ["//visibility:public"]
+)
+"""
+
 def _emit_config_settings(platforms):
-    blocks = []
-    for plat in platforms:
-        cv = PLATFORM_CONSTRAINTS[plat]
-        blocks.append(
-            'config_setting(name = "is_{p}", constraint_values = {cv})'.format(
-                p = plat,
-                cv = repr(cv),
-            ),
+    return "".join([
+        _CONFIG_SETTING_TPL.format(
+            platform = plat,
+            constraint_values = join_and_indent(PLATFORM_CONSTRAINTS[plat]),
         )
-    return "\n".join(blocks)
+        for plat in platforms
+    ])
 
 def _emit_alias(name, hub_name, platforms):
-    branches = []
-    for plat in platforms:
-        branches.append(
-            '        ":is_{p}": "@{hub}_{p}//:{name}"'.format(
-                p = plat,
-                hub = hub_name,
-                name = name,
-            ),
-        )
-    return (
-        "alias(\n" +
-        '    name = "{name}",\n'.format(name = name) +
-        "    actual = select({\n" +
-        ",\n".join(branches) + ",\n" +
-        "    }),\n" +
-        '    visibility = ["//visibility:public"],\n' +
-        ")"
+    branches = {
+        ":is_{}".format(platform): "@{}_{}//:{}".format(hub_name, platform, name)
+        for platform in platforms
+    }
+    return _ALIAS_TPL.format(
+        name = name,
+        branches = join_and_indent(branches),
     )
 
 def _rb_hub_repository_impl(repository_ctx):
@@ -99,13 +102,13 @@ def _rb_hub_repository_impl(repository_ctx):
         alias_names.append(n)
 
     parts = [
-        'package(default_visibility = ["//visibility:public"])',
+        'package(default_visibility = ["//visibility:public"])\n',
         _emit_config_settings(platforms),
     ]
     for n in alias_names:
         parts.append(_emit_alias(n, hub_name, platforms))
 
-    repository_ctx.file("BUILD", "\n\n".join(parts) + "\n")
+    repository_ctx.file("BUILD", "".join(parts))
 
     repository_ctx.template(
         "engine/BUILD",
