@@ -1,5 +1,5 @@
 bazel_dep(name = "rules_ruby")
-bazel_dep(name = "protobuf", version = "34.1")
+bazel_dep(name = "protobuf", version = "35.1")
 
 # We don't depend on these, but have to force newer resolutions for protobuf which has crazy deps.
 force_bazel9_compat = None
