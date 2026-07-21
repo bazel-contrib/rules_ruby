@@ -33,10 +33,12 @@ module Bazel
     def rlocation(path)
       raise ArgumentError, 'path must not be empty' if path.to_s.empty?
 
+      return path if Pathname.new(path).absolute?
+
       invalid_path = %r{\A\.\.[/\\]|[/\\]\.\.[/\\]|\A\.[/\\]|[/\\]\.[/\\]|[/\\]\.\z|[/\\][/\\]}
       raise ArgumentError, "path is not valid: #{path.inspect}" if path.match?(invalid_path)
 
-      return path if Pathname.new(path).absolute?
+      raise ArgumentError, "path is absolute without a drive letter: #{path.inspect}" if path.start_with?('\\')
 
       @strategy.rlocation(path)
     end
