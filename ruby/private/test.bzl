@@ -128,7 +128,7 @@ bazel coverage //...
 > [!NOTE]
 > Code coverage is currently not supported on Windows.
 
-See the [README](../../README.md#code-coverage) for more details.
+See the [README](https://github.com/bazel-contrib/rules_ruby/blob/main/README.md#code-coverage) for more details.
 
 Note that you can also `run` every test target passing extra arguments to
 the Ruby script. For example, you can re-use `:rubocop` target to perform autocorrect:
