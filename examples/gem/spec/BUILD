@@ -55,6 +55,24 @@ rb_test(
 )
 
 rb_test(
+    name = "runfiles",
+    size = "small",
+    timeout = "moderate",  # JRuby startup can be slow
+    srcs = ["runfiles_spec.rb"],
+    args = ["spec/runfiles_spec.rb"],
+    data = ["//spec/support:file"],
+    env = {
+        "RLOCATIONPATH_DATA": "$(rlocationpath //spec/support:file)",
+        "RLOCATIONPATH_DEP": "$(rlocationpath //lib/gem:add)",
+    },
+    main = "@bundle//bin:rspec",
+    deps = [
+        ":spec_helper",
+        "//lib/gem:add",
+    ],
+)
+
+rb_test(
     name = "support",
     size = "small",
     timeout = "moderate",  # JRuby startup can be slow

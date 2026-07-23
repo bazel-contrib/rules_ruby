@@ -61,6 +61,7 @@ rb_test(
         "//lib:gem",
         "//spec:add",
         "//spec:env",
+        "//spec:runfiles",
         "//spec:subtract",
         "//spec:support",
         "@bundle",
