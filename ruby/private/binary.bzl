@@ -65,13 +65,17 @@ Supports `$(location)` expansion for targets from `srcs`, `data` and `deps`.
         allow_single_file = True,
         default = "@rules_ruby//ruby/private:coverage.rb",
     ),
+    "_runfiles_helper": attr.label(
+        allow_single_file = True,
+        default = "@rules_ruby//ruby/runfiles:lib/bazel/runfiles.rb",
+    ),
     "coverage_filters": attr.string_list(
         doc = "Additional coverage filters to add to SimpleCov. Only applied during 'bazel coverage'.",
     ),
 }
 
 # buildifier: disable=function-docstring
-def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {}, java_bin = "", jars_home_strip_suffix = "", coverage_helper = "", is_jruby = False):
+def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {}, java_bin = "", jars_home_strip_suffix = "", coverage_helper = "", runfiles_helper = "", is_jruby = False):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
     if ctx.attr.ruby != None:
         toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
@@ -129,6 +133,7 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
             "{rlocation_function}": rlocation_function,
             "{locate_binary_in_runfiles}": locate_binary_in_runfiles,
             "{coverage_helper}": coverage_helper,
+            "{runfiles_helper}": runfiles_helper,
             "{is_jruby}": "true" if is_jruby else "",
         },
     )
@@ -153,6 +158,7 @@ def rb_binary_impl(ctx):
         ruby_toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
     tools = list(ruby_toolchain.files)
     tools.append(ctx.file._coverage_helper)
+    tools.append(ctx.file._runfiles_helper)
 
     if ruby_toolchain.version.startswith("jruby"):
         java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
@@ -220,6 +226,7 @@ def rb_binary_impl(ctx):
         java_bin = java_bin,
         jars_home_strip_suffix = jars_home_strip_suffix,
         coverage_helper = _to_rlocation_path(ctx, ctx.file._coverage_helper),
+        runfiles_helper = _to_rlocation_path(ctx, ctx.file._runfiles_helper),
         is_jruby = ruby_toolchain.version.startswith("jruby"),
     )
 
