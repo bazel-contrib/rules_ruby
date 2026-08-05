@@ -13,6 +13,17 @@ filegroup(
     }),
 )
 
+# The complete Ruby install tree (bin/, lib/, include/, ...). Useful for
+# packaging the interpreter into a container image (portable-ruby is relocatable
+# via relative rpaths, so this tars cleanly to e.g. /usr/local).
+filegroup(
+    name = "dist_files",
+    srcs = glob(
+        ["dist/**/*"],
+        allow_empty = True,
+    ),
+)
+
 rb_binary(
     name = "ruby",
     main = ":ruby_file",

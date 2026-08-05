@@ -41,6 +41,7 @@ _STATIC_ALIASES = [
     "toolchain",
     "headers",
     "jars",
+    "dist_files",
 ]
 
 _CONFIG_SETTING_TPL = """
