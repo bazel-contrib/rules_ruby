@@ -112,6 +112,7 @@ def _rb_bundle_install_impl(ctx):
             "{env}": _convert_env_to_script(ctx, env),
             "{bundler_exe}": _normalize_path(ctx, bundler_exe),
             "{ruby_path}": _normalize_path(ctx, toolchain.ruby.path),
+            "{extra_args}": " ".join(ctx.attr.extra_args),
         },
     )
 
@@ -184,6 +185,11 @@ rb_bundle_install = rule(
         ),
         "env": attr.string_dict(
             doc = "Environment variables to use during installation.",
+        ),
+        "extra_args": attr.string_list(
+            doc = "Extra arguments appended to the `bundle install` command line. " +
+                  "For example `[\"--target-rbconfig\", \"$(location //path:rbconfig.rb)\"]` " +
+                  "to install a different platform's precompiled gems (cross-platform bundle).",
         ),
         "ruby": attr.label(
             doc = "Override Ruby toolchain to use when installing the gem.",

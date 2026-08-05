@@ -247,6 +247,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
             "{gem_fragments}": "".join(gem_fragments),
             "{gem_install_fragments}": "".join(gem_install_fragments),
             "{env}": repr(repository_ctx.attr.env),
+            "{extra_args}": repr(repository_ctx.attr.extra_args),
             "{ruby}": ruby_toolchain_attr,
         },
     )
@@ -258,6 +259,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
             "gemfile_lock": repository_ctx.attr.gemfile_lock,
             "srcs": repository_ctx.attr.srcs,
             "env": repository_ctx.attr.env,
+            "extra_args": repository_ctx.attr.extra_args,
             "bundler_remote": repository_ctx.attr.bundler_remote,
             "bundler_checksums": repository_ctx.attr.bundler_checksums,
             "gem_checksums": gem_checksums,
@@ -300,6 +302,10 @@ rb_bundle_fetch = repository_rule(
         ),
         "env": attr.string_dict(
             doc = "Environment variables to use during installation.",
+        ),
+        "extra_args": attr.string_list(
+            doc = "Extra arguments appended to the `bundle install` command line " +
+                  "run by the generated rb_bundle_install target.",
         ),
         "bundler_remote": attr.string(
             default = "https://rubygems.org/",
