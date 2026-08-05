@@ -1,2 +1,6 @@
 # In code review, collapse generated files
 docs/*.md linguist-generated=true
+
+# cmd.exe finds batch labels by byte offset and fails on LF-only .cmd files,
+# so these launcher templates must stay CRLF.
+ruby/private/**/*.cmd.tpl text eol=crlf
