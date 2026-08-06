@@ -249,6 +249,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
             "{env}": repr(repository_ctx.attr.env),
             "{extra_args}": repr(repository_ctx.attr.extra_args),
             "{data}": _join_and_indent(repository_ctx.attr.data),
+            "{binstubs}": repr(repository_ctx.attr.binstubs),
             "{ruby}": ruby_toolchain_attr,
         },
     )
@@ -262,6 +263,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
             "env": repository_ctx.attr.env,
             "extra_args": repository_ctx.attr.extra_args,
             "data": repository_ctx.attr.data,
+            "binstubs": repository_ctx.attr.binstubs,
             "bundler_remote": repository_ctx.attr.bundler_remote,
             "bundler_checksums": repository_ctx.attr.bundler_checksums,
             "gem_checksums": gem_checksums,
@@ -303,12 +305,19 @@ rb_bundle_fetch = repository_rule(
             doc = "List of Ruby source files necessary during installation.",
         ),
         "env": attr.string_dict(
-            doc = "Environment variables to use during installation.",
+            doc = "Environment variables to use during installation. Values support " +
+                  "`$(location ...)` expansion against `data` (forwarded to the " +
+                  "generated rb_bundle_install `env`).",
         ),
         "extra_args": attr.string_list(
             doc = "Extra arguments appended to the `bundle install` command line " +
                   "run by the generated rb_bundle_install target. Supports " +
                   "`$(location ...)` expansion against `data`.",
+        ),
+        "binstubs": attr.bool(
+            default = True,
+            doc = "Forwarded to the generated rb_bundle_install `binstubs` (set False " +
+                  "to skip `bundle binstubs --all` for cross-platform bundles).",
         ),
         "data": attr.string_list(
             doc = "Labels (as canonical strings) referenced from `extra_args` via " +

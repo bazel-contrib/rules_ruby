@@ -57,12 +57,20 @@ def _rb_bundle_install_impl(ctx):
 
     jar_files = ctx.files.jars if ctx.attr.jars else []
 
+    # Expand `$(location ...)`/`$(execpath ...)` in env values (against `data`),
+    # mirroring `extra_args`. Lets an env var reference a build artifact by label
+    # — e.g. prepending a generated cross-compiler wrapper dir onto PATH.
+    attr_env = {
+        key: ctx.expand_location(value, ctx.attr.data)
+        for key, value in ctx.attr.env.items()
+    }
+
     env = {}
     env.update(toolchain.env)
-    env.update(ctx.attr.env)
+    env.update(attr_env)
 
     bundler_env = {}
-    bundler_env.update(ctx.attr.env)
+    bundler_env.update(attr_env)
     jars_home_strip_suffix = ""
 
     if toolchain.version.startswith("jruby"):
@@ -80,12 +88,12 @@ def _rb_bundle_install_impl(ctx):
     if _is_windows(ctx):
         script = ctx.actions.declare_file("bundle_install_{}.cmd".format(ctx.label.name))
         template = ctx.file._bundle_install_cmd_tpl
-        path = ctx.attr.env.get("PATH", "%PATH%")
+        path = attr_env.get("PATH", "%PATH%")
         env.update({"PATH": _normalize_path(ctx, toolchain.ruby.dirname) + ";" + path})
     else:
         script = ctx.actions.declare_file("bundle_install_{}.sh".format(ctx.label.name))
         template = ctx.file._bundle_install_sh_tpl
-        path = ctx.attr.env.get("PATH", "$PATH")
+        path = attr_env.get("PATH", "$PATH")
         env.update({"PATH": toolchain.ruby.dirname + ":" + path})
 
     # Calculate relative location between BUNDLE_GEMFILE and BUNDLE_PATH.
@@ -105,6 +113,21 @@ def _rb_bundle_install_impl(ctx):
         "BUNDLE_SHEBANG": _normalize_path(ctx, toolchain.ruby.short_path),
     })
 
+    # Binstubs generation runs with the HOST ruby, which validates gems against
+    # the running platform. For a cross-platform bundle (e.g. installed with
+    # --target-rbconfig for another OS/arch) the host can't see those gems'
+    # native extensions and `binstubs --all` fails. `binstubs = False` skips it,
+    # just materializing the (empty) declared binstubs dir instead.
+    if ctx.attr.binstubs:
+        binstubs_cmd = "{} {} binstubs --all".format(
+            _normalize_path(ctx, toolchain.ruby.path),
+            _normalize_path(ctx, bundler_exe),
+        )
+    elif _is_windows(ctx):
+        binstubs_cmd = 'if not exist "{p}" mkdir "{p}"'.format(p = _normalize_path(ctx, binstubs.path))
+    else:
+        binstubs_cmd = 'mkdir -p "{}"'.format(binstubs.path)
+
     ctx.actions.expand_template(
         template = template,
         output = script,
@@ -112,6 +135,7 @@ def _rb_bundle_install_impl(ctx):
             "{env}": _convert_env_to_script(ctx, env),
             "{bundler_exe}": _normalize_path(ctx, bundler_exe),
             "{ruby_path}": _normalize_path(ctx, toolchain.ruby.path),
+            "{binstubs_cmd}": binstubs_cmd,
             "{extra_args}": " ".join([
                 ctx.expand_location(arg, ctx.attr.data)
                 for arg in ctx.attr.extra_args
@@ -141,6 +165,11 @@ def _rb_bundle_install_impl(ctx):
             files = depset(files),
             runfiles = ctx.runfiles(files),
         ),
+        # `gems` exposes JUST the installed vendor/bundle tree (no Gemfile/
+        # binstubs), so consumers can package it cleanly — e.g.
+        # `filegroup(output_group = "gems")` + pkg_files strip_prefix to lay the
+        # gems into a container's BUNDLE_PATH without the surrounding files.
+        OutputGroupInfo(gems = depset([bundle_path])),
         RubyFilesInfo(
             binary = None,
             transitive_srcs = depset([ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs),
@@ -187,7 +216,16 @@ rb_bundle_install = rule(
             doc = "List of Ruby source files used to build the library.",
         ),
         "env": attr.string_dict(
-            doc = "Environment variables to use during installation.",
+            doc = "Environment variables to use during installation. Values support " +
+                  "`$(location ...)`/`$(execpath ...)` make-variable expansion against " +
+                  "`data` (e.g. prepend a generated cross-compiler wrapper dir onto PATH).",
+        ),
+        "binstubs": attr.bool(
+            default = True,
+            doc = "Whether to run `bundle binstubs --all` after install. Set False for " +
+                  "cross-platform bundles (installed with a foreign --target-rbconfig): the " +
+                  "host ruby can't validate the target's native extensions, so binstubs " +
+                  "generation fails. When False the (empty) binstubs dir is still created.",
         ),
         "extra_args": attr.string_list(
             doc = "Extra arguments appended to the `bundle install` command line. " +
