@@ -3,6 +3,6 @@
 {env}
 
 {ruby_path} {bundler_exe} install --standalone --local {extra_args}
-{ruby_path} {bundler_exe} binstubs --all
+{binstubs_cmd}
 
 :: vim: ft=dosbatch

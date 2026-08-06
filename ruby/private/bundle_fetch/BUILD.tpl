@@ -10,6 +10,7 @@ rb_bundle_install(
     data = {data},
     env = {env},
     extra_args = {extra_args},
+    binstubs = {binstubs},
     gemfile = "{gemfile_path}",
     gemfile_lock = "{gemfile_lock_path}",
     jars = glob(["{jars_path}/**/*.jar"], allow_empty = True),

@@ -24,6 +24,19 @@ filegroup(
     ),
 )
 
+# The interpreter's own rbconfig.rb (a single file). Because portable-ruby is
+# relocatable (rbconfig computes TOPDIR from __FILE__), passing this unmodified
+# to `gem install --target-rbconfig` cross-compiles source gems for THIS Ruby's
+# platform — its rubyhdrdir/libdir auto-resolve to the staged `dist` tree. Under
+# a platform transition it resolves to the target arch's Ruby.
+filegroup(
+    name = "rbconfig",
+    srcs = glob(
+        ["dist/lib/ruby/*/*/rbconfig.rb"],
+        allow_empty = True,
+    ),
+)
+
 rb_binary(
     name = "ruby",
     main = ":ruby_file",

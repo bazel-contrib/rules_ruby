@@ -42,6 +42,7 @@ _STATIC_ALIASES = [
     "headers",
     "jars",
     "dist_files",
+    "rbconfig",
 ]
 
 _CONFIG_SETTING_TPL = """
