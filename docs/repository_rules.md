@@ -117,8 +117,9 @@ rb_library(
 <pre>
 load("@rules_ruby//ruby:deps.bzl", "rb_bundle_fetch")
 
-rb_bundle_fetch(<a href="#rb_bundle_fetch-name">name</a>, <a href="#rb_bundle_fetch-srcs">srcs</a>, <a href="#rb_bundle_fetch-auth_patterns">auth_patterns</a>, <a href="#rb_bundle_fetch-bundler_checksums">bundler_checksums</a>, <a href="#rb_bundle_fetch-bundler_remote">bundler_remote</a>, <a href="#rb_bundle_fetch-env">env</a>, <a href="#rb_bundle_fetch-gem_checksums">gem_checksums</a>,
-                <a href="#rb_bundle_fetch-gemfile">gemfile</a>, <a href="#rb_bundle_fetch-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_fetch-jar_checksums">jar_checksums</a>, <a href="#rb_bundle_fetch-netrc">netrc</a>, <a href="#rb_bundle_fetch-repo_mapping">repo_mapping</a>, <a href="#rb_bundle_fetch-ruby">ruby</a>)
+rb_bundle_fetch(<a href="#rb_bundle_fetch-name">name</a>, <a href="#rb_bundle_fetch-srcs">srcs</a>, <a href="#rb_bundle_fetch-data">data</a>, <a href="#rb_bundle_fetch-auth_patterns">auth_patterns</a>, <a href="#rb_bundle_fetch-binstubs">binstubs</a>, <a href="#rb_bundle_fetch-bundler_checksums">bundler_checksums</a>, <a href="#rb_bundle_fetch-bundler_remote">bundler_remote</a>, <a href="#rb_bundle_fetch-env">env</a>,
+                <a href="#rb_bundle_fetch-extra_args">extra_args</a>, <a href="#rb_bundle_fetch-gem_checksums">gem_checksums</a>, <a href="#rb_bundle_fetch-gemfile">gemfile</a>, <a href="#rb_bundle_fetch-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_fetch-jar_checksums">jar_checksums</a>, <a href="#rb_bundle_fetch-netrc">netrc</a>, <a href="#rb_bundle_fetch-repo_mapping">repo_mapping</a>,
+                <a href="#rb_bundle_fetch-ruby">ruby</a>)
 </pre>
 
 Fetches Bundler dependencies to be automatically installed by other targets.
@@ -180,10 +181,13 @@ rb_test(
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_bundle_fetch-name"></a>name |  A unique name for this repository.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="rb_bundle_fetch-srcs"></a>srcs |  List of Ruby source files necessary during installation.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="rb_bundle_fetch-data"></a>data |  Labels (as canonical strings) referenced from `extra_args` via `$(location ...)`; forwarded to the generated rb_bundle_install `data`.   | List of strings | optional |  `[]`  |
 | <a id="rb_bundle_fetch-auth_patterns"></a>auth_patterns |  A list of patterns to match against urls for which the auth object should be used.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
+| <a id="rb_bundle_fetch-binstubs"></a>binstubs |  Forwarded to the generated rb_bundle_install `binstubs` (set False to skip `bundle binstubs --all` for cross-platform bundles).   | Boolean | optional |  `True`  |
 | <a id="rb_bundle_fetch-bundler_checksums"></a>bundler_checksums |  Custom map from Bundler version to its SHA-256 checksum.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="rb_bundle_fetch-bundler_remote"></a>bundler_remote |  Remote to fetch the bundler gem from.   | String | optional |  `"https://rubygems.org/"`  |
-| <a id="rb_bundle_fetch-env"></a>env |  Environment variables to use during installation.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
+| <a id="rb_bundle_fetch-env"></a>env |  Environment variables to use during installation. Values support `$(location ...)` expansion against `data` (forwarded to the generated rb_bundle_install `env`).   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
+| <a id="rb_bundle_fetch-extra_args"></a>extra_args |  Extra arguments appended to the `bundle install` command line run by the generated rb_bundle_install target. Supports `$(location ...)` expansion against `data`.   | List of strings | optional |  `[]`  |
 | <a id="rb_bundle_fetch-gem_checksums"></a>gem_checksums |  SHA-256 checksums for remote gems. Keys are gem names (e.g. foobar-1.2.3), values are SHA-256 checksums.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="rb_bundle_fetch-gemfile"></a>gemfile |  Gemfile to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_bundle_fetch-gemfile_lock"></a>gemfile_lock |  Gemfile.lock to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |

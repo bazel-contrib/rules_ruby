@@ -147,7 +147,8 @@ rake, version 13.1.0
 <pre>
 load("@rules_ruby//ruby:defs.bzl", "rb_bundle_install")
 
-rb_bundle_install(<a href="#rb_bundle_install-name">name</a>, <a href="#rb_bundle_install-srcs">srcs</a>, <a href="#rb_bundle_install-env">env</a>, <a href="#rb_bundle_install-gemfile">gemfile</a>, <a href="#rb_bundle_install-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_install-gems">gems</a>, <a href="#rb_bundle_install-jars">jars</a>, <a href="#rb_bundle_install-jars_path">jars_path</a>, <a href="#rb_bundle_install-ruby">ruby</a>)
+rb_bundle_install(<a href="#rb_bundle_install-name">name</a>, <a href="#rb_bundle_install-srcs">srcs</a>, <a href="#rb_bundle_install-data">data</a>, <a href="#rb_bundle_install-binstubs">binstubs</a>, <a href="#rb_bundle_install-env">env</a>, <a href="#rb_bundle_install-extra_args">extra_args</a>, <a href="#rb_bundle_install-gemfile">gemfile</a>, <a href="#rb_bundle_install-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_install-gems">gems</a>, <a href="#rb_bundle_install-jars">jars</a>,
+                  <a href="#rb_bundle_install-jars_path">jars_path</a>, <a href="#rb_bundle_install-ruby">ruby</a>)
 </pre>
 
 Installs Bundler dependencies from cached gems.
@@ -162,7 +163,10 @@ used by `rb_bundle_fetch()`.
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_bundle_install-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="rb_bundle_install-srcs"></a>srcs |  List of Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="rb_bundle_install-env"></a>env |  Environment variables to use during installation.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
+| <a id="rb_bundle_install-data"></a>data |  Files referenced from `extra_args` via `$(location ...)` expansion. They are also added as inputs to the `bundle install` action.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="rb_bundle_install-binstubs"></a>binstubs |  Whether to run `bundle binstubs --all` after install. Set False for cross-platform bundles (installed with a foreign --target-rbconfig): the host ruby can't validate the target's native extensions, so binstubs generation fails. When False the (empty) binstubs dir is still created.   | Boolean | optional |  `True`  |
+| <a id="rb_bundle_install-env"></a>env |  Environment variables to use during installation. Values support `$(location ...)`/`$(execpath ...)` make-variable expansion against `data` (e.g. prepend a generated cross-compiler wrapper dir onto PATH).   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
+| <a id="rb_bundle_install-extra_args"></a>extra_args |  Extra arguments appended to the `bundle install` command line. Supports `$(location ...)`/`$(rootpath ...)`/`$(execpath ...)` make-variable expansion against `data`. For example `["--target-rbconfig", "$(location //path:rbconfig.rb)"]` to install a different platform's precompiled gems (cross-platform bundle).   | List of strings | optional |  `[]`  |
 | <a id="rb_bundle_install-gemfile"></a>gemfile |  Gemfile to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_bundle_install-gemfile_lock"></a>gemfile_lock |  Gemfile.lock to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_bundle_install-gems"></a>gems |  List of gems in vendor/cache that are used to install dependencies from.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | required |  |
