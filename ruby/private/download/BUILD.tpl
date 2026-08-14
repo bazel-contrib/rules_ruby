@@ -1,6 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@rules_java//java:defs.bzl", "java_import")
-load("@rules_ruby//ruby:defs.bzl", "rb_binary")
+load("@rules_ruby//ruby:defs.bzl", "rb_binary", "rb_library")
 load("@rules_ruby//ruby:toolchain.bzl", "rb_toolchain")
 
 package(default_visibility = ["//visibility:public"])
@@ -17,7 +17,7 @@ filegroup(
 # packaging the interpreter into a container image (portable-ruby is relocatable
 # via relative rpaths, so this tars cleanly to e.g. /usr/local).
 filegroup(
-    name = "dist_files",
+    name = "files",
     srcs = glob(
         ["dist/**/*"],
         allow_empty = True,
@@ -29,7 +29,7 @@ filegroup(
 # to `gem install --target-rbconfig` cross-compiles source gems for THIS Ruby's
 # platform — its rubyhdrdir/libdir auto-resolve to the staged `dist` tree. Under
 # a platform transition it resolves to the target arch's Ruby.
-filegroup(
+rb_library(
     name = "rbconfig",
     srcs = glob(
         ["dist/lib/ruby/*/*/rbconfig.rb"],

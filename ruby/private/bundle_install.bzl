@@ -57,9 +57,6 @@ def _rb_bundle_install_impl(ctx):
 
     jar_files = ctx.files.jars if ctx.attr.jars else []
 
-    # Expand `$(location ...)`/`$(execpath ...)` in env values (against `data`),
-    # mirroring `extra_args`. Lets an env var reference a build artifact by label
-    # — e.g. prepending a generated cross-compiler wrapper dir onto PATH.
     attr_env = {
         key: ctx.expand_location(value, ctx.attr.data)
         for key, value in ctx.attr.env.items()
