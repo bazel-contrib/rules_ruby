@@ -41,7 +41,7 @@ _STATIC_ALIASES = [
     "toolchain",
     "headers",
     "jars",
-    "dist_files",
+    "files",
     "rbconfig",
 ]
 
