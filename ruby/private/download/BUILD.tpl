@@ -13,9 +13,16 @@ filegroup(
     }),
 )
 
-# The complete Ruby install tree (bin/, lib/, include/, ...). Useful for
-# packaging the interpreter into a container image (portable-ruby is relocatable
-# via relative rpaths, so this tars cleanly to e.g. /usr/local).
+# The complete Ruby install tree (bin/, lib/, include/, ...). This is the single
+# definition of that tree: rb_toolchain's `files` attribute below consumes it
+# rather than re-globbing, so the toolchain and anything depending on this
+# target can never drift apart.
+#
+# Exposed as a target because ToolchainInfo.files is only reachable from a rule
+# implementation that resolves the toolchain — a BUILD file that wants the tree
+# (e.g. to package the interpreter into a container image) has no way to ask for
+# it otherwise. portable-ruby is relocatable via relative rpaths, so this tars
+# cleanly to e.g. /usr/local.
 filegroup(
     name = "files",
     srcs = glob(
@@ -67,7 +74,7 @@ rb_toolchain(
         "//conditions:default": "dist/bin/bundle",
     }),
     env = {env},
-    files = glob(["dist/**/*"]),
+    files = [":files"],
     gem = select({
         "@platforms//os:windows": "dist/bin/{gem_binary_name}.cmd",
         "//conditions:default": "dist/bin/{gem_binary_name}",
