@@ -264,3 +264,17 @@ jobs:
       mount_bazel_caches: false
       prerelease: false
       release_files: rules_ruby-*.tar.gz
+
+  publish:
+    name: Publish to BCR
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: release
+    uses: ./.github/workflows/publish.yaml
+    with:
+      tag_name: ${{ github.ref_name }}
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+    secrets:
+      publish_token: ${{ secrets.BCR_PUBLISH_TOKEN }}

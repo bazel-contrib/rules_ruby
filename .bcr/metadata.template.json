@@ -2,8 +2,10 @@
   "homepage": "https://github.com/bazel-contrib/rules_ruby",
   "maintainers": [
     {
+      "name": "Alex Rodionov",
+      "email": "p0deje@gmail.com",
       "github": "p0deje",
-      "name": "Alex Rodionov"
+      "github_user_id": 665846
     }
   ],
   "repository": ["github:bazel-contrib/rules_ruby"],
