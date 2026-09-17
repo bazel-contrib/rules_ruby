@@ -10,22 +10,27 @@ def _rb_gem_push_impl(ctx):
     if ctx.attr.ruby != None:
         ruby_toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
     srcs = [ctx.file.gem]
-    tools = [ruby_toolchain.gem]
+    tools = list(ruby_toolchain.files)
+    java_bin = ""
 
     if ruby_toolchain.version.startswith("jruby"):
-        env["JAVA_HOME"] = java_toolchain.java_runtime.java_home
         tools.extend(java_toolchain.java_runtime.files.to_list())
+        java_bin = java_toolchain.java_runtime.java_executable_runfiles_path[3:]
+
+    env.update(ruby_toolchain.env)
+    env.update(ctx.attr.env)
 
     script = generate_rb_binary_script(
         ctx,
         binary = ruby_toolchain.gem,
         bundler = False,
         args = ["push", ctx.file.gem.short_path],
+        env = env,
+        java_bin = java_bin,
     )
 
     runfiles = ctx.runfiles(srcs + tools)
     runfiles = runfiles.merge(ctx.attr._runfiles_library[DefaultInfo].default_runfiles)
-    env.update(ctx.attr.env)
 
     return [
         DefaultInfo(
