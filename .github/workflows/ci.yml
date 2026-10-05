@@ -37,7 +37,6 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - 3.2.11
           - 3.3.12
           - 3.4.11
           - 4.0.7
@@ -68,7 +67,7 @@ jobs:
       - if: matrix.ruby == 'system'
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.4.11
+          ruby-version: 3.3.12
       - run: bazel build ...
       - run: bazel run lib/gem:add-numbers 2
       - run: bazel run lib/gem:print-version
@@ -183,7 +182,7 @@ jobs:
       - if: matrix.ruby == 'system'
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.4.11
+          ruby-version: 3.3.12
       - run: ./do_test
 
   examples-rails:
