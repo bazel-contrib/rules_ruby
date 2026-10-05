@@ -7,7 +7,6 @@ RubyFilesInfo = provider(
         "transitive_data": "Transitive data files to add to runfiles.",
         "transitive_deps": "Transitive dependencies to get files from.",
         "transitive_srcs": "Transitive Ruby files.",
-        "bundle_env": "Bundle environment variables (deprecated)",
     },
 )
 
@@ -91,11 +90,10 @@ def get_transitive_runfiles(runfiles, srcs, data, deps):
             transitive_runfiles.append(target[DefaultInfo].default_runfiles)
     return runfiles.merge_all(transitive_runfiles)
 
-def get_bundle_env(envs, deps):
-    """Obtain the BUNDLE_* environment variables for a target and its transitive dependencies.
+def get_bundle_env(deps):
+    """Obtain the runtime environment variables from transitive Bundler dependencies.
 
     Args:
-        envs: a list of environment variables
         deps: a list of targets that are direct dependencies
     Returns:
         a collection of the transitive environment variables
@@ -104,11 +102,7 @@ def get_bundle_env(envs, deps):
 
     transitive_deps = get_transitive_deps(deps).to_list()
     for dep in transitive_deps:
-        bundle_env.update(dep[RubyFilesInfo].bundle_env)
         if BundlerInfo in dep:
             bundle_env.update(dep[BundlerInfo].env)
 
-    for env in envs:
-        if env.startswith("BUNDLE_"):
-            bundle_env[env] = envs[env]
     return bundle_env

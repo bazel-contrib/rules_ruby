@@ -39,7 +39,6 @@ bzl_library(
     name = "deps",
     srcs = ["deps.bzl"],
     deps = [
-        "//ruby/private:bundle",
         "//ruby/private:bundle_fetch",
         "//ruby/private:toolchain",
     ],

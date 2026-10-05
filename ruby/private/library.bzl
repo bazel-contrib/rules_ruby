@@ -5,7 +5,6 @@ load(
     "//ruby/private:providers.bzl",
     "BundlerInfo",
     "RubyFilesInfo",
-    "get_bundle_env",
     "get_transitive_data",
     "get_transitive_deps",
     "get_transitive_runfiles",
@@ -25,10 +24,6 @@ ATTRS = {
     "data": attr.label_list(
         allow_files = True,
         doc = "List of runtime dependencies needed by a program that depends on this library.",
-    ),
-    "bundle_env": attr.string_dict(
-        default = {},
-        doc = "List of bundle environment variables to set when building the library.",
     ),
 }
 
@@ -51,7 +46,6 @@ def _rb_library_impl(ctx):
             transitive_data = depset(transitive_data),
             transitive_deps = depset(transitive_deps),
             transitive_srcs = depset(transitive_srcs),
-            bundle_env = get_bundle_env(ctx.attr.bundle_env, ctx.attr.deps),
         ),
     ]
 
