@@ -20,7 +20,7 @@ in `BUILD` files to define the packages for the gem.
 ```output
 |-- BUILD
 |-- Gemfile
-|-- WORKSPACE
+|-- MODULE.bazel
 |-- gem.gemspec
 `-- lib
     |-- BUILD
@@ -206,7 +206,7 @@ used by `rb_bundle_fetch()`.
 <pre>
 load("@rules_ruby//ruby:defs.bzl", "rb_gem_build")
 
-rb_gem_build(<a href="#rb_gem_build-name">name</a>, <a href="#rb_gem_build-deps">deps</a>, <a href="#rb_gem_build-srcs">srcs</a>, <a href="#rb_gem_build-data">data</a>, <a href="#rb_gem_build-bundle_env">bundle_env</a>, <a href="#rb_gem_build-gemspec">gemspec</a>, <a href="#rb_gem_build-ruby">ruby</a>)
+rb_gem_build(<a href="#rb_gem_build-name">name</a>, <a href="#rb_gem_build-deps">deps</a>, <a href="#rb_gem_build-srcs">srcs</a>, <a href="#rb_gem_build-data">data</a>, <a href="#rb_gem_build-gemspec">gemspec</a>, <a href="#rb_gem_build-ruby">ruby</a>)
 </pre>
 
 Builds a Ruby gem.
@@ -217,7 +217,7 @@ in `BUILD` files to define the packages for the gem.
 ```output
 |-- BUILD
 |-- Gemfile
-|-- WORKSPACE
+|-- MODULE.bazel
 |-- gem.gemspec
 `-- lib
     |-- BUILD
@@ -294,7 +294,6 @@ $ bazel build :gem-build
 | <a id="rb_gem_build-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="rb_gem_build-srcs"></a>srcs |  List of Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="rb_gem_build-data"></a>data |  List of runtime dependencies needed by a program that depends on this library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="rb_gem_build-bundle_env"></a>bundle_env |  List of bundle environment variables to set when building the library.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="rb_gem_build-gemspec"></a>gemspec |  Gemspec file to use for gem building.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_gem_build-ruby"></a>ruby |  Override Ruby toolchain to use when running the script.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 
@@ -318,7 +317,7 @@ to build a Ruby gem package from the sources.
 ```output
 |-- BUILD
 |-- Gemfile
-|-- WORKSPACE
+|-- MODULE.bazel
 |-- gem.gemspec
 `-- lib
     |-- BUILD
@@ -375,7 +374,7 @@ Successfully installed example-0.1.0
 <pre>
 load("@rules_ruby//ruby:defs.bzl", "rb_gem_push")
 
-rb_gem_push(<a href="#rb_gem_push-name">name</a>, <a href="#rb_gem_push-deps">deps</a>, <a href="#rb_gem_push-srcs">srcs</a>, <a href="#rb_gem_push-data">data</a>, <a href="#rb_gem_push-bundle_env">bundle_env</a>, <a href="#rb_gem_push-env">env</a>, <a href="#rb_gem_push-env_inherit">env_inherit</a>, <a href="#rb_gem_push-gem">gem</a>, <a href="#rb_gem_push-ruby">ruby</a>)
+rb_gem_push(<a href="#rb_gem_push-name">name</a>, <a href="#rb_gem_push-deps">deps</a>, <a href="#rb_gem_push-srcs">srcs</a>, <a href="#rb_gem_push-data">data</a>, <a href="#rb_gem_push-env">env</a>, <a href="#rb_gem_push-env_inherit">env_inherit</a>, <a href="#rb_gem_push-gem">gem</a>, <a href="#rb_gem_push-ruby">ruby</a>)
 </pre>
 
 Pushes a built Ruby gem.
@@ -387,7 +386,7 @@ to build a Ruby gem package from the sources.
 ```output
 |-- BUILD
 |-- Gemfile
-|-- WORKSPACE
+|-- MODULE.bazel
 |-- gem.gemspec
 `-- lib
     |-- BUILD
@@ -435,7 +434,6 @@ Successfully registered gem: example (0.1.0)
 | <a id="rb_gem_push-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="rb_gem_push-srcs"></a>srcs |  List of Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="rb_gem_push-data"></a>data |  List of runtime dependencies needed by a program that depends on this library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="rb_gem_push-bundle_env"></a>bundle_env |  List of bundle environment variables to set when building the library.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="rb_gem_push-env"></a>env |  Environment variables to use during execution.<br><br>Supports `$(location)` expansion for targets from `srcs`, `data` and `deps`.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="rb_gem_push-env_inherit"></a>env_inherit |  List of environment variable names to be inherited by the test runner.   | List of strings | optional |  `[]`  |
 | <a id="rb_gem_push-gem"></a>gem |  Gem file to push to RubyGems. You would usually use an output of `rb_gem_build()` target here.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
@@ -449,7 +447,7 @@ Successfully registered gem: example (0.1.0)
 <pre>
 load("@rules_ruby//ruby:defs.bzl", "rb_library")
 
-rb_library(<a href="#rb_library-name">name</a>, <a href="#rb_library-deps">deps</a>, <a href="#rb_library-srcs">srcs</a>, <a href="#rb_library-data">data</a>, <a href="#rb_library-bundle_env">bundle_env</a>)
+rb_library(<a href="#rb_library-name">name</a>, <a href="#rb_library-deps">deps</a>, <a href="#rb_library-srcs">srcs</a>, <a href="#rb_library-data">data</a>)
 </pre>
 
 Defines a Ruby library.
@@ -459,7 +457,7 @@ Suppose you have the following Ruby gem:
 ```output
 |-- BUILD
 |-- Gemfile
-|-- WORKSPACE
+|-- MODULE.bazel
 |-- gem.gemspec
 `-- lib
     |-- BUILD
@@ -537,7 +535,6 @@ using other rules.
 | <a id="rb_library-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="rb_library-srcs"></a>srcs |  List of Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="rb_library-data"></a>data |  List of runtime dependencies needed by a program that depends on this library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="rb_library-bundle_env"></a>bundle_env |  List of bundle environment variables to set when building the library.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 
 
 <a id="rb_test"></a>
@@ -558,7 +555,7 @@ in `BUILD` files to define the packages for the gem.
 ```output
 |-- BUILD
 |-- Gemfile
-|-- WORKSPACE
+|-- MODULE.bazel
 |-- gem.gemspec
 |-- lib
 |   |-- BUILD

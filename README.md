@@ -6,8 +6,9 @@ This repository hosts [Ruby][1] language ruleset for [Bazel][2].
 
 The ruleset is known to work with:
 
-- Bazel 8 using WORKSPACE and Bzlmod _(tested on CI)_.
-- Bazel 7 using WORKSPACE and Bzlmod _(no longer tested on CI)_.
+- Bazel 9 _(tested on CI)_.
+- Bazel 8 using Bzlmod _(no longer tested on CI)_.
+- Bazel 7 using Bzlmod _(no longer tested on CI)_.
 
 ## Getting Started
 
@@ -15,78 +16,46 @@ The ruleset is known to work with:
 
 The fastest way to try this in an empty project is to click the green "Use this template" button on https://github.com/bazel-starters/ruby.
 
-### WORKSPACE
-
-1. Install the ruleset following WORKSPACE instructions on the [latest release][13].
-2. Download and install Ruby:
-
-```bazel
-# WORKSPACE
-load("@rules_ruby//ruby:deps.bzl", "rb_register_toolchains")
-
-rb_register_toolchains(
-    version = "3.3.9",
-    # alternatively, load version from .ruby-version file
-    # version_file = "//:.ruby-version",
-)
-```
-
-3. _(Optional)_ Download and install Bundler dependencies:
-
-```bazel
-# WORKSPACE
-load("@rules_ruby//ruby:deps.bzl", "rb_bundle_fetch")
-
-rb_bundle_fetch(
-    name = "bundle",
-    gemfile = "//:Gemfile",
-    gemfile_lock = "//:Gemfile.lock",
-)
-```
-
-4. Start defining your library, binary and test targets in `BUILD` files.
-
-### Bzlmod
-
 1. Install ruleset following Bzlmod instructions on the [latest release][13].
-2. Download and install Ruby:
+2. Start defining your library, binary and test targets in `BUILD` files. A default
+   MRI 4.0.7 toolchain is registered automatically, using portable Ruby on Linux
+   and macOS and RubyInstaller on Windows.
+3. _(Optional)_ Download and install Bundler dependencies:
 
 ```bazel
 # MODULE.bazel
 ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
-ruby.toolchain(
-    name = "ruby",
-    version = "3.0.6",
-    # alternatively, load version from .ruby-version file
-    # version_file = "//:.ruby-version",
-)
-use_repo(ruby, "ruby")
-```
-
-3. _(Optional)_ Download and install Bundler dependencies:
-
-```bazel
-# MODULE.bazel
 ruby.bundle_fetch(
     name = "bundle",
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
 )
-use_repo(ruby, "bundle", "ruby_toolchains")
+use_repo(ruby, "bundle")
 ```
 
-4. Register Ruby toolchains:
+To select a different Ruby version or engine, override the default toolchain in
+your root `MODULE.bazel` using the name `ruby`:
 
 ```bazel
-# MODULE.bazel
+ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
+ruby.toolchain(
+    name = "ruby",
+    portable_ruby = True,
+    version = "3.4.11",
+    # Alternatively, load the version from a .ruby-version file:
+    # version_file = "//:.ruby-version",
+)
+use_repo(ruby, "ruby", "ruby_toolchains")
 register_toolchains("@ruby_toolchains//:all")
 ```
 
-4. Start defining your library, binary and test targets in `BUILD` files.
+The root module's configuration takes precedence over toolchains declared by
+its dependencies. Use a different name and register it explicitly to add another
+toolchain alongside the default.
 
 ## Documentation
 
-- See [repository rules][3] for the documentation of `WORKSPACE` rules.
+- See [repository rules][3] for the rules used by the Ruby module extension.
 - See [rules][4] for the documentation of `BUILD` rules.
 - See [rails][18] for the documentation of Ruby on Rails rules.
 
@@ -103,20 +72,21 @@ The following toolchains are known to work and tested on CI.
 | MRI 4.0          | 🟩    | 🟩    | 🟩      |
 | MRI 3.4          | 🟩    | 🟩    | 🟩      |
 | MRI 3.3          | 🟩    | 🟩    | 🟩      |
-| MRI 3.2          | 🟩    | 🟩    | 🟩      |
 | JRuby 10.1       | 🟩    | 🟩    | 🟩      |
-| TruffleRuby 34.0 | 🟩    | 🟩    | 🟥      |
+| TruffleRuby 40.0 | 🟩    | 🟩    | 🟥      |
 
 The following toolchains were previously known to work but _no longer tested on CI_.
 
 | Ruby             | Linux | macOS | Windows |
 | ---------------- | ----- | ----- | ------- |
+| MRI 3.2          | 🟩    | 🟩    | 🟩      |
 | MRI 3.1          | 🟩    | 🟩    | 🟩      |
 | MRI 3.0          | 🟩    | 🟩    | 🟩      |
 | MRI 2.7          | 🟩    | 🟩    | 🟩      |
 | JRuby 10.0       | 🟩    | 🟩    | 🟩      |
 | JRuby 9.4        | 🟩    | 🟩    | 🟩      |
 | JRuby 9.3        | 🟩    | 🟩    | 🟩      |
+| TruffleRuby 34.0 | 🟩    | 🟩    | 🟥      |
 | TruffleRuby 33.0 | 🟩    | 🟩    | 🟥      |
 | TruffleRuby 25.0 | 🟩    | 🟩    | 🟥      |
 | TruffleRuby 24.0 | 🟩    | 🟩    | 🟥      |
@@ -156,7 +126,7 @@ attributes for you. The utility needs to know the version of Ruby to download.
 By default, it will use the Ruby version specified in the `.ruby-version` file.
 
 ```bash
-bazel run @rules_ruby//tools/generate_portable_ruby_checksums -- 3.4.8
+bazel run @rules_ruby//tools/generate_portable_ruby_checksums -- --ruby-version 3.4.11
 ```
 
 After running the utility, the toolchain declaration in your `MODULE.bazel`
@@ -184,7 +154,7 @@ ruby.toolchain(
 - Setting `portable_ruby = True` has no effect on JRuby, TruffleRuby, or Windows.
 - On Windows, the toolchain automatically falls back to RubyInstaller.
 - Find available portable Ruby releases at https://github.com/bazel-contrib/portable-ruby/releases
-- Portable Ruby toolchains are multi-platform and can be used on for [Remote Build Execution][15].
+- Portable Ruby toolchains are multi-platform and can be used for [Remote Build Execution][15].
 
 ### JRuby
 
@@ -262,7 +232,7 @@ rb_test(
 [10]: https://github.com/oracle/truffleruby/issues/2784
 [11]: https://github.com/jruby/jruby/issues/7182#issuecomment-1112953015
 [12]: https://github.com/rubocop/rubocop/pull/12062
-[13]: https://github.com/bazel-contrib/rules_ruby/releases/tag/v0.3.0
+[13]: https://github.com/bazel-contrib/rules_ruby/releases/latest
 [14]: examples/
 [15]: https://bazel.build/remote/rbe
 [16]: https://bazel.build/reference/command-line-reference#flag--experimental_inprocess_symlink_creation

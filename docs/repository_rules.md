@@ -2,27 +2,6 @@
 
 Public API for repository rules
 
-<a id="rb_bundle"></a>
-
-## rb_bundle
-
-<pre>
-load("@rules_ruby//ruby:deps.bzl", "rb_bundle")
-
-rb_bundle(<a href="#rb_bundle-toolchain">toolchain</a>, <a href="#rb_bundle-kwargs">**kwargs</a>)
-</pre>
-
-Wraps `rb_bundle_rule()` providing default toolchain name.
-
-**PARAMETERS**
-
-
-| Name  | Description | Default Value |
-| :------------- | :------------- | :------------- |
-| <a id="rb_bundle-toolchain"></a>toolchain |  default Ruby toolchain BUILD   |  `"@ruby//:BUILD"` |
-| <a id="rb_bundle-kwargs"></a>kwargs |  underlying attrs passed to rb_bundle_rule()   |  none |
-
-
 <a id="rb_register_toolchains"></a>
 
 ## rb_register_toolchains
@@ -32,10 +11,13 @@ load("@rules_ruby//ruby:deps.bzl", "rb_register_toolchains")
 
 rb_register_toolchains(<a href="#rb_register_toolchains-name">name</a>, <a href="#rb_register_toolchains-version">version</a>, <a href="#rb_register_toolchains-version_file">version_file</a>, <a href="#rb_register_toolchains-msys2_packages">msys2_packages</a>, <a href="#rb_register_toolchains-portable_ruby">portable_ruby</a>,
                        <a href="#rb_register_toolchains-portable_ruby_release_suffix">portable_ruby_release_suffix</a>, <a href="#rb_register_toolchains-portable_ruby_checksums">portable_ruby_checksums</a>, <a href="#rb_register_toolchains-resolved_version">resolved_version</a>,
-                       <a href="#rb_register_toolchains-register">register</a>, <a href="#rb_register_toolchains-kwargs">**kwargs</a>)
+                       <a href="#rb_register_toolchains-kwargs">**kwargs</a>)
 </pre>
 
-Register a Ruby toolchain and lazily download the Ruby Interpreter.
+Create Ruby toolchain repositories and lazily download the Ruby interpreter.
+
+Use the Ruby module extension to create these repositories, then register
+the toolchains in `MODULE.bazel`.
 
 * _(For MRI on Linux and macOS)_ Installed using [ruby-build](https://github.com/rbenv/ruby-build).
 * _(For MRI on Windows)_ Installed using [RubyInstaller](https://rubyinstaller.org).
@@ -59,13 +41,17 @@ as a single unconstrained toolchain — no per-platform repos needed.
 Other modes (ruby-build for MRI source compile, TruffleRuby, RubyInstaller,
 `system`) remain single-platform host-only.
 
-`WORKSPACE`:
+`MODULE.bazel`:
 ```bazel
-load("@rules_ruby//ruby:deps.bzl", "rb_register_toolchains")
+ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
 
-rb_register_toolchains(
-    version = "3.0.6"
+ruby.toolchain(
+    name = "ruby",
+    version = "3.4.11",
 )
+use_repo(ruby, "ruby", "ruby_toolchains")
+
+register_toolchains("@ruby_toolchains//:all")
 ```
 
 Once registered, you can use the toolchain directly as it provides all the binaries:
@@ -106,7 +92,6 @@ rb_library(
 | <a id="rb_register_toolchains-portable_ruby_release_suffix"></a>portable_ruby_release_suffix |  release suffix for portable Ruby (default "1", e.g. "2" downloads X.Y.Z-2).   |  `""` |
 | <a id="rb_register_toolchains-portable_ruby_checksums"></a>portable_ruby_checksums |  platform checksums for portable Ruby downloads, overriding built-in checksums.   |  `{}` |
 | <a id="rb_register_toolchains-resolved_version"></a>resolved_version |  the version string resolved from `version_file` by the module extension. Used to detect JRuby (which skips the multi-platform `portable_ruby` path since its archive is platform-independent).   |  `None` |
-| <a id="rb_register_toolchains-register"></a>register |  whether to register the resulting toolchains, should be False under bzlmod   |  `True` |
 | <a id="rb_register_toolchains-kwargs"></a>kwargs |  additional parameters to the downloader for this interpreter type   |  none |
 
 
@@ -118,8 +103,7 @@ rb_library(
 load("@rules_ruby//ruby:deps.bzl", "rb_bundle_fetch")
 
 rb_bundle_fetch(<a href="#rb_bundle_fetch-name">name</a>, <a href="#rb_bundle_fetch-srcs">srcs</a>, <a href="#rb_bundle_fetch-data">data</a>, <a href="#rb_bundle_fetch-auth_patterns">auth_patterns</a>, <a href="#rb_bundle_fetch-binstubs">binstubs</a>, <a href="#rb_bundle_fetch-bundler_checksums">bundler_checksums</a>, <a href="#rb_bundle_fetch-bundler_remote">bundler_remote</a>, <a href="#rb_bundle_fetch-env">env</a>,
-                <a href="#rb_bundle_fetch-extra_args">extra_args</a>, <a href="#rb_bundle_fetch-gem_checksums">gem_checksums</a>, <a href="#rb_bundle_fetch-gemfile">gemfile</a>, <a href="#rb_bundle_fetch-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_fetch-jar_checksums">jar_checksums</a>, <a href="#rb_bundle_fetch-netrc">netrc</a>, <a href="#rb_bundle_fetch-repo_mapping">repo_mapping</a>,
-                <a href="#rb_bundle_fetch-ruby">ruby</a>)
+                <a href="#rb_bundle_fetch-extra_args">extra_args</a>, <a href="#rb_bundle_fetch-gem_checksums">gem_checksums</a>, <a href="#rb_bundle_fetch-gemfile">gemfile</a>, <a href="#rb_bundle_fetch-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_fetch-jar_checksums">jar_checksums</a>, <a href="#rb_bundle_fetch-netrc">netrc</a>, <a href="#rb_bundle_fetch-ruby">ruby</a>)
 </pre>
 
 Fetches Bundler dependencies to be automatically installed by other targets.
@@ -127,27 +111,28 @@ Fetches Bundler dependencies to be automatically installed by other targets.
 Currently doesn't support installing gems from Git repositories,
 see https://github.com/bazel-contrib/rules_ruby/issues/62.
 
-`WORKSPACE`:
+`MODULE.bazel`:
 ```bazel
-load("@rules_ruby//ruby:deps.bzl", "rb_bundle_fetch")
+ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
 
-rb_bundle_fetch(
+ruby.bundle_fetch(
     name = "bundle",
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
     srcs = [
         "//:gem.gemspec",
         "//:lib/gem/version.rb",
-    ]
+    ],
 )
+use_repo(ruby, "bundle")
 ```
 
 Checksums for gems in Gemfile.lock are printed by the ruleset during the build.
 It's recommended to add them to `gem_checksums` attribute.
 
-`WORKSPACE`:
+`MODULE.bazel`:
 ```bazel
-rb_bundle_fetch(
+ruby.bundle_fetch(
     name = "bundle",
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
@@ -193,65 +178,6 @@ rb_test(
 | <a id="rb_bundle_fetch-gemfile_lock"></a>gemfile_lock |  Gemfile.lock to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_bundle_fetch-jar_checksums"></a>jar_checksums |  SHA-256 checksums for JAR dependencies. Keys are Maven coordinates (e.g. org.yaml:snakeyaml:1.33), values are SHA-256 checksums.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="rb_bundle_fetch-netrc"></a>netrc |  Path to .netrc file to read credentials from   | String | optional |  `""`  |
-| <a id="rb_bundle_fetch-repo_mapping"></a>repo_mapping |  In `WORKSPACE` context only: a dictionary from local repository name to global repository name. This allows controls over workspace dependency resolution for dependencies of this repository.<br><br>For example, an entry `"@foo": "@bar"` declares that, for any time this repository depends on `@foo` (such as a dependency on `@foo//some:target`, it should actually resolve that dependency within globally-declared `@bar` (`@bar//some:target`).<br><br>This attribute is _not_ supported in `MODULE.bazel` context (when invoking a repository rule inside a module extension's implementation function).   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  |
 | <a id="rb_bundle_fetch-ruby"></a>ruby |  Override Ruby toolchain to use for installation.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
-
-
-<a id="rb_bundle_rule"></a>
-
-## rb_bundle_rule
-
-<pre>
-load("@rules_ruby//ruby:deps.bzl", "rb_bundle_rule")
-
-rb_bundle_rule(<a href="#rb_bundle_rule-name">name</a>, <a href="#rb_bundle_rule-srcs">srcs</a>, <a href="#rb_bundle_rule-env">env</a>, <a href="#rb_bundle_rule-gemfile">gemfile</a>, <a href="#rb_bundle_rule-repo_mapping">repo_mapping</a>, <a href="#rb_bundle_rule-toolchain">toolchain</a>)
-</pre>
-
-(Deprecated) Use `rb_bundle_fetch()` instead.
-
-Installs Bundler dependencies and registers an external repository
-that can be used by other targets.
-
-`WORKSPACE`:
-```bazel
-load("@rules_ruby//ruby:deps.bzl", "rb_bundle")
-
-rb_bundle(
-    name = "bundle",
-    gemfile = "//:Gemfile",
-    srcs = [
-        "//:gem.gemspec",
-        "//:lib/gem/version.rb",
-    ]
-)
-```
-
-All the installed gems can be accessed using `@bundle` target and additionally
-gems binary files can also be used:
-
-`BUILD`:
-```bazel
-load("@rules_ruby//ruby:defs.bzl", "rb_binary")
-
-package(default_visibility = ["//:__subpackages__"])
-
-rb_binary(
-    name = "rubocop",
-    main = "@bundle//:bin/rubocop",
-    deps = ["@bundle"],
-)
-```
-
-**ATTRIBUTES**
-
-
-| Name  | Description | Type | Mandatory | Default |
-| :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="rb_bundle_rule-name"></a>name |  A unique name for this repository.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="rb_bundle_rule-srcs"></a>srcs |  List of Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="rb_bundle_rule-env"></a>env |  Environment variables to use during installation.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
-| <a id="rb_bundle_rule-gemfile"></a>gemfile |  Gemfile to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
-| <a id="rb_bundle_rule-repo_mapping"></a>repo_mapping |  In `WORKSPACE` context only: a dictionary from local repository name to global repository name. This allows controls over workspace dependency resolution for dependencies of this repository.<br><br>For example, an entry `"@foo": "@bar"` declares that, for any time this repository depends on `@foo` (such as a dependency on `@foo//some:target`, it should actually resolve that dependency within globally-declared `@bar` (`@bar//some:target`).<br><br>This attribute is _not_ supported in `MODULE.bazel` context (when invoking a repository rule inside a module extension's implementation function).   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  |
-| <a id="rb_bundle_rule-toolchain"></a>toolchain |  -   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
 
