@@ -56,7 +56,7 @@ bzl_library(
     deps = [
         ":deps",
         "//ruby/private:download",
-        "//ruby/private:toolchain",
+        "//ruby/private/toolchain:selection",
     ],
 )
 

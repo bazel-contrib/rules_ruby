@@ -18,10 +18,12 @@ def rb_register_toolchains(
         portable_ruby_release_suffix = "",
         portable_ruby_checksums = {},
         resolved_version = None,
-        register = True,
         **kwargs):
     """
-    Register a Ruby toolchain and lazily download the Ruby Interpreter.
+    Create Ruby toolchain repositories and lazily download the Ruby interpreter.
+
+    Use the Ruby module extension to create these repositories, then register
+    the toolchains in `MODULE.bazel`.
 
     * _(For MRI on Linux and macOS)_ Installed using [ruby-build](https://github.com/rbenv/ruby-build).
     * _(For MRI on Windows)_ Installed using [RubyInstaller](https://rubyinstaller.org).
@@ -45,13 +47,17 @@ def rb_register_toolchains(
     Other modes (ruby-build for MRI source compile, TruffleRuby, RubyInstaller,
     `system`) remain single-platform host-only.
 
-    `WORKSPACE`:
+    `MODULE.bazel`:
     ```bazel
-    load("@rules_ruby//ruby:deps.bzl", "rb_register_toolchains")
+    ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
 
-    rb_register_toolchains(
-        version = "3.0.6"
+    ruby.toolchain(
+        name = "ruby",
+        version = "3.4.11",
     )
+    use_repo(ruby, "ruby", "ruby_toolchains")
+
+    register_toolchains("@ruby_toolchains//:all")
     ```
 
     Once registered, you can use the toolchain directly as it provides all the binaries:
@@ -91,7 +97,6 @@ def rb_register_toolchains(
         resolved_version: the version string resolved from `version_file` by the module
             extension. Used to detect JRuby (which skips the multi-platform `portable_ruby`
             path since its archive is platform-independent).
-        register: whether to register the resulting toolchains, should be False under bzlmod
         **kwargs: additional parameters to the downloader for this interpreter type
     """
     proxy_repo_name = name + "_toolchains"
@@ -99,9 +104,8 @@ def rb_register_toolchains(
     # Multi-platform mode is only meaningful for MRI + portable_ruby. JRuby's
     # archive is platform-independent, TruffleRuby and "system" can't cross-
     # compile, and Windows MRI goes through RubyInstaller (handled per
-    # per-platform repo). When we can't determine the engine ahead of time
-    # (e.g. WORKSPACE mode with version_file but no module_ctx to read it), we
-    # fall back to single-platform host-only.
+    # per-platform repo). The module extension resolves version_file before
+    # creating the repositories.
     effective_version = resolved_version if resolved_version != None else version
     is_jruby = effective_version != None and effective_version.startswith("jruby")
     is_truffleruby = effective_version != None and effective_version.startswith("truffleruby")
@@ -118,50 +122,42 @@ def rb_register_toolchains(
         entries = []
         for plat in MULTI_PLATFORM_RUBY_PLATFORMS:
             per_repo = "{}_{}".format(name, plat)
-            if per_repo not in native.existing_rules():
-                _rb_download(
-                    name = per_repo,
-                    version = version,
-                    version_file = version_file,
-                    msys2_packages = msys2_packages,
-                    portable_ruby = portable_ruby,
-                    portable_ruby_release_suffix = portable_ruby_release_suffix,
-                    portable_ruby_checksums = portable_ruby_checksums,
-                    platform = plat,
-                    **kwargs
-                )
-            entries.append("{}|{}".format(per_repo, plat))
-        if name not in native.existing_rules():
-            _rb_hub_repository(
-                name = name,
-                apparent_name = name,
-                platforms = MULTI_PLATFORM_RUBY_PLATFORMS,
-                engine = "ruby",
-            )
-        if proxy_repo_name not in native.existing_rules():
-            _rb_toolchain_repository_proxy(
-                name = proxy_repo_name,
-                toolchains = entries,
-                toolchain_type = _TOOLCHAIN_TYPE,
-            )
-    else:
-        if name not in native.existing_rules():
             _rb_download(
-                name = name,
+                name = per_repo,
                 version = version,
                 version_file = version_file,
                 msys2_packages = msys2_packages,
                 portable_ruby = portable_ruby,
                 portable_ruby_release_suffix = portable_ruby_release_suffix,
                 portable_ruby_checksums = portable_ruby_checksums,
+                platform = plat,
                 **kwargs
             )
-        if proxy_repo_name not in native.existing_rules():
-            _rb_toolchain_repository_proxy(
-                name = proxy_repo_name,
-                toolchains = ["{}|".format(name)],
-                toolchain_type = _TOOLCHAIN_TYPE,
-            )
-
-    if register:
-        native.register_toolchains("@{}//:all".format(proxy_repo_name))
+            entries.append("{}|{}".format(per_repo, plat))
+        _rb_hub_repository(
+            name = name,
+            apparent_name = name,
+            platforms = MULTI_PLATFORM_RUBY_PLATFORMS,
+            engine = "ruby",
+        )
+        _rb_toolchain_repository_proxy(
+            name = proxy_repo_name,
+            toolchains = entries,
+            toolchain_type = _TOOLCHAIN_TYPE,
+        )
+    else:
+        _rb_download(
+            name = name,
+            version = version,
+            version_file = version_file,
+            msys2_packages = msys2_packages,
+            portable_ruby = portable_ruby,
+            portable_ruby_release_suffix = portable_ruby_release_suffix,
+            portable_ruby_checksums = portable_ruby_checksums,
+            **kwargs
+        )
+        _rb_toolchain_repository_proxy(
+            name = proxy_repo_name,
+            toolchains = ["{}|".format(name)],
+            toolchain_type = _TOOLCHAIN_TYPE,
+        )

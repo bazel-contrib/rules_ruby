@@ -19,3 +19,9 @@ bzl_library(
     visibility = ["//ruby:__subpackages__"],
     deps = [":platforms"],
 )
+
+bzl_library(
+    name = "selection",
+    srcs = ["selection.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+)
