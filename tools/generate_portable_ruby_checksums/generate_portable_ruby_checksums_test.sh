@@ -204,6 +204,8 @@ test_all_dry_run() {
   # Verify both versions are present
   assert_match "ruby-3.4.8" "${output}" "Output should contain 3.4.8 checksums"
   assert_match "ruby-3.4.7" "${output}" "Output should contain 3.4.7 checksums"
+  assert_match '"ruby-3.4.8.x86_64_linux.tar.gz": "f36cef10365d370e0867f0c3ac36e457a26ab04f3cfbbd7edb227a18e6e9b3c3"' \
+    "${output}" "Should preserve the checksum for each release suffix"
 
   # Verify entries are sorted in reverse order (3.4.8 before 3.4.7)
   local pos_348 pos_347
@@ -250,6 +252,61 @@ test_all_writes_bzl_file() {
 
 }
 
+test_all_paginates() {
+  local temp_dir
+  temp_dir="$(mktemp -d)"
+  temp_dirs+=("${temp_dir}")
+  printf 'module(name = "rules_ruby")\n' >"${temp_dir}/MODULE.bazel"
+  jq '.[0:1]' "${releases_list}" >"${temp_dir}/page1.json"
+  jq '.[1:2]' "${releases_list}" >"${temp_dir}/page2.json"
+  mkdir "${temp_dir}/bin"
+
+  # Simulate the GitHub Link header without requiring network access.
+  cat >"${temp_dir}/bin/curl" <<'EOF'
+#!/usr/bin/env bash
+set -eu
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dump-header) headers="$2"; shift 2 ;;
+    --output) output="$2"; shift 2 ;;
+    *) url="$1"; shift ;;
+  esac
+done
+cp "${url#file://}" "${output}"
+if [[ ${url} == */page1.json ]]; then
+  printf 'Link: <%s/page2.json>; rel="next"\r\n' "${url%/*}" >"${headers}"
+else
+  : >"${headers}"
+fi
+EOF
+  chmod +x "${temp_dir}/bin/curl"
+
+  local output
+  output=$(BUILD_WORKSPACE_DIRECTORY="${temp_dir}" \
+    PORTABLE_RUBY_LIST_API_URL="file://${temp_dir}/page1.json" \
+    PATH="${temp_dir}/bin:${PATH}" \
+    "${generate_portable_ruby_checksums}" --all --dry-run)
+  assert_match "ruby-3.4.8" "${output}" "Should include the first page"
+  assert_match "ruby-3.4.7" "${output}" "Should include subsequent pages"
+}
+
+test_all_rejects_missing_digests() {
+  local temp_dir
+  temp_dir="$(mktemp -d)"
+  temp_dirs+=("${temp_dir}")
+  printf 'module(name = "rules_ruby")\n' >"${temp_dir}/MODULE.bazel"
+  jq '.[0].assets[0].digest = null' "${releases_list}" >"${temp_dir}/releases.json"
+  printf 'existing checksums\n' >"${temp_dir}/checksums.bzl"
+
+  if BUILD_WORKSPACE_DIRECTORY="${temp_dir}" \
+    PORTABLE_RUBY_LIST_API_URL="file://${temp_dir}/releases.json" \
+    "${generate_portable_ruby_checksums}" --all --checksums-bzl "${temp_dir}/checksums.bzl" 2>/dev/null; then
+    fail "Should reject releases without SHA-256 digests"
+  fi
+  assert_equal "existing checksums" "$(cat "${temp_dir}/checksums.bzl")" \
+    "A failed refresh must preserve the checksum file"
+}
+
 # Run all tests
 test_basic_dry_run
 test_explicit_ruby_version
@@ -258,3 +315,5 @@ test_invalid_ruby_version
 test_all_requires_rules_ruby_repo
 test_all_dry_run
 test_all_writes_bzl_file
+test_all_paginates
+test_all_rejects_missing_digests

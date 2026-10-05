@@ -6,6 +6,7 @@
 # Maps each Ruby version to its current default release suffix.
 # Updated automatically when a new rebuild (-2, -3, etc.) is published.
 PORTABLE_RUBY_DEFAULT_SUFFIXES = {
+    "4.0.7": "1",
     "4.0.6": "2",
     "4.0.5": "2",
     "4.0.4": "2",
@@ -24,6 +25,7 @@ PORTABLE_RUBY_DEFAULT_SUFFIXES = {
     "3.4.4": "2",
     "3.4.3": "2",
     "3.4.2": "2",
+    "3.4.11": "1",
     "3.4.10": "1",
     "3.4.1": "2",
     "3.4.0": "2",
@@ -334,6 +336,10 @@ PORTABLE_RUBY_CHECKSUMS = {
         "ruby-3.4.10.arm64_linux.tar.gz": "105a6275dbf76077e10e013247d6551a86da22254ba79391526c17390ea7e3ac",
         "ruby-3.4.10.x86_64_darwin.tar.gz": "ce042d29cc7293fa94ca90c66287cb0bd36add6dd34d55480917c83d0235073d",
         "ruby-3.4.10.x86_64_linux.tar.gz": "1abedd893c0ed55864d9559d25d61c50fa643e94abe37820444cab6e24f17be3",
+        "ruby-3.4.11.arm64_darwin.tar.gz": "a71d56e05c801eec9f5a330b8d0d096b10d6c527c0bf4485c2be22126460fa05",
+        "ruby-3.4.11.arm64_linux.tar.gz": "ed51969b29997e96743446dc182f26b0b55b9ffee1fc5c24e4a9e15d1c468c77",
+        "ruby-3.4.11.x86_64_darwin.tar.gz": "7d9e89295332702c9c16f7c2a19112362daea130d422b833ddfdf69067872270",
+        "ruby-3.4.11.x86_64_linux.tar.gz": "f4a0ac310c7150586befb7fc885297be4a96bc4f7ad7b4dd362e427b87822055",
         "ruby-3.4.2.arm64_darwin.tar.gz": "80db2b6a186eb9b246ca35934f65123e7c7fdc65016d73e2a8091781cde531ce",
         "ruby-3.4.2.arm64_linux.tar.gz": "24f88c370e12c913484cc44f26eed357781c6d8fb512f386bc2ffb1f159ece8b",
         "ruby-3.4.2.x86_64_darwin.tar.gz": "c847ef00b64456461493f7a92f6ad78320595938a4f171391be33125034963ac",
@@ -406,5 +412,9 @@ PORTABLE_RUBY_CHECKSUMS = {
         "ruby-4.0.6.arm64_linux.tar.gz": "0c36b8eb5e9a711ead6897487041a6f41860d1480f1d9f307343a853bf9ade72",
         "ruby-4.0.6.x86_64_darwin.tar.gz": "2332db2b40d65a4397e8ec139cee07fbbace8b154f2b342d4a54dc48dbcc7d8e",
         "ruby-4.0.6.x86_64_linux.tar.gz": "b48589229ec09877ce1b41e99a08767dc4ad275bc236c51c79464c964f1fbc17",
+        "ruby-4.0.7.arm64_darwin.tar.gz": "8f4da3470f5b45e3c8a563d7eab64cbcb0413b2edcf5d31f8ae35122ccc1b93b",
+        "ruby-4.0.7.arm64_linux.tar.gz": "f753cccc3447ad4795662f21f25673327c15f846a0098f447eb3e81266f72c47",
+        "ruby-4.0.7.x86_64_darwin.tar.gz": "bb2a16c88810f3c064b148fd624ca6897f5ac8fe96119deb0df01005998bb9b7",
+        "ruby-4.0.7.x86_64_linux.tar.gz": "14bcb2ab3c9ea2afc1dd4b7946e89a95770f0d21fbb4116902539350cce5cb54",
     },
 }
