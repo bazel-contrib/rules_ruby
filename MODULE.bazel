@@ -7,6 +7,10 @@ module(
     compatibility_level = 1,
 )
 
+# Use the Apple C++ toolchain for development on macOS. This must precede
+# rules_cc so Bazel registers it before the generic Unix toolchain.
+bazel_dep(name = "apple_support", version = "1.24.2", dev_dependency = True)
+
 # Lower-bound dependency versions.
 # These should NOT be increased unless needed, as bumping our lower-bound may change
 # the versions resolved in users repositories.
