@@ -2,7 +2,7 @@
 bcr_test_module:
   module_path: "examples/gem"
   matrix:
-    bazel: ["8.x", "7.x"]
+    bazel: ["9.x", "8.x", "7.x"]
     # NB: Windows is removed due to https://github.com/bazel-contrib/rules_ruby/issues/64
     platform: ["debian10", "macos", "ubuntu2004"]
   tasks:
@@ -11,6 +11,7 @@ bcr_test_module:
       platform: ${{ platform }}
       bazel: ${{ bazel }}
       test_flags:
+        - "--enable_bzlmod"
         - "--test_tag_filters=-bcr-presubmit-failure"
       test_targets:
         - "//..."

@@ -363,27 +363,28 @@ Fetches Bundler dependencies to be automatically installed by other targets.
 Currently doesn't support installing gems from Git repositories,
 see https://github.com/bazel-contrib/rules_ruby/issues/62.
 
-`WORKSPACE`:
+`MODULE.bazel`:
 ```bazel
-load("@rules_ruby//ruby:deps.bzl", "rb_bundle_fetch")
+ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
 
-rb_bundle_fetch(
+ruby.bundle_fetch(
     name = "bundle",
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
     srcs = [
         "//:gem.gemspec",
         "//:lib/gem/version.rb",
-    ]
+    ],
 )
+use_repo(ruby, "bundle")
 ```
 
 Checksums for gems in Gemfile.lock are printed by the ruleset during the build.
 It's recommended to add them to `gem_checksums` attribute.
 
-`WORKSPACE`:
+`MODULE.bazel`:
 ```bazel
-rb_bundle_fetch(
+ruby.bundle_fetch(
     name = "bundle",
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",

@@ -73,7 +73,7 @@ Suppose you have the following Ruby gem:
 ```output
 |-- BUILD
 |-- Gemfile
-|-- WORKSPACE
+|-- MODULE.bazel
 |-- gem.gemspec
 `-- lib
     |-- BUILD
