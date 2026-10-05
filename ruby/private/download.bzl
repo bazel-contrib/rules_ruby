@@ -7,7 +7,7 @@ load(
     "PORTABLE_RUBY_PLATFORMS",
 )
 
-RUBY_BUILD_VERSION = "20260512"
+RUBY_BUILD_VERSION = "20260924"
 
 _JRUBY_BINARY_URL = "https://repo1.maven.org/maven2/org/jruby/jruby-dist/{version}/jruby-dist-{version}-bin.tar.gz"
 _RUBY_BUILD_URL = "https://github.com/rbenv/ruby-build/archive/refs/tags/v{version}.tar.gz"
@@ -21,11 +21,6 @@ _PORTABLE_RUBY_URL = "https://github.com/bazel-contrib/portable-ruby/releases/do
 _JRUBY_VERSIONS = {
     "9.3.0.0": "2dc1f85936d3ff3adc20d90e5f4894499c585a7ea5fedec67154e2f9ecb1bc9b",
     "9.3.1.0": "4a9778c114452c0227e10e6718b2c5e128b310b9c6551be93bdd938888f3c418",
-    "9.3.10.0": "c78c127e0aa166f257eeab03c4733ba3d96a445314eff7e5dc1f8154d2b5ae45",
-    "9.3.11.0": "655f120c8f29ee81c24b98f2932f6384e317062bcd40720dd8bfef555f97eac9",
-    "9.3.12.0": "abe413f1ab7014e3a0d7736619ec02659f07a1f0427c22d4ee9f18e0e4369f61",
-    "9.3.13.0": "da60d6cb5c4e4d191abe20448e337b394b27bf0e095133966bcab8ac1191f51d",
-    "9.3.14.0": "04c482511d497f41c335345247ee52985be9a8174c042e306dc4c24fac81a9f9",
     "9.3.2.0": "26699ca02beeafa8326573c1125c57a5971ba8b94d15f84e6b3baf2594244f33",
     "9.3.3.0": "3da828cbe287d5468507f1c2c42bef6cf34bc5361bcd6a5d99c207b21b9fdc5c",
     "9.3.4.0": "531544d327a87155d8c804f153a2df3cf04f0182561cb2dd2c9372f48605b65c",
@@ -34,6 +29,12 @@ _JRUBY_VERSIONS = {
     "9.3.7.0": "94a7a8b3beeac2253a8876e73adfac6bececb2b54d2ddfa68f245dc81967d0c1",
     "9.3.8.0": "674a4d1308631faa5f0124d01d73eb1edc89346ee7de21c70e14305bd61b46df",
     "9.3.9.0": "251e6dd8d1d2f82922c8c778d7857e1bef82fe5ca2cf77bc09356421d0b05ab8",
+    "9.3.10.0": "c78c127e0aa166f257eeab03c4733ba3d96a445314eff7e5dc1f8154d2b5ae45",
+    "9.3.11.0": "655f120c8f29ee81c24b98f2932f6384e317062bcd40720dd8bfef555f97eac9",
+    "9.3.12.0": "abe413f1ab7014e3a0d7736619ec02659f07a1f0427c22d4ee9f18e0e4369f61",
+    "9.3.13.0": "da60d6cb5c4e4d191abe20448e337b394b27bf0e095133966bcab8ac1191f51d",
+    "9.3.14.0": "04c482511d497f41c335345247ee52985be9a8174c042e306dc4c24fac81a9f9",
+    "9.3.15.0": "0f8f8e4ed2fe97976d1c68350e967b937a860001fe3cbb42247a8612ab246628",
     "9.4.0.0": "897bb8a98ad43adcbf5fd3aa75ec85b3312838c949592ca3f623dc1f569d2870",
     "9.4.1.0": "5e0cce40b7c42f8ad0f619fdd906460fe3ef13444707f70eb8abfc6481e0d6b6",
     "9.4.2.0": "c2b065c5546d398343f86ddea68892bb4a4b4345e6c8875e964a97377733c3f1",
@@ -47,6 +48,7 @@ _JRUBY_VERSIONS = {
     "9.4.10.0": "0b325bb6e64896dfcf235bbc6506ca9b5af78f1c8fec7f048bc4188b1793b5e0",
     "9.4.11.0": "cf4067bdc3a6ab518c786588e2486adc047b9cea0b96a43218b03ac651d26e11",
     "9.4.12.0": "05c5d203d6990c92671cc42f57d2fa1c1083bbfd16fa7023dc5848cdb8f0aa2e",
+    "9.4.12.1": "b7fbaf1dda7a9d477cccda9197273fac85dc1f6dcb4046e1f7aa5b11a48d148b",
     "9.4.13.0": "226d9c3a2e332f8f249838f96c20e87e0df2b9a464a11477b47be6dafb66412c",
     "9.4.14.0": "7ea2be8d0c5989714c795b4544492bf9941c9576e7a78f593a19c85567bc0452",
     "9.4.15.0": "c8b8c5a7a1581fdba3ba73f7c375f793f6528117b444cc6baf6fb29bbcf9696d",
@@ -58,9 +60,12 @@ _JRUBY_VERSIONS = {
     "10.0.4.0": "d0260ebc753a5e9ae49be1eec0e4eec907aaf2b7184faaafc879b0ec3253ca24",
     "10.0.5.0": "6b3aa0340bd60a2b131e12490bb498c45359d9c91e477f5760c3aa18e37d1988",
     "10.0.6.0": "58c0d10b8a6b0b74a6119109f094ce073a6a6e813c7368c3876d71967e3a877f",
+    "10.0.7.0": "a5cbec1a3b854d92a64ce3be58d638daff26e6ce8ee80104c840a1f5bd895a4e",
     "10.1.0.0": "9c14a0ce81f3a312fd98c415986982132e91d36b12cb8d74a3dfdae93fe984ac",
     "10.1.1.0": "1e08bff6a7f0134a4774fba37d8cf88b9dd4a7317bd49fca5af696a327450148",
+    "10.1.2.0": "6dcb361bc1df554803fdd0243dc7c7a42723ac88a4b6f66830026afe82db28a8",
 }
+
 _JRUBY_INTEGRITY_MISSING = """
 
 Missing integrity for JRuby {version} ({sha256}).
@@ -162,15 +167,22 @@ def _rb_download_impl(repository_ctx):
         # https://www.graalvm.org/dev/reference-manual/ruby/UTF8Locale/
         env.update({"LANG": "en_US.UTF-8"})
 
-        # TruffleRuby dynamically locates libyaml/openssl which are not available in sandbox,
-        # so we need to preserve explicit paths to them and propagate down the builds.
-        # https://github.com/oracle/truffleruby/blob/ac88a0fe68bf957f75af7d316594b89731fdec4e/lib/truffle/rbconfig.rb#L119-L135
-        libyaml_prefix = _execute_command(repository_ctx, ["dist/bin/ruby", "-rrbconfig", "-e", "puts ENV['LIBYAML_PREFIX']"])
-        if libyaml_prefix:
-            env.update({"LIBYAML_PREFIX": libyaml_prefix})
-        openssl_prefix = _execute_command(repository_ctx, ["dist/bin/ruby", "-rrbconfig", "-e", "puts ENV['OPENSSL_PREFIX']"])
-        if openssl_prefix:
-            env.update({"OPENSSL_PREFIX": openssl_prefix})
+        # Resolve native libraries before entering the build sandbox. Older
+        # TruffleRuby releases discover these prefixes in rbconfig; 40+ needs
+        # explicit Bundler build options for gems using Homebrew libraries.
+        brew = repository_ctx.which("brew") if repository_ctx.os.name.startswith("mac") else None
+        for variable, formula, library, gem in [
+            ("LIBYAML_PREFIX", "libyaml", "libyaml", "PSYCH"),
+            ("OPENSSL_PREFIX", "openssl@3", "openssl", "OPENSSL"),
+        ]:
+            prefix = _execute_command(repository_ctx, ["dist/bin/ruby", "-rrbconfig", "-e", "puts ENV['%s']" % variable])
+            if not prefix and brew:
+                result = repository_ctx.execute([brew, "--prefix", formula], quiet = True)
+                if result.return_code == 0 and repository_ctx.path(result.stdout.strip()).exists:
+                    prefix = result.stdout.strip()
+            if prefix:
+                env[variable] = prefix
+                env["BUNDLE_BUILD__" + gem] = "--with-%s-dir=%s" % (library, prefix)
     elif version == "system":
         engine = _symlink_system_ruby(repository_ctx)
     elif is_windows_target:
