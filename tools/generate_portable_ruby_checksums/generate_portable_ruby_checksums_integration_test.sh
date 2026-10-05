@@ -58,11 +58,7 @@ test_buildozer_updates() {
   cd "${temp_dir}"
   export BUILD_WORKSPACE_DIRECTORY="${temp_dir}"
 
-  # Create a minimal Bazel workspace
-  cat >WORKSPACE.bazel <<'EOF'
-# Empty workspace for testing
-EOF
-
+  # Create a minimal Bazel module without a WORKSPACE file.
   cat >MODULE.bazel <<'EOF'
 module(name = "test_workspace")
 
@@ -70,7 +66,7 @@ ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
 
 ruby.toolchain(
     name = "ruby",
-    ruby_version = "3.3.0",
+    version = "3.3.0",
 )
 
 use_repo(ruby, "ruby_toolchains")
@@ -111,9 +107,9 @@ EOF
     "${module_content}" \
     "MODULE.bazel should contain x86_64_darwin checksum"
 
-  # Verify ruby_version was NOT changed (we didn't update it)
-  assert_match 'ruby_version = "3.3.0"' "${module_content}" \
-    "MODULE.bazel should preserve existing ruby_version"
+  # Verify the Ruby version was NOT changed (we didn't update it)
+  assert_match 'version = "3.3.0"' "${module_content}" \
+    "MODULE.bazel should preserve existing version"
 }
 
 # Test: Buildozer updates only target toolchain by name
@@ -125,11 +121,7 @@ test_buildozer_name_filtering() {
   cd "${temp_dir}"
   export BUILD_WORKSPACE_DIRECTORY="${temp_dir}"
 
-  # Create workspace with multiple toolchains
-  cat >WORKSPACE.bazel <<'EOF'
-# Empty workspace for testing
-EOF
-
+  # Create a module with multiple toolchains.
   cat >MODULE.bazel <<'EOF'
 module(name = "test_workspace")
 
@@ -137,12 +129,12 @@ ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
 
 ruby.toolchain(
     name = "ruby",
-    ruby_version = "3.3.0",
+    version = "3.3.0",
 )
 
 ruby.toolchain(
     name = "ruby_alt",
-    ruby_version = "3.2.0",
+    version = "3.2.0",
 )
 
 use_repo(ruby, "ruby_toolchains")

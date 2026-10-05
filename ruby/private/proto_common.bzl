@@ -1,4 +1,4 @@
-"""Fork of 
+"""Fork of
 https://github.com/protocolbuffers/protobuf/blob/95dc8a02ad7d64527f0850c17edb1b86d3996ad8/bazel/common/proto_common.bzl#L15
 that exposes some helper functions that _compile uses, so we can implement our own version of it.
 """

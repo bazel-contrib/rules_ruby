@@ -27,7 +27,7 @@ in `BUILD` files to define the packages for the gem.
 ```output
 |-- BUILD
 |-- Gemfile
-|-- WORKSPACE
+|-- MODULE.bazel
 |-- gem.gemspec
 |-- lib
 |   |-- BUILD
