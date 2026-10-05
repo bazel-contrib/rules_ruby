@@ -172,7 +172,6 @@ def _rb_bundle_install_impl(ctx):
             transitive_srcs = depset([ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs),
             transitive_deps = depset(),
             transitive_data = depset(),
-            bundle_env = {},
         ),
         BundlerInfo(
             bin = binstubs,

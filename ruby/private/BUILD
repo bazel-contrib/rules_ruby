@@ -141,12 +141,6 @@ bzl_library(
 )
 
 bzl_library(
-    name = "bundle",
-    srcs = ["bundle.bzl"],
-    visibility = ["//ruby:__subpackages__"],
-)
-
-bzl_library(
     name = "bundler_checksums",
     srcs = ["bundler_checksums.bzl"],
     visibility = ["//ruby:__subpackages__"],

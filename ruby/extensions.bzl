@@ -26,14 +26,6 @@ def _resolve_version(module_ctx, toolchain):
         return None
     return content
 
-ruby_bundle = tag_class(attrs = {
-    "name": attr.string(doc = "Resulting repository name for the bundle"),
-    "srcs": attr.label_list(),
-    "env": attr.string_dict(),
-    "gemfile": attr.label(),
-    "toolchain": attr.label(),
-})
-
 ruby_bundle_fetch = tag_class(attrs = {
     "name": attr.string(doc = "Resulting repository name for the bundle"),
     "srcs": attr.label_list(),
@@ -190,7 +182,6 @@ def _ruby_module_extension(module_ctx):
 ruby = module_extension(
     implementation = _ruby_module_extension,
     tag_classes = {
-        "bundle": ruby_bundle,
         "bundle_fetch": ruby_bundle_fetch,
         "toolchain": ruby_toolchain,
     },

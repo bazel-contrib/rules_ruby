@@ -6,7 +6,6 @@ load(
     "//ruby/private:providers.bzl",
     "BundlerInfo",
     "RubyFilesInfo",
-    "get_bundle_env",
     "get_transitive_data",
     "get_transitive_deps",
     "get_transitive_srcs",
@@ -18,7 +17,6 @@ def _rb_gem_build_impl(ctx):
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
     transitive_deps = get_transitive_deps(ctx.attr.deps).to_list()
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
-    bundle_env = get_bundle_env({}, ctx.attr.deps)
     java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
     if ctx.attr.ruby != None:
@@ -90,7 +88,6 @@ def _rb_gem_build_impl(ctx):
             transitive_data = depset(transitive_data),
             transitive_deps = depset(transitive_deps),
             transitive_srcs = depset(transitive_srcs),
-            bundle_env = bundle_env,
         ),
     ])
 
