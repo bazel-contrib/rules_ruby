@@ -82,6 +82,7 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
 
     binary_path = ""
     locate_binary_in_runfiles = ""
+    ruby_binary_name = toolchain.ruby.basename
     if binary and binary != toolchain.ruby:
         binary_path = binary.short_path
 
@@ -94,6 +95,11 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
             locate_binary_in_runfiles = "true"
         else:
             binary_path = _normalize_path(ctx, binary_path)
+
+        # Batch stubs such as JRuby's jgem.cmd are not Ruby scripts and must be
+        # executed directly rather than passed to the interpreter.
+        if binary.extension in ["cmd", "bat"]:
+            ruby_binary_name = ""
 
     environment = {}
     environment.update(env)
@@ -128,7 +134,7 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
             "{bundler_command}": bundler_command,
             "{jars_home_strip_suffix}": jars_home_strip_suffix,
             "{ruby}": _to_rlocation_path(ctx, toolchain.ruby),
-            "{ruby_binary_name}": toolchain.ruby.basename,
+            "{ruby_binary_name}": ruby_binary_name,
             "{java_bin}": java_bin,
             "{rlocation_function}": rlocation_function,
             "{locate_binary_in_runfiles}": locate_binary_in_runfiles,
