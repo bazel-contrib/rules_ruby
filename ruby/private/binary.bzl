@@ -96,9 +96,9 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
         else:
             binary_path = _normalize_path(ctx, binary_path)
 
-        # Batch stubs such as JRuby's jgem.cmd are not Ruby scripts and must be
-        # executed directly rather than passed to the interpreter.
-        if binary.extension in ["cmd", "bat"]:
+        # JRuby's .cmd stubs are plain batch files, so they must be executed
+        # directly. MRI's are Ruby polyglots and only work via the interpreter.
+        if binary.extension in ["cmd", "bat"] and toolchain.version.startswith("jruby"):
             ruby_binary_name = ""
 
     environment = {}
