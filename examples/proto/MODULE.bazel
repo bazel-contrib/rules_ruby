@@ -1,6 +1,14 @@
 bazel_dep(name = "rules_ruby")
 bazel_dep(name = "protobuf", version = "34.1")
 
+# TODO: Remove once protobuf releases the protoc authenticity action's
+# automatic execution groups fix. That release needs the rules_ruby fixes first.
+single_version_override(
+    module_name = "protobuf",
+    patch_strip = 1,
+    patches = ["//:protobuf_auto_exec_groups.patch"],
+)
+
 # We don't depend on these, but have to force newer resolutions for protobuf which has crazy deps.
 force_bazel9_compat = None
 
