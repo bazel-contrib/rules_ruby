@@ -1,1 +1,2 @@
 common --repo_env="JAVA_HOME=../bazel_tools/jdk"
+build --incompatible_auto_exec_groups

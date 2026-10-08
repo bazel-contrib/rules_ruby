@@ -18,8 +18,8 @@ def _ruby_proto_aspect_impl(target, ctx):
         return []
 
     proto_info = target[ProtoInfo]
-    protoc_info = ctx.toolchains[PROTO_TOOLCHAIN].proto
-    grpc_info = ctx.toolchains[GRPC_PLUGIN_TOOLCHAIN].proto
+    protoc_info = ctx.exec_groups["proto"].toolchains[PROTO_TOOLCHAIN].proto
+    grpc_info = ctx.exec_groups["proto"].toolchains[GRPC_PLUGIN_TOOLCHAIN].proto
     msg_outputs = proto_common.declare_generated_files(ctx.actions, proto_info, "_pb.rb")
     service_outputs = proto_common.declare_generated_files(ctx.actions, proto_info, "_services_pb.rb")
     proto_outdir = proto_common.output_directory(proto_info, msg_outputs[0].root)
@@ -53,6 +53,7 @@ def _ruby_proto_aspect_impl(target, ctx):
     args.add("-I.")  # Needs to come last
     args.add_all(proto_info.direct_sources)
     ctx.actions.run_shell(
+        exec_group = "proto",
         # https://grpc.io/docs/languages/ruby/basics/#generating-client-and-server-code
         # grpc_tools_ruby_protoc -I ../../protos --ruby_out=../lib --grpc_out=../lib ../../protos/route_guide.proto
         command = " && ".join(services_not_created_workarounds + ["{} $@".format(protoc_info.proto_compiler.executable.path)]),
@@ -81,5 +82,8 @@ ruby_proto_aspect = aspect(
     attr_aspects = ["deps"],
     required_providers = [ProtoInfo],
     provides = [RubyFilesInfo],
-    toolchains = [PROTO_TOOLCHAIN, GRPC_PLUGIN_TOOLCHAIN],
+    # Protoc invokes the gRPC plugin, so both must run on the same platform.
+    exec_groups = {
+        "proto": exec_group(toolchains = [PROTO_TOOLCHAIN, GRPC_PLUGIN_TOOLCHAIN]),
+    },
 )
