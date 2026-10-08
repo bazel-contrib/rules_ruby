@@ -11,7 +11,7 @@ load(
 def _rb_gem_install_impl(ctx):
     gem = ctx.file.gem
     install_dir = ctx.actions.declare_directory(gem.basename[:-4])
-    toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
+    toolchain = ctx.exec_groups["ruby"].toolchains["@rules_ruby//ruby:toolchain_type"]
     if ctx.attr.ruby != None:
         toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
 
@@ -22,7 +22,7 @@ def _rb_gem_install_impl(ctx):
     tools.extend(toolchain.files)
 
     if toolchain.version.startswith("jruby"):
-        java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
+        java_toolchain = ctx.exec_groups["ruby"].toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
         tools.extend(java_toolchain.java_runtime.files.to_list())
         env.update({"JAVA_HOME": java_toolchain.java_runtime.java_home})
 
@@ -48,6 +48,7 @@ def _rb_gem_install_impl(ctx):
 
     name, _, version = ctx.attr.name.rpartition("-")
     ctx.actions.run(
+        exec_group = "ruby",
         executable = gem_install,
         inputs = depset([gem, gem_install]),
         outputs = [install_dir],
@@ -89,10 +90,13 @@ rb_gem_install = rule(
             default = "@platforms//os:windows",
         ),
     },
-    toolchains = [
-        "@rules_ruby//ruby:toolchain_type",
-        "@bazel_tools//tools/jdk:runtime_toolchain_type",
-    ],
+    # JRuby runs Ruby and Java tools in the same action, on the same platform.
+    exec_groups = {
+        "ruby": exec_group(toolchains = [
+            "@rules_ruby//ruby:toolchain_type",
+            "@bazel_tools//tools/jdk:runtime_toolchain_type",
+        ]),
+    },
     doc = """
 Installs a built Ruby gem.
 
