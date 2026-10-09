@@ -71,7 +71,6 @@ def _ruby_proto_aspect_impl(target, ctx):
             ]),
             transitive_deps = depset(),
             transitive_data = depset(),
-            bundle_env = {},
         ),
     ]
 

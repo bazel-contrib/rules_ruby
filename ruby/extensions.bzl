@@ -2,8 +2,8 @@
 
 load("@bazel_features//:features.bzl", "bazel_features")
 load("//ruby/private:download.bzl", "RUBY_BUILD_VERSION")
-load("//ruby/private:toolchain.bzl", "DEFAULT_RUBY_REPOSITORY")
-load(":deps.bzl", "rb_bundle", "rb_bundle_fetch", "rb_register_toolchains")
+load("//ruby/private/toolchain:selection.bzl", "select_toolchains")
+load(":deps.bzl", "rb_bundle_fetch", "rb_register_toolchains")
 
 def _resolve_version(module_ctx, toolchain):
     """Resolve the Ruby version string from `version` or `version_file`.
@@ -25,14 +25,6 @@ def _resolve_version(module_ctx, toolchain):
                 return line.partition(" ")[-1]
         return None
     return content
-
-ruby_bundle = tag_class(attrs = {
-    "name": attr.string(doc = "Resulting repository name for the bundle"),
-    "srcs": attr.label_list(),
-    "env": attr.string_dict(),
-    "gemfile": attr.label(),
-    "toolchain": attr.label(),
-})
 
 ruby_bundle_fetch = tag_class(attrs = {
     "name": attr.string(doc = "Resulting repository name for the bundle"),
@@ -82,21 +74,8 @@ Keys: linux-x86_64, linux-arm64, macos-arm64, macos-x86_64.\
 def _ruby_module_extension(module_ctx):
     direct_dep_names = []
     direct_dev_dep_names = []
-    registrations = {}
+    registrations = select_toolchains(module_ctx.modules)
     for mod in module_ctx.modules:
-        for bundle in mod.tags.bundle:
-            rb_bundle(
-                name = bundle.name,
-                srcs = bundle.srcs,
-                env = bundle.env,
-                gemfile = bundle.gemfile,
-                toolchain = bundle.toolchain,
-            )
-            if module_ctx.is_dev_dependency(bundle):
-                direct_dev_dep_names.append(bundle.name)
-            else:
-                direct_dep_names.append(bundle.name)
-
         for bundle_fetch in mod.tags.bundle_fetch:
             rb_bundle_fetch(
                 name = bundle_fetch.name,
@@ -112,68 +91,30 @@ def _ruby_module_extension(module_ctx):
                 bundler_remote = bundle_fetch.bundler_remote,
                 bundler_checksums = bundle_fetch.bundler_checksums,
             )
+            if not mod.is_root:
+                continue
             if module_ctx.is_dev_dependency(bundle_fetch):
                 direct_dev_dep_names.append(bundle_fetch.name)
             else:
                 direct_dep_names.append(bundle_fetch.name)
 
-        for toolchain in mod.tags.toolchain:
-            # Prevent a users dependencies creating conflicting toolchain names
-            if toolchain.name != DEFAULT_RUBY_REPOSITORY and not mod.is_root:
-                fail("Only the root module may provide a name for the ruby toolchain.")
-
-            if toolchain.name in registrations.keys():
-                if toolchain.version == registrations[toolchain.name]:
-                    # No problem to register a matching toolchain twice
-                    continue
-                fail("Multiple conflicting toolchains declared for name {} ({}, {}) and {}".format(
-                    toolchain.name,
-                    toolchain.version,
-                    toolchain.version_file,
-                    toolchain.ruby_build_version,
-                    registrations[toolchain.name],
-                ))
-            else:
-                registrations[toolchain.name] = (
-                    toolchain.version,
-                    toolchain.version_file,
-                    toolchain.msys2_packages,
-                    toolchain.ruby_build_version,
-                    toolchain.portable_ruby,
-                    toolchain.portable_ruby_release_suffix,
-                    toolchain.portable_ruby_checksums,
-                    _resolve_version(module_ctx, toolchain),
-                )
+        if mod.is_root:
+            for toolchain in mod.tags.toolchain:
+                names = [toolchain.name, "%s_toolchains" % toolchain.name]
                 if module_ctx.is_dev_dependency(toolchain):
-                    direct_dev_dep_names.append(toolchain.name)
-                    direct_dev_dep_names.append("%s_toolchains" % toolchain.name)
+                    direct_dev_dep_names.extend(names)
                 else:
-                    direct_dep_names.append(toolchain.name)
-                    direct_dep_names.append("%s_toolchains" % toolchain.name)
+                    direct_dep_names.extend(names)
 
     for name, config in registrations.items():
-        (
-            version,
-            version_file,
-            msys2_packages,
-            ruby_build_version,
-            portable_ruby,
-            portable_ruby_release_suffix,
-            portable_ruby_checksums,
-            resolved_version,
-        ) = config
         rb_register_toolchains(
             name = name,
-            version = version,
-            version_file = version_file,
-            msys2_packages = msys2_packages,
-            ruby_build_version = ruby_build_version,
-            portable_ruby = portable_ruby,
-            portable_ruby_release_suffix = portable_ruby_release_suffix,
-            portable_ruby_checksums = portable_ruby_checksums,
-            resolved_version = resolved_version,
-            register = False,
+            resolved_version = _resolve_version(module_ctx, struct(**config)),
+            **config
         )
+
+    direct_dep_names = {name: None for name in direct_dep_names}.keys()
+    direct_dev_dep_names = {name: None for name in direct_dev_dep_names if name not in direct_dep_names}.keys()
 
     if bazel_features.external_deps.extension_metadata_has_reproducible:
         return module_ctx.extension_metadata(
@@ -190,7 +131,6 @@ def _ruby_module_extension(module_ctx):
 ruby = module_extension(
     implementation = _ruby_module_extension,
     tag_classes = {
-        "bundle": ruby_bundle,
         "bundle_fetch": ruby_bundle_fetch,
         "toolchain": ruby_toolchain,
     },

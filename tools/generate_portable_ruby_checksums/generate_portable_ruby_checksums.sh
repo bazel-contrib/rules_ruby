@@ -115,7 +115,20 @@ if [[ ${all_releases} == "true" ]]; then
 
   # Fetch list of all releases with their assets
   list_url="${PORTABLE_RUBY_LIST_API_URL:-https://api.github.com/repos/bazel-contrib/portable-ruby/releases?per_page=100}"
-  all_response=$(curl -sL --max-time 60 "${list_url}")
+  response_dir=$(mktemp -d)
+  trap 'rm -rf "${response_dir}"' EXIT
+  page=0
+  while [[ -n ${list_url} ]]; do
+    curl --fail --silent --show-error --location --max-time 60 \
+      --dump-header "${response_dir}/headers" \
+      --output "${response_dir}/${page}.json" "${list_url}"
+    jq -e 'type == "array"' "${response_dir}/${page}.json" >/dev/null \
+      || fail "Error: Expected a list of Ruby releases"
+    list_url=$(sed -nE 's/^[Ll]ink:.*<([^>]*)>; rel="next".*/\1/p' "${response_dir}/headers" | tr -d '\r')
+    page=$((page + 1))
+  done
+
+  all_response=$(jq -s 'add' "${response_dir}"/*.json)
 
   # Extract checksums grouped by suffix; keys are plain asset names (ruby-VERSION.PLATFORM.tar.gz)
   entries=$(echo "${all_response}" | jq -r '
@@ -126,7 +139,12 @@ if [[ ${all_releases} == "true" ]]; then
       .assets[] |
       select(.name | endswith(".tar.gz")) |
       select(.name | contains("no_yjit") | not) |
-      {suffix: $suffix, key: .name, checksum: (.digest | ltrimstr("sha256:"))}
+      select(.name | startswith("ruby-" + $version + ".")) |
+      if (.digest // "" | test("^sha256:[a-f0-9]{64}$")) then
+        {suffix: $suffix, key: .name, checksum: (.digest | ltrimstr("sha256:"))}
+      else
+        error("Missing SHA-256 digest for " + .name)
+      end
     ] |
     group_by(.suffix) |
     sort_by(.[0].suffix | tonumber) | reverse |

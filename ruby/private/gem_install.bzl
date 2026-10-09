@@ -103,7 +103,7 @@ to build a Ruby gem package from the sources.
 ```output
 |-- BUILD
 |-- Gemfile
-|-- WORKSPACE
+|-- MODULE.bazel
 |-- gem.gemspec
 `-- lib
     |-- BUILD

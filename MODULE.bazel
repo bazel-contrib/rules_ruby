@@ -7,12 +7,16 @@ module(
     compatibility_level = 1,
 )
 
+# Use the Apple C++ toolchain for development on macOS. This must precede
+# rules_cc so Bazel registers it before the generic Unix toolchain.
+bazel_dep(name = "apple_support", version = "1.24.2", dev_dependency = True)
+
 # Lower-bound dependency versions.
 # These should NOT be increased unless needed, as bumping our lower-bound may change
 # the versions resolved in users repositories.
 bazel_dep(name = "bazel_features", version = "1.9.0")
 bazel_dep(name = "bazel_skylib", version = "1.3.0")
-bazel_dep(name = "cgrindel_bazel_starlib", version = "0.27.0")
+bazel_dep(name = "cgrindel_bazel_starlib", version = "0.30.0")
 bazel_dep(name = "platforms", version = "0.0.5")
 bazel_dep(name = "rules_cc", version = "0.0.9")
 bazel_dep(name = "rules_java", version = "7.2.0")
@@ -32,4 +36,13 @@ bazel_dep(name = "stardoc", version = "0.8.0", dev_dependency = True)
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk", dev_dependency = True)
 go_sdk.download(version = "1.23.1")
 
-# TODO: should we register any toolchain by default?
+# Root modules can override this fallback by declaring a toolchain named "ruby".
+ruby = use_extension("//ruby:extensions.bzl", "ruby")
+ruby.toolchain(
+    name = "ruby",
+    portable_ruby = True,
+    version = "4.0.7",
+)
+use_repo(ruby, "ruby", "ruby_toolchains")
+
+register_toolchains("@ruby_toolchains//:all")

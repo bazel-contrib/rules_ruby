@@ -172,10 +172,6 @@ def rb_binary_impl(ctx):
         java_bin = java_toolchain.java_runtime.java_executable_runfiles_path[3:]
 
     for dep in transitive_deps.to_list():
-        # TODO: Remove workspace name check together with `rb_bundle()`
-        if dep.label.workspace_name.endswith("bundle"):
-            bundler = True
-
         if BundlerInfo in dep:
             info = dep[BundlerInfo]
             bundler_srcs.extend([info.gemfile, info.bin, info.path])
@@ -191,8 +187,7 @@ def rb_binary_impl(ctx):
     if len(bundler_srcs) > 0:
         transitive_srcs = depset(bundler_srcs, transitive = [transitive_srcs])
 
-    bundle_env = get_bundle_env(ctx.attr.env, ctx.attr.deps)
-    env.update(bundle_env)
+    env.update(get_bundle_env(ctx.attr.deps))
     env.update(ruby_toolchain.env)
     env.update(ctx.attr.env)
 
@@ -247,7 +242,6 @@ def rb_binary_impl(ctx):
             transitive_data = depset(tools, transitive = [transitive_data]),
             transitive_deps = transitive_deps,
             transitive_srcs = transitive_srcs,
-            bundle_env = bundle_env,
         ),
         RunEnvironmentInfo(
             environment = env,
@@ -278,7 +272,7 @@ in `BUILD` files to define the packages for the gem.
 ```output
 |-- BUILD
 |-- Gemfile
-|-- WORKSPACE
+|-- MODULE.bazel
 |-- gem.gemspec
 `-- lib
     |-- BUILD
