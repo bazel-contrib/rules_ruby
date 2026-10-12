@@ -29,6 +29,7 @@ def _resolve_version(module_ctx, toolchain):
 ruby_bundle_fetch = tag_class(attrs = {
     "name": attr.string(doc = "Resulting repository name for the bundle"),
     "srcs": attr.label_list(),
+    "generated_srcs": attr.label_list(doc = "Build outputs the Gemfile needs, staged at build time. See `rb_bundle_fetch`."),
     "env": attr.string_dict(),
     "env_file": attr.label(doc = """\
 Optional file with KEY=VALUE lines providing environment variables for the \
@@ -88,6 +89,7 @@ def _ruby_module_extension(module_ctx):
             rb_bundle_fetch(
                 name = bundle_fetch.name,
                 srcs = bundle_fetch.srcs,
+                generated_srcs = bundle_fetch.generated_srcs,
                 env = bundle_fetch.env,
                 env_file = bundle_fetch.env_file,
                 extra_args = bundle_fetch.extra_args,
