@@ -1,0 +1,9 @@
+# Runfiles are off by default on Windows.
+startup --windows_enable_symlinks
+build --enable_runfiles
+
+common --lockfile_mode=off
+
+# Do not autoload language-specific rules removed in Bazel core.
+# https://github.com/bazelbuild/bazel/issues/23043
+common --incompatible_autoload_externally=
