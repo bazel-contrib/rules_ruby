@@ -1,0 +1,33 @@
+"Bazel dependencies"
+
+bazel_dep(name = "bazel_skylib", version = "1.9.2", dev_dependency = True)
+bazel_dep(name = "rules_ruby", version = "0.0.0", dev_dependency = True)
+local_path_override(
+    module_name = "rules_ruby",
+    path = "../..",
+)
+
+ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
+ruby.toolchain(
+    name = "ruby",
+    portable_ruby = True,
+    version_file = "//:.ruby-version",
+)
+ruby.bundle_fetch(
+    name = "bundle",
+    srcs = ["//:greeter.gemspec"],
+    gem_checksums = {
+        "diff-lcs-1.5.1": "273223dfb40685548436d32b4733aa67351769c7dea621da7d9dd4813e63ddfe",
+        "rspec-3.13.0": "d490914ac1d5a5a64a0e1400c1d54ddd2a501324d703b8cfe83f458337bab993",
+        "rspec-core-3.13.2": "94fbda6e4738e478f1c7532b7cc241272fcdc8b9eac03a97338b1122e4573300",
+        "rspec-expectations-3.13.3": "0e6b5af59b900147698ea0ff80456c4f2e69cac4394fbd392fbd1ca561f66c58",
+        "rspec-mocks-3.13.2": "2327335def0e1665325a9b617e3af9ae20272741d80ac550336309a7c59abdef",
+        "rspec-support-3.13.2": "cea3a2463fd9b84b9dcc9685efd80ea701aa8f7b3decb3b3ce795ed67737dbec",
+    },
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+    generated_srcs = ["//lib:greeter/version.rb"],
+)
+use_repo(ruby, "bundle", "ruby", "ruby_toolchains")
+
+register_toolchains("@ruby_toolchains//:all")
