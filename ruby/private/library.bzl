@@ -7,6 +7,7 @@ load(
     "RubyFilesInfo",
     "get_transitive_data",
     "get_transitive_deps",
+    "get_transitive_load_paths",
     "get_transitive_runfiles",
     "get_transitive_srcs",
 )
@@ -45,6 +46,7 @@ def _rb_library_impl(ctx):
             binary = None,
             transitive_data = depset(transitive_data),
             transitive_deps = depset(transitive_deps),
+            transitive_load_paths = get_transitive_load_paths([], ctx.attr.deps),
             transitive_srcs = depset(transitive_srcs),
         ),
     ]

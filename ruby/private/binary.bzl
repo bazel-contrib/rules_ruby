@@ -8,6 +8,7 @@ load(
     "get_bundle_env",
     "get_transitive_data",
     "get_transitive_deps",
+    "get_transitive_load_paths",
     "get_transitive_runfiles",
     "get_transitive_srcs",
 )
@@ -75,7 +76,7 @@ Supports `$(location)` expansion for targets from `srcs`, `data` and `deps`.
 }
 
 # buildifier: disable=function-docstring
-def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {}, java_bin = "", jars_home_strip_suffix = "", coverage_helper = "", runfiles_helper = "", is_jruby = False):
+def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {}, java_bin = "", jars_home_strip_suffix = "", coverage_helper = "", runfiles_helper = "", is_jruby = False, load_paths = []):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
     if ctx.attr.ruby != None:
         toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
@@ -140,6 +141,7 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
             "{locate_binary_in_runfiles}": locate_binary_in_runfiles,
             "{coverage_helper}": coverage_helper,
             "{runfiles_helper}": runfiles_helper,
+            "{load_paths}": " ".join(['"%s"' % path for path in load_paths]),
             "{is_jruby}": "true" if is_jruby else "",
         },
     )
@@ -157,6 +159,7 @@ def rb_binary_impl(ctx):
     # TODO: avoid expanding the depset to a list, it may be expensive in a large graph
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps)
     transitive_deps = get_transitive_deps(ctx.attr.deps)
+    transitive_load_paths = get_transitive_load_paths([], ctx.attr.deps)
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps)
 
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
@@ -229,6 +232,7 @@ def rb_binary_impl(ctx):
         coverage_helper = _to_rlocation_path(ctx, ctx.file._coverage_helper),
         runfiles_helper = _to_rlocation_path(ctx, ctx.file._runfiles_helper),
         is_jruby = ruby_toolchain.version.startswith("jruby"),
+        load_paths = transitive_load_paths.to_list(),
     )
 
     return [
@@ -241,6 +245,7 @@ def rb_binary_impl(ctx):
             binary = executable,
             transitive_data = depset(tools, transitive = [transitive_data]),
             transitive_deps = transitive_deps,
+            transitive_load_paths = transitive_load_paths,
             transitive_srcs = transitive_srcs,
         ),
         RunEnvironmentInfo(

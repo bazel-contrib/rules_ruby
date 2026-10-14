@@ -16,3 +16,14 @@ proto_library(
     visibility = ["//visibility:public"],
     deps = ["@protobuf//:timestamp_proto"],
 )
+
+# Bundles the other protos without compiling any sources of its own,
+# like the `all_protos` style targets in envoy_api.
+proto_library(
+    name = "all_protos",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":foo_proto",
+        ":subdir_proto",
+    ],
+)

@@ -6,6 +6,7 @@ RubyFilesInfo = provider(
         "binary": "Main Ruby script.",
         "transitive_data": "Transitive data files to add to runfiles.",
         "transitive_deps": "Transitive dependencies to get files from.",
+        "transitive_load_paths": "Transitive runfiles-relative directories to add to the Ruby load path.",
         "transitive_srcs": "Transitive Ruby files.",
     },
 )
@@ -57,6 +58,25 @@ def get_transitive_data(data, deps):
     return depset(
         data,
         transitive = [dep[RubyFilesInfo].transitive_data for dep in deps],
+    )
+
+def get_transitive_load_paths(load_paths, deps):
+    """Obtain the load path directories for a target and its transitive dependencies.
+
+    Args:
+        load_paths: a list of runfiles-relative directories
+        deps: a list of targets that are direct dependencies
+    Returns:
+        a collection of the transitive load path directories
+    """
+    return depset(
+        load_paths,
+        transitive = [
+            # Not every RubyFilesInfo producer sets this field.
+            getattr(dep[RubyFilesInfo], "transitive_load_paths", None) or depset()
+            for dep in deps
+            if RubyFilesInfo in dep
+        ],
     )
 
 def get_transitive_deps(deps):
