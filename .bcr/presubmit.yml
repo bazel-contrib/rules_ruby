@@ -3,8 +3,7 @@ bcr_test_module:
   module_path: "examples/gem"
   matrix:
     bazel: ["9.x", "8.x", "7.x"]
-    # NB: Windows is removed due to https://github.com/bazel-contrib/rules_ruby/issues/64
-    platform: ["debian10", "macos", "ubuntu2004"]
+    platform: ["debian10", "macos", "ubuntu2004", "windows"]
   tasks:
     run_tests:
       name: "Run test module"
