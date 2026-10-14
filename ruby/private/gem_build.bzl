@@ -17,8 +17,8 @@ def _rb_gem_build_impl(ctx):
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
     transitive_deps = get_transitive_deps(ctx.attr.deps).to_list()
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
-    java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
-    ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
+    java_toolchain = ctx.exec_groups["ruby"].toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
+    ruby_toolchain = ctx.exec_groups["ruby"].toolchains["@rules_ruby//ruby:toolchain_type"]
     if ctx.attr.ruby != None:
         ruby_toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
     tools = []
@@ -61,6 +61,7 @@ def _rb_gem_build_impl(ctx):
     args = ctx.actions.args()
     args.add(gem_builder)
     ctx.actions.run(
+        exec_group = "ruby",
         executable = ruby_toolchain.ruby,
         inputs = depset(inputs),
         outputs = [ctx.outputs.gem],
@@ -114,10 +115,13 @@ rb_gem_build = rule(
     outputs = {
         "gem": "%{name}.gem",
     },
-    toolchains = [
-        "@rules_ruby//ruby:toolchain_type",
-        "@bazel_tools//tools/jdk:runtime_toolchain_type",
-    ],
+    # JRuby runs Ruby and Java tools in the same action, on the same platform.
+    exec_groups = {
+        "ruby": exec_group(toolchains = [
+            "@rules_ruby//ruby:toolchain_type",
+            "@bazel_tools//tools/jdk:runtime_toolchain_type",
+        ]),
+    },
     doc = """
 Builds a Ruby gem.
 
