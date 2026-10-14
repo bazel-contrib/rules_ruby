@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: bazel-contrib/setup-bazel@0.19.0
+      - uses: bazel-contrib/setup-bazel@0.19.1
         with:
           bazelrc: common --announce_rc --color=yes
           repository-cache: true
@@ -56,7 +56,7 @@ jobs:
         working-directory: examples/gem
     steps:
       - uses: actions/checkout@v7
-      - uses: bazel-contrib/setup-bazel@0.19.0
+      - uses: bazel-contrib/setup-bazel@0.19.1
         with:
           bazelrc: common --announce_rc --color=yes
           module-root: examples/gem
@@ -113,7 +113,7 @@ jobs:
         working-directory: examples/jekyll
     steps:
       - uses: actions/checkout@v7
-      - uses: bazel-contrib/setup-bazel@0.19.0
+      - uses: bazel-contrib/setup-bazel@0.19.1
         with:
           bazelrc: common --announce_rc --color=yes
           module-root: examples/jekyll
@@ -140,7 +140,7 @@ jobs:
         working-directory: examples/native_ext
     steps:
       - uses: actions/checkout@v7
-      - uses: bazel-contrib/setup-bazel@0.19.0
+      - uses: bazel-contrib/setup-bazel@0.19.1
         with:
           bazelrc: common --announce_rc --color=yes
           module-root: examples/native_ext
@@ -172,7 +172,7 @@ jobs:
         working-directory: examples/deep_gem
     steps:
       - uses: actions/checkout@v7
-      - uses: bazel-contrib/setup-bazel@0.19.0
+      - uses: bazel-contrib/setup-bazel@0.19.1
         with:
           bazelrc: common --announce_rc --color=yes
           module-root: examples/deep_gem
@@ -204,7 +204,7 @@ jobs:
         working-directory: examples/rails
     steps:
       - uses: actions/checkout@v7
-      - uses: bazel-contrib/setup-bazel@0.19.0
+      - uses: bazel-contrib/setup-bazel@0.19.1
         with:
           bazelrc: common --announce_rc
           module-root: examples/rails
@@ -235,7 +235,7 @@ jobs:
         working-directory: examples/proto
     steps:
       - uses: actions/checkout@v7
-      - uses: bazel-contrib/setup-bazel@0.19.0
+      - uses: bazel-contrib/setup-bazel@0.19.1
         with:
           bazelrc: common --announce_rc
           module-root: examples/proto
