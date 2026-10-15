@@ -13,7 +13,7 @@ single_version_override(
 force_bazel9_compat = None
 
 bazel_dep(name = "rules_go", version = "0.64.2", repo_name = force_bazel9_compat)
-bazel_dep(name = "rules_kotlin", version = "2.4.20", repo_name = force_bazel9_compat)
+bazel_dep(name = "rules_kotlin", version = "2.4.21", repo_name = force_bazel9_compat)
 
 local_path_override(
     module_name = "rules_ruby",
