@@ -186,6 +186,28 @@ jobs:
           ruby-version: 3.3.12
       - run: ./do_test
 
+  examples-stamped-gem:
+    name: Examples / Stamped Gem
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: examples/stamped_gem
+    steps:
+      - uses: actions/checkout@v7
+      - uses: bazel-contrib/setup-bazel@0.19.0
+        with:
+          bazelrc: common --announce_rc --color=yes
+          module-root: examples/stamped_gem
+          repository-cache: true
+      - run: bazel test ...
+      - run: bazel test --stamp ...
+      - run: bazel build --stamp :gem-build
+      - name: Test with a CRLF Gemfile.lock
+        run: |
+          sed -i 's/$/\r/' Gemfile.lock
+          bazel test ...
+
   examples-rails:
     name: Examples / Rails
     runs-on: ${{ matrix.os }}
@@ -253,6 +275,7 @@ jobs:
       - examples-jekyll
       - examples-native_ext
       - examples-rails
+      - examples-stamped-gem
     uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7
     with:
       mount_bazel_caches: false
