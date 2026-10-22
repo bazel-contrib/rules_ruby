@@ -81,6 +81,7 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
         toolchain = ctx.attr.ruby[platform_common.ToolchainInfo]
 
     binary_path = ""
+    binary_fallback_path = ""
     locate_binary_in_runfiles = ""
     ruby_binary_name = toolchain.ruby.basename
     if binary and binary != toolchain.ruby:
@@ -90,11 +91,22 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
         # so for now we skip locating the binary in runfiles. This only prevents
         # running binary scripts directly and should not affect normal `bazel run`.
         # See BATCH_RLOCATION_FUNCTION comments for more details.
-        if binary_path.startswith("../") and not _is_windows(ctx):
-            binary_path = _to_rlocation_path(ctx, binary)
-            locate_binary_in_runfiles = "true"
-        else:
+        if _is_windows(ctx):
             binary_path = _normalize_path(ctx, binary_path)
+        else:
+            binary_path = _to_rlocation_path(ctx, binary)
+
+            # Binaries outside the main repository are always expected to be
+            # locatable through runfiles. Binaries in the main repository are
+            # resolved through runfiles when possible, so that they can be
+            # executed from any working directory (e.g. via --run_under or by
+            # running the launcher directly), and fall back to the relative
+            # path, which requires the default `bazel run` working directory.
+            if binary.short_path.startswith("../"):
+                locate_binary_in_runfiles = "true"
+            else:
+                binary_fallback_path = _normalize_path(ctx, binary.short_path)
+                locate_binary_in_runfiles = "fallback"
 
         # JRuby's .cmd stubs are plain batch files, so they must be executed
         # directly. MRI's are Ruby polyglots and only work via the interpreter.
@@ -130,6 +142,7 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
         substitutions = {
             "{args}": args,
             "{binary}": binary_path,
+            "{binary_fallback}": binary_fallback_path,
             "{env}": _convert_env_to_script(ctx, environment),
             "{bundler_command}": bundler_command,
             "{jars_home_strip_suffix}": jars_home_strip_suffix,
