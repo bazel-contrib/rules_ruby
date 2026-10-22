@@ -76,10 +76,15 @@ if [ -n "{bundler_command}" ]; then
   fi
 fi
 
-if [ -n "{locate_binary_in_runfiles}" ]; then
+if [ "{locate_binary_in_runfiles}" = "true" ]; then
   binary="$(rlocation "{binary}")" \
     || (fail "Failed to locate {binary} in the runfiles." \
       "Did you forget to add the binary to the deps?")
+elif [ "{locate_binary_in_runfiles}" = "fallback" ]; then
+  binary="$(rlocation "{binary}" 2>/dev/null || true)"
+  if [ -z "$binary" ] || [ ! -f "$binary" ]; then
+    binary="{binary_fallback}"
+  fi
 else
   binary="{binary}"
 fi

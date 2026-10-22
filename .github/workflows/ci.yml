@@ -95,6 +95,13 @@ jobs:
         with:
           name: coverage-${{ matrix.os }}-${{ matrix.ruby }}
           path: examples/gem/bazel-testlogs/spec/add/coverage.dat
+      # rb_binary launchers must resolve the main script from any working
+      # directory, not only under `bazel run` defaults.
+      - run: |
+          launcher="$PWD/$(bazel cquery --output=starlark --starlark:expr='target.files_to_run.executable.path' lib/gem:add-numbers)"
+          cd /
+          "$launcher" 1 2
+        if: matrix.os != 'windows-latest'
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
 
