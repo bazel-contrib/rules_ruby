@@ -29,6 +29,7 @@ def _resolve_version(module_ctx, toolchain):
 ruby_bundle_fetch = tag_class(attrs = {
     "name": attr.string(doc = "Resulting repository name for the bundle"),
     "srcs": attr.label_list(),
+    "generated_srcs": attr.label_list(doc = "Build outputs the Gemfile needs, staged at build time. See `rb_bundle_fetch`."),
     "env": attr.string_dict(),
     "extra_args": attr.string_list(doc = "Extra arguments appended to `bundle install`. Supports `$(location ...)` against `data`."),
     "data": attr.label_list(doc = "Files referenced from `extra_args` via `$(location ...)`."),
@@ -80,6 +81,7 @@ def _ruby_module_extension(module_ctx):
             rb_bundle_fetch(
                 name = bundle_fetch.name,
                 srcs = bundle_fetch.srcs,
+                generated_srcs = bundle_fetch.generated_srcs,
                 env = bundle_fetch.env,
                 extra_args = bundle_fetch.extra_args,
                 data = [str(label) for label in bundle_fetch.data],
