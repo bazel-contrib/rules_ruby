@@ -233,6 +233,15 @@ def _rb_bundle_fetch_impl(repository_ctx):
         },
     )
 
+    if repository_ctx.attr.env_bzl:
+        env_load = 'load("{}", "bundle_env")'.format(str(repository_ctx.attr.env_bzl))
+        env_value = "bundle_env"
+        if repository_ctx.attr.env:
+            env_value = "bundle_env | {}".format(repr(repository_ctx.attr.env))
+    else:
+        env_load = ""
+        env_value = repr(repository_ctx.attr.env)
+
     repository_ctx.template(
         "BUILD",
         repository_ctx.attr._build_tpl,
@@ -246,7 +255,8 @@ def _rb_bundle_fetch_impl(repository_ctx):
             "{gems}": _join_and_indent(gem_full_names),
             "{gem_fragments}": "".join(gem_fragments),
             "{gem_install_fragments}": "".join(gem_install_fragments),
-            "{env}": repr(repository_ctx.attr.env),
+            "{env_load}": env_load,
+            "{env}": env_value,
             "{extra_args}": repr(repository_ctx.attr.extra_args),
             "{data}": _join_and_indent(repository_ctx.attr.data),
             "{binstubs}": repr(repository_ctx.attr.binstubs),
@@ -308,6 +318,11 @@ rb_bundle_fetch = repository_rule(
             doc = "Environment variables to use during installation. Values support " +
                   "`$(location ...)` expansion against `data` (forwarded to the " +
                   "generated rb_bundle_install `env`).",
+        ),
+        "env_bzl": attr.label(
+            doc = "Optional .bzl file exporting `bundle_env` (dict), merged into the " +
+                  "generated rb_bundle_install `env`. Values are resolved at " +
+                  "BUILD-evaluation time, so they can come from generated repositories.",
         ),
         "extra_args": attr.string_list(
             doc = "Extra arguments appended to the `bundle install` command line " +

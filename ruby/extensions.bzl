@@ -30,6 +30,12 @@ ruby_bundle_fetch = tag_class(attrs = {
     "name": attr.string(doc = "Resulting repository name for the bundle"),
     "srcs": attr.label_list(),
     "env": attr.string_dict(),
+    "env_bzl": attr.label(doc = """\
+Optional .bzl file exporting a dict named `bundle_env`, merged into the generated \
+rb_bundle_install `env`. Unlike `env` (static strings), values are resolved at \
+BUILD-evaluation time, so they can come from generated repositories (e.g. a \
+machine-resolved toolchain path).\
+""",),
     "extra_args": attr.string_list(doc = "Extra arguments appended to `bundle install`. Supports `$(location ...)` against `data`."),
     "data": attr.label_list(doc = "Files referenced from `extra_args` via `$(location ...)`."),
     "binstubs": attr.bool(default = True, doc = "Run `bundle binstubs --all` after install. Set False for cross-platform bundles."),
@@ -81,6 +87,7 @@ def _ruby_module_extension(module_ctx):
                 name = bundle_fetch.name,
                 srcs = bundle_fetch.srcs,
                 env = bundle_fetch.env,
+                env_bzl = bundle_fetch.env_bzl,
                 extra_args = bundle_fetch.extra_args,
                 data = [str(label) for label in bundle_fetch.data],
                 binstubs = bundle_fetch.binstubs,
