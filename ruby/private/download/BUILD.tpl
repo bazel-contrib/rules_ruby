@@ -73,6 +73,7 @@ rb_toolchain(
         "@platforms//os:windows": "dist/bin/bundle.cmd",
         "//conditions:default": "dist/bin/bundle",
     }),
+    bundle_build_env = {bundle_build_env},
     env = {env},
     files = [":files"],
     gem = select({

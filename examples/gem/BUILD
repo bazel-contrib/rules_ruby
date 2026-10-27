@@ -45,6 +45,13 @@ sh_test(
     data = ["@bundle//:BUILD"],
 )
 
+sh_test(
+    name = "launcher_env_check_test",
+    srcs = ["launcher_env_check.sh"],
+    args = ["$(location //lib/gem:add-numbers)"],
+    data = ["//lib/gem:add-numbers"],
+)
+
 rb_binary(
     name = "rake",
     main = "@bundle//bin:rake",

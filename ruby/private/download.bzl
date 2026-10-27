@@ -142,6 +142,7 @@ def _rb_download_impl(repository_ctx):
 
     engine = "ruby"
     env = {}
+    bundle_build_env = {}
     ruby_binary_name = "ruby"
     gem_binary_name = "gem"
 
@@ -201,12 +202,12 @@ def _rb_download_impl(repository_ctx):
 
         # Portable Ruby may ship with libyaml and openssl which are needed to compile the
         # psych and openssl gems respectively when built with --incompatible_strict_action_env).
-        # TODO: This won't work on RBE.
-        dist_dir = str(repository_ctx.path("dist"))
-        if repository_ctx.path("dist/include/yaml.h").exists:
-            env.update({"BUNDLE_BUILD__PSYCH": "--with-libyaml-dir=" + dist_dir})
-        if repository_ctx.path("dist/include/openssl").exists:
-            env.update({"BUNDLE_BUILD__OPENSSL": "--with-openssl-dir=" + dist_dir})
+        # The paths are relative to this repository and are made absolute when the action
+        # runs (see `resolve_bundle_build_env`), so the repository has no absolute paths.
+        bundle_build_env = portable_ruby_bundle_build_env(
+            has_libyaml = repository_ctx.path("dist/include/yaml.h").exists,
+            has_openssl = repository_ctx.path("dist/include/openssl").exists,
+        )
     else:
         _install_via_ruby_build(repository_ctx, version)
 
@@ -228,6 +229,7 @@ def _rb_download_impl(repository_ctx):
             "{ruby_binary_name}": ruby_binary_name,
             "{gem_binary_name}": gem_binary_name,
             "{env}": repr(env),
+            "{bundle_build_env}": repr(bundle_build_env),
             "{includes}": repr(includes),
         },
     )
@@ -240,6 +242,58 @@ def _rb_download_impl(repository_ctx):
             "{ruby_engine}": engine,
         },
     )
+
+    # Bazel 8.3+ can reuse the repository from the repository cache when it is
+    # marked reproducible. Only do that when nothing host-specific was written.
+    if hasattr(repository_ctx, "repo_metadata") and is_reproducible(
+        version = version,
+        portable_ruby = repository_ctx.attr.portable_ruby,
+        is_windows_target = is_windows_target,
+    ):
+        return repository_ctx.repo_metadata(reproducible = True)
+    return None
+
+def portable_ruby_bundle_build_env(has_libyaml, has_openssl):
+    """Returns Bundler build options for libraries shipped with portable Ruby.
+
+    Values are `<flag>=<path relative to the repository root>`. Rules that
+    compile native extensions turn the path into an absolute one at action time
+    with `resolve_bundle_build_env`.
+
+    Args:
+        has_libyaml: whether `dist/` ships libyaml headers
+        has_openssl: whether `dist/` ships openssl headers
+
+    Returns:
+        dict of environment variable name to relative value
+    """
+    env = {}
+    if has_libyaml:
+        env["BUNDLE_BUILD__PSYCH"] = "--with-libyaml-dir=dist"
+    if has_openssl:
+        env["BUNDLE_BUILD__OPENSSL"] = "--with-openssl-dir=dist"
+    return env
+
+def is_reproducible(version, portable_ruby, is_windows_target):
+    """Returns whether the downloaded Ruby repository is reproducible.
+
+    Only portable Ruby is: it is a checksummed archive and writes no absolute
+    paths. System Ruby depends on the host, TruffleRuby records Homebrew
+    prefixes, and JRuby, Windows and ruby-build installs are not covered.
+
+    Args:
+        version: Ruby version string
+        portable_ruby: value of the `portable_ruby` attribute
+        is_windows_target: whether the repository targets Windows
+
+    Returns:
+        bool
+    """
+    if not portable_ruby or is_windows_target:
+        return False
+    if version == "system" or version.startswith("jruby") or version.startswith("truffleruby"):
+        return False
+    return True
 
 def _read_version_from_file(repository_ctx):
     version = repository_ctx.read(repository_ctx.attr.version_file).strip("\r\n")
