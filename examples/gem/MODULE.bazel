@@ -27,6 +27,10 @@ ruby.bundle_fetch(
     env = {
         "BUNDLE_BUILD__FOO": "bar",
     },
+    # Exercises `env_file` end-to-end, so a regression in that plumbing
+    # (e.g. the file not being read, or the env being mangled into the
+    # generated repository) fails the build instead of going unnoticed.
+    env_file = "//:test_env",
     # Exercises `extra_args` end-to-end, so a regression in that plumbing
     # (e.g. the flag getting dropped or the command line getting mangled)
     # fails the build instead of going unnoticed.

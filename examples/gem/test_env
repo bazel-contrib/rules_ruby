@@ -1,0 +1,2 @@
+# KEY=VALUE file consumed via the rules_ruby `env_file` attribute (see MODULE.bazel).
+RULES_RUBY_ENV_FILE_TEST=exercised

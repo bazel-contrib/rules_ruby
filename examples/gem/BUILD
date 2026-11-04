@@ -38,6 +38,13 @@ sh_test(
     deps = ["@bazel_tools//tools/bash/runfiles"],
 )
 
+sh_test(
+    name = "env_file_check_test",
+    srcs = ["env_file_check.sh"],
+    args = ["$(location @bundle//:BUILD)"],
+    data = ["@bundle//:BUILD"],
+)
+
 rb_binary(
     name = "rake",
     main = "@bundle//bin:rake",
