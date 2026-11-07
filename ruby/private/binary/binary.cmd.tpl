@@ -45,8 +45,11 @@ if "{bundler_command}" neq "" (
 )
 
 if "%COVERAGE%" == "1" (
-  echo>&2 ERROR: Code coverage is currently not supported on Windows.
-  exit 1
+  call :rlocation {coverage_helper} _coverage_helper_path
+  set "RUBYOPT=-r!_coverage_helper_path:\=/! !RUBYOPT!"
+  if "{is_jruby}" neq "" (
+    set "JRUBY_OPTS=--debug !JRUBY_OPTS!"
+  )
 )
 
 {bundler_command} {ruby_binary_name} {binary} {args} %*

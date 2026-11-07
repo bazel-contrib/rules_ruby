@@ -79,7 +79,6 @@ jobs:
       - run: bazel run :gem-release "--" --help
       - run: bazel test ...
       - name: Run coverage
-        if: matrix.os != 'windows-latest'
         shell: bash
         run: |
           bazel coverage //spec:add
@@ -90,7 +89,6 @@ jobs:
             exit 1
           fi
       - name: Upload coverage report
-        if: matrix.os != 'windows-latest'
         uses: actions/upload-artifact@v7
         with:
           name: coverage-${{ matrix.os }}-${{ matrix.ruby }}
