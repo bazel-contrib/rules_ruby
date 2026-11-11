@@ -9,7 +9,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.2)
-    concurrent-ruby (1.3.5)
+    concurrent-ruby (1.3.8)
     date (3.5.1)
     date (3.5.1-java)
     debug (1.10.0)
@@ -22,7 +22,7 @@ GEM
       multi_json
     excon (1.3.2)
       logger
-    i18n (1.14.7)
+    i18n (1.15.2)
       concurrent-ruby (~> 1.0)
     io-console (0.8.0)
     io-console (0.8.0-java)
