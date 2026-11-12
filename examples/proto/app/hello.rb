@@ -1,10 +1,3 @@
-# TODO: is there a ruby runfiles helper?
-runfiles_dir = ENV["RUNFILES_DIR"]
-if runfiles_dir
-  main_root = File.join(runfiles_dir, "_main")
-  $LOAD_PATH.unshift(main_root) if Dir.exist?(main_root) && !$LOAD_PATH.include?(main_root)
-end
-
 require "grpc"
 require "proto/foo_pb"
 require "proto/foo_services_pb"

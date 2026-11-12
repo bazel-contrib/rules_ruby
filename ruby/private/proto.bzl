@@ -5,7 +5,7 @@ This file is loaded by `rules_ruby` (see its `rb_library` implementation) using
 """
 
 load("@protobuf//bazel/common:proto_info.bzl", "ProtoInfo")
-load("//ruby/private:providers.bzl", "RubyFilesInfo")
+load("//ruby/private:providers.bzl", "RubyFilesInfo", "get_transitive_load_paths")
 load(":proto_common.bzl", "proto_common")
 
 GRPC_PLUGIN_TOOLCHAIN = "@rules_ruby//ruby:ruby_grpc_protoc_plugin.toolchain_type"
@@ -13,11 +13,43 @@ PROTO_TOOLCHAIN = "@protobuf//bazel/private:proto_toolchain_type"
 RUBY_OUTPUT_FILE = "{proto_file_basename}_pb.rb"
 RUBY_SERVICE_OUTPUT_FILE = "{proto_file_basename}_services_pb.rb"
 
+# The google-protobuf gem already ships Ruby code for these, and generating our
+# own copies would shadow the gem's on the load path.
+PROTOBUF_WELL_KNOWN_TYPES_REPO = Label("@protobuf//:BUILD").repo_name
+
+def _ruby_files_info(ctx, srcs = [], load_paths = []):
+    deps = ctx.rule.attr.deps
+    return RubyFilesInfo(
+        transitive_srcs = depset(srcs, transitive = [
+            dep[RubyFilesInfo].transitive_srcs
+            for dep in deps
+            if RubyFilesInfo in dep
+        ]),
+        transitive_load_paths = get_transitive_load_paths(load_paths, deps),
+        transitive_deps = depset(),
+        transitive_data = depset(),
+    )
+
+def _runfiles_load_path(ctx, output_root, proto_outdir):
+    """Converts a protoc output directory into a path relative to the runfiles root."""
+    path = proto_outdir.removeprefix(output_root.path).removeprefix("/")
+    if path.startswith("external/"):
+        return path.removeprefix("external/")
+    if path.startswith("../"):
+        return path.removeprefix("../")
+    return ctx.workspace_name + "/" + path if path else ctx.workspace_name
+
 def _ruby_proto_aspect_impl(target, ctx):
     if not ProtoInfo in target:
         return []
 
     proto_info = target[ProtoInfo]
+
+    # Aggregator proto_library targets (deps only, no srcs) have nothing to compile.
+    is_aggregator = not proto_info.direct_sources
+    if is_aggregator or target.label.repo_name == PROTOBUF_WELL_KNOWN_TYPES_REPO:
+        return [_ruby_files_info(ctx)]
+
     protoc_info = ctx.exec_groups["proto"].toolchains[PROTO_TOOLCHAIN].proto
     grpc_info = ctx.exec_groups["proto"].toolchains[GRPC_PLUGIN_TOOLCHAIN].proto
     msg_outputs = proto_common.declare_generated_files(ctx.actions, proto_info, "_pb.rb")
@@ -64,14 +96,10 @@ def _ruby_proto_aspect_impl(target, ctx):
     )
 
     return [
-        RubyFilesInfo(
-            transitive_srcs = depset(msg_outputs + service_outputs, transitive = [
-                dep[RubyFilesInfo].transitive_srcs
-                for dep in ctx.rule.attr.deps
-                if RubyFilesInfo in dep
-            ]),
-            transitive_deps = depset(),
-            transitive_data = depset(),
+        _ruby_files_info(
+            ctx,
+            srcs = msg_outputs + service_outputs,
+            load_paths = [_runfiles_load_path(ctx, msg_outputs[0].root, proto_outdir)],
         ),
     ]
 
