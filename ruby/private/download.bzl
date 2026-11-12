@@ -143,6 +143,7 @@ def _rb_download_impl(repository_ctx):
     engine = "ruby"
     env = {}
     bundle_build_env = {}
+    sha256 = None
     ruby_binary_name = "ruby"
     gem_binary_name = "gem"
 
@@ -193,7 +194,7 @@ def _rb_download_impl(repository_ctx):
         # (multi-platform mode picking the Windows per-platform repo).
         _install_via_rubyinstaller(repository_ctx, version)
     elif repository_ctx.attr.portable_ruby:
-        _install_portable_ruby(
+        sha256 = _install_portable_ruby(
             repository_ctx,
             version,
             platform,
@@ -249,6 +250,8 @@ def _rb_download_impl(repository_ctx):
         version = version,
         portable_ruby = repository_ctx.attr.portable_ruby,
         is_windows_target = is_windows_target,
+        platform = repository_ctx.attr.platform,
+        sha256 = sha256,
     ):
         return repository_ctx.repo_metadata(reproducible = True)
     return None
@@ -274,22 +277,25 @@ def portable_ruby_bundle_build_env(has_libyaml, has_openssl):
         env["BUNDLE_BUILD__OPENSSL"] = "--with-openssl-dir=dist"
     return env
 
-def is_reproducible(version, portable_ruby, is_windows_target):
+def is_reproducible(version, portable_ruby, is_windows_target, platform, sha256):
     """Returns whether the downloaded Ruby repository is reproducible.
 
-    Only portable Ruby is: it is a checksummed archive and writes no absolute
-    paths. System Ruby depends on the host, TruffleRuby records Homebrew
-    prefixes, and JRuby, Windows and ruby-build installs are not covered.
+    Only portable Ruby is, and only when the archive is pinned by sha256 and
+    the platform is set explicitly rather than detected from the host. System
+    Ruby depends on the host, TruffleRuby records Homebrew prefixes, and JRuby,
+    Windows and ruby-build installs are not covered.
 
     Args:
         version: Ruby version string
         portable_ruby: value of the `portable_ruby` attribute
         is_windows_target: whether the repository targets Windows
+        platform: value of the `platform` attribute (empty when detected from the host)
+        sha256: sha256 the portable Ruby archive was verified against, or None
 
     Returns:
         bool
     """
-    if not portable_ruby or is_windows_target:
+    if not portable_ruby or is_windows_target or not platform or not sha256:
         return False
     if version == "system" or version.startswith("jruby") or version.startswith("truffleruby"):
         return False
@@ -403,6 +409,9 @@ def _install_portable_ruby(repository_ctx, ruby_version, platform, checksums):
         ruby_version: Ruby version (e.g., "3.4.8")
         platform: Canonical platform key (e.g., "x86_64_linux")
         checksums: Dict mapping artifact names to SHA256 checksums
+
+    Returns:
+        The sha256 the archive was verified against, or None when unknown.
     """
     if platform not in PORTABLE_RUBY_PLATFORMS:
         fail("portable Ruby is not available for platform {}; supported: {}".format(
@@ -439,6 +448,7 @@ def _install_portable_ruby(repository_ctx, ruby_version, platform, checksums):
         stripPrefix = "ruby-{}".format(ruby_version),
         **kwargs
     )
+    return kwargs.get("sha256")
 
 def _symlink_system_ruby(repository_ctx):
     _symlink_system_ruby_dir("bindir", repository_ctx)
