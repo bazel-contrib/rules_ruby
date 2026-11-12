@@ -46,7 +46,8 @@ if "{bundler_command}" neq "" (
 
 if "%COVERAGE%" == "1" (
   call :rlocation {coverage_helper} _coverage_helper_path
-  set "RUBYOPT=-r!_coverage_helper_path:\=/! !RUBYOPT!"
+  for %%a in ("!_coverage_helper_path!\..") do set "RUBYLIB=%%~fa;!RUBYLIB!"
+  set "RUBYOPT=-rrules_ruby_coverage !RUBYOPT!"
   if "{is_jruby}" neq "" (
     set "JRUBY_OPTS=--debug !JRUBY_OPTS!"
   )
