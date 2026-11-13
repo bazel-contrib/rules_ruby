@@ -151,7 +151,7 @@ def _rb_download_impl(repository_ctx):
     is_windows_target = platform.endswith("_windows")
 
     if version.startswith("jruby"):
-        _install_jruby(repository_ctx, version)
+        sha256 = _install_jruby(repository_ctx, version)
 
         engine = "jruby"
         ruby_binary_name = "jruby"
@@ -280,24 +280,30 @@ def portable_ruby_bundle_build_env(has_libyaml, has_openssl):
 def is_reproducible(version, portable_ruby, is_windows_target, platform, sha256):
     """Returns whether the downloaded Ruby repository is reproducible.
 
-    Only portable Ruby is, and only when the archive is pinned by sha256 and
-    the platform is set explicitly rather than detected from the host. System
-    Ruby depends on the host, TruffleRuby records Homebrew prefixes, and JRuby,
-    Windows and ruby-build installs are not covered.
+    Portable Ruby is, when the archive is pinned by sha256 and the platform is
+    set explicitly rather than detected from the host. JRuby is, when its
+    archive is pinned by sha256; the archive is the same on every platform, so
+    neither `portable_ruby` nor `platform` matter. System Ruby depends on the
+    host, TruffleRuby records Homebrew prefixes, and Windows and ruby-build
+    installs are not covered.
 
     Args:
         version: Ruby version string
         portable_ruby: value of the `portable_ruby` attribute
         is_windows_target: whether the repository targets Windows
         platform: value of the `platform` attribute (empty when detected from the host)
-        sha256: sha256 the portable Ruby archive was verified against, or None
+        sha256: sha256 the downloaded archive was verified against, or None
 
     Returns:
         bool
     """
-    if not portable_ruby or is_windows_target or not platform or not sha256:
+    if not sha256:
         return False
-    if version == "system" or version.startswith("jruby") or version.startswith("truffleruby"):
+    if version.startswith("jruby"):
+        return True
+    if not portable_ruby or is_windows_target or not platform:
+        return False
+    if version == "system" or version.startswith("truffleruby"):
         return False
     return True
 
@@ -337,9 +343,17 @@ def _install_jruby(repository_ctx, version):
 
     # Always create the Windows `.cmd` wrappers — JRuby's archive is the same
     # across platforms, and the BUILD.tpl select picks `bundle.cmd` / `jgem.cmd`
-    # when consumed at a Windows target config. Symlinks are harmless on Unix.
-    repository_ctx.symlink("dist/bin/bundle.bat", "dist/bin/bundle.cmd")
-    repository_ctx.symlink("dist/bin/jgem.bat", "dist/bin/jgem.cmd")
+    # when consumed at a Windows target config. They are copies rather than
+    # symlinks, which would point to an absolute path and keep the repository
+    # from being reproducible. They are harmless on Unix.
+    for name in ["bundle", "jgem"]:
+        repository_ctx.file(
+            "dist/bin/%s.cmd" % name,
+            repository_ctx.read("dist/bin/%s.bat" % name),
+            executable = True,
+        )
+
+    return sha256
 
 # https://github.com/oneclick/rubyinstaller2/wiki/FAQ#q-how-do-i-perform-a-silentunattended-install-with-the-rubyinstaller
 def _install_via_rubyinstaller(repository_ctx, version):

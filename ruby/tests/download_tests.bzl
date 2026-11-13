@@ -49,8 +49,12 @@ def _is_reproducible_test_impl(ctx):
     asserts.false(env, _is_reproducible("3.4.8", portable_ruby = False, is_windows_target = False, **pinned))
     asserts.false(env, _is_reproducible("3.4.8", portable_ruby = True, is_windows_target = True, **pinned))
     asserts.false(env, _is_reproducible("system", portable_ruby = True, is_windows_target = False, **pinned))
-    asserts.false(env, _is_reproducible("jruby-10.0.2.0", portable_ruby = True, is_windows_target = False, **pinned))
     asserts.false(env, _is_reproducible("truffleruby-25.0.0", portable_ruby = True, is_windows_target = False, **pinned))
+
+    # JRuby is reproducible once pinned; its archive is platform independent.
+    asserts.true(env, _is_reproducible("jruby-10.0.2.0", portable_ruby = True, is_windows_target = False, **pinned))
+    asserts.true(env, _is_reproducible("jruby-10.0.2.0", portable_ruby = False, is_windows_target = True, platform = "", sha256 = "0" * 64))
+    asserts.false(env, _is_reproducible("jruby-10.0.2.0", portable_ruby = True, is_windows_target = False, platform = "x86_64_linux", sha256 = None))
 
     # Host-detected platform or an unpinned download is not reproducible.
     asserts.false(env, _is_reproducible("3.4.8", portable_ruby = True, is_windows_target = False, platform = "", sha256 = "0" * 64))
