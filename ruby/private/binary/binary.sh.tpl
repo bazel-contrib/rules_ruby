@@ -90,7 +90,8 @@ else
 fi
 
 if [[ "${COVERAGE:-}" == "1" ]]; then
-  export RUBYOPT="-r$(rlocation {coverage_helper}) ${RUBYOPT:-}"
+  export RUBYLIB="$(dirname "$(rlocation "{coverage_helper}")")${RUBYLIB:+:${RUBYLIB}}"
+  export RUBYOPT="-rrules_ruby_coverage ${RUBYOPT:-}"
   if [ -n "{is_jruby}" ]; then
     export JRUBY_OPTS="--debug ${JRUBY_OPTS:-}"
   fi
