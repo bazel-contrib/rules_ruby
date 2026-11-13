@@ -80,6 +80,9 @@ jobs:
       - run: bazel test ...
       - name: Run coverage
         shell: bash
+        env:
+          # Git Bash rewrites `//spec:add` into `/spec:add` on Windows.
+          MSYS_NO_PATHCONV: 1
         run: |
           bazel coverage //spec:add
           COVERAGE_FILE=bazel-testlogs/spec/add/coverage.dat
