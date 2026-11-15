@@ -7,6 +7,7 @@ load(
     _convert_env_to_script = "convert_env_to_script",
     _is_windows = "is_windows",
     _normalize_path = "normalize_path",
+    _resolve_bundle_build_env = "resolve_bundle_build_env",
     _to_rlocation_path = "to_rlocation_path",
 )
 
@@ -64,6 +65,8 @@ def _rb_bundle_install_impl(ctx):
 
     env = {}
     env.update(toolchain.env)
+    if not _is_windows(ctx):
+        env.update(_resolve_bundle_build_env(toolchain.ruby.path, getattr(toolchain, "bundle_build_env", {})))
     env.update(attr_env)
 
     bundler_env = {}

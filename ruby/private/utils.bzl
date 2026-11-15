@@ -107,6 +107,35 @@ def convert_env_to_script(ctx, env):
 
     return newline.join(environment)
 
+def resolve_bundle_build_env(ruby_path, bundle_build_env):
+    """Makes the relative paths in `bundle_build_env` absolute at action time.
+
+    Each value has the form `<flag>=<path>`, with `<path>` relative to the
+    toolchain root: the directory two levels above the `ruby` binary
+    (`<root>/dist/bin/ruby`). The result is a shell value that prefixes the
+    path with `$PWD`, the execroot when the action starts. Paths are resolved on
+    the machine that runs the action, so this also works with remote execution.
+
+    Only for shell scripts. Windows toolchains never set `bundle_build_env`.
+
+    Args:
+        ruby_path: exec path of the toolchain `ruby` binary
+        bundle_build_env: dict of environment variable name to relative value
+
+    Returns:
+        dict of environment variable name to a quoted shell value
+    """
+    root = ruby_path.rpartition("/")[0].rpartition("/")[0].rpartition("/")[0]
+    resolved = {}
+    for name, value in bundle_build_env.items():
+        flag, sep, path = value.partition("=")
+        if not sep:
+            fail("invalid bundle_build_env value for %s: %r (expected <flag>=<path>)" % (name, value))
+        if root:
+            path = root + "/" + path
+        resolved[name] = '"%s=$PWD/%s"' % (flag, path)
+    return resolved
+
 def normalize_path(ctx, path):
     """Converts path to an OS-specific equivalent.
 
