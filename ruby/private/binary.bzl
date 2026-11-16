@@ -63,7 +63,7 @@ Supports `$(location)` expansion for targets from `srcs`, `data` and `deps`.
     ),
     "_coverage_helper": attr.label(
         allow_single_file = True,
-        default = "@rules_ruby//ruby/private:coverage.rb",
+        default = "@rules_ruby//ruby/private/coverage:rules_ruby_coverage.rb",
     ),
     "_runfiles_helper": attr.label(
         allow_single_file = True,

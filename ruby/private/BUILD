@@ -1,7 +1,5 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
-exports_files(["coverage.rb"])
-
 bzl_library(
     name = "binary",
     srcs = ["binary.bzl"],
