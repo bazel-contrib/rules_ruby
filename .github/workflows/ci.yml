@@ -103,6 +103,18 @@ jobs:
           cd /
           "$launcher" 1 2
         if: matrix.os != 'windows-latest'
+      # Binaries from other repositories, such as Bundler binstubs inside the
+      # generated bin/private directory, are always located through runfiles.
+      - name: Run binstub launcher from another directory
+        shell: bash
+        env:
+          # Git Bash rewrites `@bundle//bin:rake` into `@bundle/bin:rake` on Windows.
+          MSYS_NO_PATHCONV: 1
+        run: |
+          bazel build @bundle//bin:rake
+          launcher="$PWD/$(bazel cquery --output=starlark --starlark:expr='target.files_to_run.executable.path' @bundle//bin:rake)"
+          cd /
+          "$launcher" --version
       - if: failure() && runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
 
