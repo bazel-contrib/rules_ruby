@@ -52,29 +52,37 @@ set abs_path=
 for /F "tokens=2* usebackq" %%i in (`%SYSTEMROOT%\system32\findstr.exe /l /c:"!runfile_path! " "%MF%"`) do (
   set abs_path=%%i
 )
-:: There should be a way to locate the fully resolved path to a file in runfiles
-:: because the manifest doesn't contain paths to files in directories. This prevents
-:: finding Bundler-generated binstubs (runfiles manifest has only `bin/private` record).
-:: It works fine on runfiles.bash, so it's a matter of making a better batch script that
-:: handles all the cases. PRs are welcome but current Ruby ruleset maintainers don't 
-:: have enough Windows scripting knowledge. Below is a naive attempt to make it work
-:: but it fails in certain cases, so this functionality is completely disabled.
-::
-:: if "!abs_path!" equ "" (
-::   if exist %~f0.runfiles\!runfile_path:/=\! (
-::     set pshpath=%~f0.runfiles\!runfile_path:/=\!
-::     for /f %%A in ('powershell -Command "Get-Item -LiteralPath \"!pshpath!\" | Get-ItemProperty | Select-Object -ExpandProperty Target"') do (
-::       set abs_path=%%A
-::       set abs_path=!abs_path:\=/!
-::     )
-::   )
-:: )
+:: The manifest has no entries for files inside directories (e.g. Bundler
+:: binstubs under `bin/private`), so look up the nearest parent directory entry
+:: and append the rest of the path to it.
+if "!abs_path!" equ "" (
+  set "rlocation_dir=!runfile_path!"
+  set "rlocation_rest="
+  call :rlocation_parent
+)
 if "!abs_path!" equ "" (
   echo>&2 ERROR: !runfile_path! not found in runfiles manifest
   exit 1
 )
 set %~2=!abs_path!
 exit /b 0
+:rlocation_parent
+if "!rlocation_dir!" equ "" exit /b 0
+set "rlocation_char=!rlocation_dir:~-1!"
+set "rlocation_dir=!rlocation_dir:~0,-1!"
+if "!rlocation_char!" neq "/" (
+  set "rlocation_rest=!rlocation_char!!rlocation_rest!"
+  goto :rlocation_parent
+)
+for /F "tokens=2* usebackq" %%i in (`%SYSTEMROOT%\system32\findstr.exe /b /l /c:"!rlocation_dir! " "%MF%"`) do (
+  set abs_path=%%i
+)
+if "!abs_path!" neq "" (
+  set "abs_path=!abs_path!/!rlocation_rest!"
+  exit /b 0
+)
+set "rlocation_rest=/!rlocation_rest!"
+goto :rlocation_parent
 :rlocation_end
 :: End of rlocation
 """.replace("\r\n", "\n").replace("\n", "\r\n")

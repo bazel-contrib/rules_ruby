@@ -44,6 +44,12 @@ if "{bundler_command}" neq "" (
   )
 )
 
+if "{locate_binary_in_runfiles}" neq "" (
+  call :rlocation "{binary}" binary
+) else (
+  set "binary={binary}"
+)
+
 if "%COVERAGE%" == "1" (
   call :rlocation {coverage_helper} _coverage_helper_path
   for %%a in ("!_coverage_helper_path!\..") do set "RUBYLIB=%%~fa;!RUBYLIB!"
@@ -53,6 +59,6 @@ if "%COVERAGE%" == "1" (
   )
 )
 
-{bundler_command} {ruby_binary_name} {binary} {args} %*
+{bundler_command} {ruby_binary_name} !binary! {args} %*
 
 :: vim: ft=dosbatch
