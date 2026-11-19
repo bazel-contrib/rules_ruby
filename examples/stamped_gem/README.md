@@ -4,7 +4,7 @@ The gem version lives only in `version.bzl`. `lib/greeter/version.rb` is
 generated from it, with the real version under `--stamp` and
 `UNSTAMPED_VERSION` otherwise, and `Gemfile.lock` records the real version.
 
-Because a generated file is listed in `bundle_fetch(srcs = ...)`, the bundle
+Because the version file is listed in `bundle_fetch(generated_srcs = ...)`, the bundle
 stages its Gemfile inputs at build time and rewrites the path gem's version in
 its copy of `Gemfile.lock` to match the gemspec. Bumping `VERSION` (and the
 lock) therefore leaves every test cached, while `bazel build --stamp

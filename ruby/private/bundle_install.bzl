@@ -54,34 +54,23 @@ def _staged_path(ctx, file):
     return paths.join(_STAGE_DIR, file.short_path)
 
 def _stage(ctx, file, staged):
-    """Copies a Gemfile input into one tree at its workspace-relative path.
-
-    Inputs come either from this repository (copied by rb_bundle_fetch) or from
-    the main repository (generated files), and Bundler needs the gemspec and the
-    files it requires side by side. A copy rather than a symlink is required:
-    `__dir__` and `File.realpath` resolve symlinks and would escape the tree.
-    """
     path = _staged_path(ctx, file)
     if path not in staged:
         output = ctx.actions.declare_file(path)
+
+        # A copy, not a symlink: `__dir__` resolves symlinks, so a staged gemspec would
+        # require files from its original directory.
         ctx.actions.expand_template(template = file, output = output, substitutions = {})
         staged[path] = output
     return staged[path]
 
 def _normalize_lock(ctx, toolchain, gemfile, srcs):
-    """Stages Gemfile.lock with path gem versions taken from the staged gemspecs.
-
-    When the gemspec's version is generated, the checked-in lock can keep the
-    real version: unstamped builds then still produce a byte-identical staged
-    lock, so the install action and every test stay cached across version bumps.
-    """
-
     # Bundler only looks for the lock next to the Gemfile.
     output = ctx.actions.declare_file(_staged_path(ctx, ctx.file.gemfile) + ".lock")
     env = dict(toolchain.env)
     tools = list(toolchain.files)
     if toolchain.version.startswith("jruby"):
-        java_runtime = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"].java_runtime
+        java_runtime = ctx.exec_groups["ruby"].toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"].java_runtime
         env["JAVA_HOME"] = java_runtime.java_home
         tools.extend(java_runtime.files.to_list())
         if _is_windows(ctx):
@@ -92,7 +81,11 @@ def _normalize_lock(ctx, toolchain, gemfile, srcs):
     args.add(ctx.file.gemfile_lock)
     args.add(gemfile)
     args.add(output)
+
+    # A separate action, so a byte-identical result keeps `bundle install` and tests
+    # cached when only the checked-in path gem version changes.
     ctx.actions.run(
+        exec_group = "ruby",
         executable = toolchain.ruby,
         arguments = [args],
         inputs = [ctx.file._normalize_lock, ctx.file.gemfile_lock, gemfile] + srcs,
@@ -134,10 +127,10 @@ def _rb_bundle_install_impl(ctx):
         srcs = [_stage(ctx, src, staged) for src in ctx.files.srcs]
         gemfile_lock = _normalize_lock(ctx, toolchain, gemfile, srcs)
         relative_dir = "../" * len(gemfile.dirname.split("/"))
-        cache_path = [gem.dirname for gem in ctx.files.gems if gem.basename.endswith(".gem")][0]
-
-        # Kept with forward slashes: Bundler globs this path, and Ruby globs treat backslashes as escapes.
-        cache_env["BUNDLE_CACHE_PATH"] = relative_dir + cache_path
+        cache_paths = [gem.dirname for gem in ctx.files.gems if gem.basename.endswith(".gem")]
+        if cache_paths:
+            # Kept with forward slashes: Bundler globs this path, and Ruby globs treat backslashes as escapes.
+            cache_env["BUNDLE_CACHE_PATH"] = relative_dir + cache_paths[0]
     else:
         gemfile = ctx.file.gemfile
         gemfile_lock = ctx.file.gemfile_lock

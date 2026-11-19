@@ -133,19 +133,26 @@ def _rb_bundle_fetch_impl(repository_ctx):
         repository_ctx.file(rel_path, repository_ctx.read(path))
         return rel_path
 
-    gemfile_ref = _copy_file(repository_ctx.attr.gemfile)
+    # Copy all necessary inputs to the repository.
+    gemfile_path = repository_ctx.path(repository_ctx.attr.gemfile)
+    gemfile_rel_path = _copy_file(gemfile_path)
     gemfile_lock_path = repository_ctx.path(repository_ctx.attr.gemfile_lock)
-    gemfile_lock_ref = _copy_file(repository_ctx.attr.gemfile_lock)
-    srcs = [_copy_file(src) for src in repository_ctx.attr.srcs]
-
-    # Generated files are never read here; rb_bundle_install() stages them at build time.
-    srcs.extend([str(src) for src in repository_ctx.attr.generated_srcs])
+    gemfile_lock_rel_path = _copy_file(gemfile_lock_path)
 
     # Define vendor/cache relative to the location of Gemfile.
     # This is expected by Bundler to operate correctly.
-    gemfile_dir = paths.dirname(_relativize(repository_ctx.path(repository_ctx.attr.gemfile)))
-    cache_path = paths.join(gemfile_dir, "vendor/cache")
-    jars_path = paths.join(gemfile_dir, "vendor/jars")
+    cache_path = paths.join(paths.dirname(gemfile_rel_path), "vendor/cache")
+    jars_path = paths.join(paths.dirname(gemfile_rel_path), "vendor/jars")
+
+    srcs = []
+    for src in repository_ctx.attr.srcs:
+        # Create the source files in the same shape that they exist in the
+        # source tree. Otherwise, the relative_requires may not work.
+        rel_path = _copy_file(src)
+        srcs.append(rel_path)
+
+    # Generated files are never read here; rb_bundle_install() stages them at build time.
+    srcs.extend([str(src) for src in repository_ctx.attr.generated_srcs])
 
     # We insert our default value here, not on the attribute's default, so it
     # isn't documented. # The BUNDLER_CHECKSUMS value is huge and not useful to
@@ -247,8 +254,8 @@ def _rb_bundle_fetch_impl(repository_ctx):
         substitutions = {
             "{name}": repository_name,
             "{srcs}": _join_and_indent(srcs),
-            "{gemfile}": gemfile_ref,
-            "{gemfile_lock}": gemfile_lock_ref,
+            "{gemfile_path}": gemfile_rel_path,
+            "{gemfile_lock_path}": gemfile_lock_rel_path,
             "{jars_path}": jars_path,
             "{gems}": _join_and_indent(gem_full_names),
             "{gem_fragments}": "".join(gem_fragments),
