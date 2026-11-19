@@ -108,6 +108,7 @@ bzl_library(
         ":gem_install",
         ":providers",
         ":utils",
+        "@bazel_skylib//lib:paths",
     ],
 )
 

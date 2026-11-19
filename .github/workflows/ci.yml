@@ -194,6 +194,44 @@ jobs:
           ruby-version: 3.3.12
       - run: ./do_test
 
+  examples-stamped-gem:
+    name: Examples / Stamped Gem
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+    defaults:
+      run:
+        working-directory: examples/stamped_gem
+    steps:
+      - uses: actions/checkout@v7
+      - uses: bazel-contrib/setup-bazel@0.19.2
+        with:
+          bazelrc: common --announce_rc --color=yes
+          module-root: examples/stamped_gem
+          # Staged Gemfile inputs add path depth; keep it under the Windows path limit.
+          output-base: ${{ matrix.os == 'windows-latest' && 'D:/b' || '' }}
+          repository-cache: true
+      - run: bazel test ...
+      - name: Bumping the version keeps tests cached
+        shell: bash
+        run: |
+          perl -pi -e 's/1\.2\.3/1.2.4/' version.bzl Gemfile.lock
+          bazel test ... 2>&1 | tee test.log
+          grep -q 'Executed 0 out of' test.log
+      - run: bazel test --stamp ...
+      - run: bazel build --stamp :gem-build
+      - name: Test with a CRLF Gemfile.lock
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sed -i 's/$/\r/' Gemfile.lock
+          bazel test ...
+
   examples-rails:
     name: Examples / Rails
     runs-on: ${{ matrix.os }}
@@ -261,6 +299,7 @@ jobs:
       - examples-jekyll
       - examples-native_ext
       - examples-rails
+      - examples-stamped-gem
     uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7
     with:
       mount_bazel_caches: false
