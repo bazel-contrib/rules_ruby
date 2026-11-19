@@ -1,14 +1,6 @@
 #!/usr/bin/env ruby
 # Test that the gRPC app starts and can process a GetFoo RPC.
 
-runfiles_dir = ENV["RUNFILES_DIR"]
-if runfiles_dir
-  main_root = File.join(runfiles_dir, "_main")
-  $LOAD_PATH.unshift(main_root) if Dir.exist?(main_root) && !$LOAD_PATH.include?(main_root)
-  proto_root = File.join(main_root, "proto")
-  $LOAD_PATH.unshift(proto_root) if Dir.exist?(proto_root) && !$LOAD_PATH.include?(proto_root)
-end
-
 require "grpc"
 require "proto/foo_pb"
 require "proto/foo_services_pb"

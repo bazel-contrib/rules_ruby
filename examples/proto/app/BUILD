@@ -15,7 +15,7 @@ rb_test(
     srcs = ["hello_test.rb"],
     main = "hello_test.rb",
     deps = [
-        "//proto:foo_proto",
+        "//proto:all_protos",
         "@bundle",
     ],
 )
